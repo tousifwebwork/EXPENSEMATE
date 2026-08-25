@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { register } from '../../config/auth/authAPI'
 import toast from 'react-hot-toast'
+import { FaEye,FaEyeSlash  } from "react-icons/fa";
 
 function Register() {
   const navigate = useNavigate()
@@ -10,6 +11,16 @@ function Register() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
+
+  const [eye, seteye] = useState(false)
+  const [con_eye, setcon_eye] = useState(false)
+
+  function eye_handle(){
+    seteye(!eye);
+  }
+  function con_eye_handle(){
+    setcon_eye(!con_eye);
+  }
 
 
   const handleSubmit = async (e) => {
@@ -91,28 +102,38 @@ function Register() {
             />
           </div>
 
-          <div>
+          <div className='relative'>
             <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="password">Password</label>
             <input
               className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
               id="password"
-              type="password"
+              type={eye ? "text" : "password"}
               placeholder="Create a password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            <button
+              type="button" onClick={eye_handle}
+              className="absolute right-4 bottom-3 text-slate-500 hover:text-[#159a8c]">
+              {eye ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+             </button>
           </div>
 
-          <div>
+          <div className='relative'>
             <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="confirmPassword">Confirm Password</label>
             <input
               className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
               id="confirmPassword"
-              type="password"
+               type={con_eye ? "text" : "password"}
               placeholder="Re-enter your password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
+            <button
+              type="button" onClick={con_eye_handle}
+              className="absolute right-4 bottom-3 text-slate-500 hover:text-[#159a8c]">
+              {con_eye ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+             </button>
           </div>
 
           {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</div>}
