@@ -1,7 +1,7 @@
 const User = require("../../model/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
+const {generateProfileId} = require("../../utils/generateProfileId")
 
 
 // REGISTER
@@ -18,12 +18,22 @@ exports.register = async (req, res) => {
       return res.status(400).json({success: false,message: "User already exists",});
     }
 
+  
+  let profileId;
+  let isUnique = false;
+    while (!isUnique) {
+    profileId = generateProfileId();
+    const existing = await User.findOne({ profileId });
+    if (!existing) isUnique = true;
+  }
+ 
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({name,email,password: hashedPassword,});
+    const user = await User.create({name,email,password: hashedPassword,profileId });
 
     res.status(201).json({
       success: true,message: "Registration successful",
-      user: {id: user._id,name: user.name,email: user.email,}
+      user: {id: user._id,name: user.name,email: user.email, profileId: user.profileId}
     });
 
   } catch (error) {
@@ -39,7 +49,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
       return res.status(401).json({success: false,message: "Invalid email or password",});
