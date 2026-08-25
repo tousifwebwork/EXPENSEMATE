@@ -11,5 +11,4 @@ router.delete("/request/:requestId", protect, cancelRequest);
 router.get("/requests/pending", protect, getPendingRequests);
 router.get("/", protect, getFriends);
 router.delete("/:friendId", protect, removeFriend);
-
 module.exports = router;

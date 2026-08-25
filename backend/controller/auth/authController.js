@@ -1,7 +1,7 @@
 const User = require("../../model/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
+const {generateProfileId} = require("../../utils/generateProfileId")
 
 
 // REGISTER

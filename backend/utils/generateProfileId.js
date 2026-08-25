@@ -7,4 +7,4 @@ function generateProfileId() {
   return code;
 }
 
-module.exports = generateProfileId;
+module.exports = {generateProfileId};

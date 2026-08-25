@@ -16,7 +16,7 @@ exports.searchUsers = async (req, res) => {
         { name: { $regex: query, $options: "i" } },
         { email: { $regex: query, $options: "i" } },
       ],
-    }).select("name email profileImage");
+    }).select("name email profileId profileImage");
 
     res.status(200).json({ success: true, users });
   } catch (error) {
@@ -73,6 +73,7 @@ exports.respondToRequest = async (req, res) => {
     }
 
     const request = await FriendRequest.findById(requestId);
+
     if (!request) {
       return res.status(404).json({ success: false, message: "Request not found" });
     }
