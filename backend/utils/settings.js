@@ -11,6 +11,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", require("../router/auth/authRoutes"));
+app.use("/api/user",require("../router/user/userRoutes"));
+app.use("/api/friends",require("../router/friend/friendRoutes"));
 }
 
 module.exports = setup;
