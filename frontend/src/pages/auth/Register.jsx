@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { register } from '../../config/auth/API'
+import { register } from '../../config/auth/authAPI'
 import toast from 'react-hot-toast'
 
 function Register() {

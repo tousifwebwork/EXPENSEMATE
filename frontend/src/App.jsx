@@ -5,7 +5,7 @@ import Dashboard from './pages/Dashboard.jsx'
 import Groups from './pages/Groups.jsx'
 import Expenses from './pages/Expenses.jsx'
 import Settlements from './pages/Settlements.jsx'
-import Settings from './pages/Settings.jsx'
+import Profile from './pages/Profile.jsx'
 
 function App() {
   return (
@@ -17,7 +17,7 @@ function App() {
       <Route path="/groups" element={<Groups />} />
       <Route path="/expenses" element={<Expenses />} />
       <Route path="/settlements" element={<Settlements />} />
-      <Route path="/settings" element={<Settings />} />
+      <Route path="/profile" element={<Profile />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )

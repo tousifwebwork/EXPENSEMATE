@@ -1,11 +1,46 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { currentUser } from '../mockData.js'
-import { logout } from '../config/auth/API.js'
+import { logout } from '../config/auth/authAPI.js'
 import toast from 'react-hot-toast'
+import {getProfile} from "../config/user/userAPI.js";
+import { useEffect, useState } from 'react';
+
 
 
 function Sidebar() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+   const [user, setUser] = useState({
+      name: "",
+      email: "",
+      phone: "",
+      preferredCurrency: "",
+      profileId: "",
+      status: "",
+    });
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+    
+        const fetchProfile = async () => {
+          try {
+            const res = await getProfile(token);
+    
+            setUser({
+              name: res.data.user.name || "",
+              email: res.data.user.email || "",
+              phone: res.data.user.phone || "",
+              preferredCurrency: res.data.user.preferredCurrency || "INR",
+              profileId: res.data.user.profileId || "",
+              status: res.data.user.status || "",
+            });
+          } catch (error) {
+            console.log(error);
+          }  
+        };
+    
+        fetchProfile();
+      }, []);
 
   const handleLogout = async () => {
     const res = await logout();
@@ -35,17 +70,19 @@ function Sidebar() {
         <NavLink className={({ isActive }) => `rounded-xl px-3 py-3 text-sm font-semibold transition ${isActive ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`} to="/settlements">
           🤝 <span className="ml-2">Settlements</span>
         </NavLink>
-        <NavLink className={({ isActive }) => `rounded-xl px-3 py-3 text-sm font-semibold transition ${isActive ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`} to="/settings">
-          ⚙️ <span className="ml-2">Settings</span>
+        <NavLink className={({ isActive }) => `rounded-xl px-3 py-3 text-sm font-semibold transition ${isActive ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`} to="/profile">
+          ⚙️ <span className="ml-2">Profile</span>
         </NavLink>
       </nav>
 
       <div className="mt-auto border-t border-white/10 pt-5">
         <div className="flex items-center gap-3 px-2">
-          <div className="grid size-10 shrink-0 place-items-center rounded-full bg-[#d7f3ee] text-sm font-bold text-[#117d72]">{currentUser.initials}</div>
+          <div className="grid size-10 shrink-0 place-items-center rounded-full bg-[#d7f3ee] text-sm font-bold text-[#117d72]">
+            {user.name.split(" ").map(word => word[0]).join("").toUpperCase()}
+          </div>
           <div>
-            <div className="text-sm font-semibold">{currentUser.name}</div>
-            <div className="max-w-40 truncate text-xs text-slate-400">{currentUser.email}</div>
+            <div className="text-sm font-semibold">{user.name}</div>
+            <div className="max-w-40 truncate text-xs text-slate-400">{user.email}</div>
           </div>
         </div>
         <button className="mt-5 w-full rounded-xl border border-white/15 px-3 py-2.5 text-sm font-semibold text-slate-300 transition hover:border-white/30 hover:bg-white/10 hover:text-white" onClick={handleLogout}>

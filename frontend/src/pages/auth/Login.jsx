@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router-dom'
-import { login } from '../../config/auth/API'
+import { login } from '../../config/auth/authAPI'
 
 function SignIn() {
   const navigate = useNavigate()
