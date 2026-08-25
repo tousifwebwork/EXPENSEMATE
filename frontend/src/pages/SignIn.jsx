@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import toast from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router-dom'
-import { login } from '../../config/auth/API'
+import { allowedEmail, authenticateUser, startSession } from '../auth.js'
 
 function SignIn() {
   const navigate = useNavigate()
@@ -9,22 +8,23 @@ function SignIn() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     if (!email || !password) {
-      toast.error('Please enter both email and password.')
+      setError('Please enter both email and password.')
       return
     }
-    try{
-    setError("");
-    const res = await login({email,password, }); 
-    localStorage.setItem("token", res.data.token);
-    toast.success("Login successful!");
-    navigate("/dashboard");
-  }catch (error) {
-    const message =error.response?.data?.message || "Something went wrong"; 
-    toast.error(message);
-  }
+    if (!allowedEmail.test(email)) {
+      setError('Please use a Gmail, Outlook, or Yahoo email address.')
+      return
+    }
+    if (!authenticateUser(email, password)) {
+      setError('No matching user account was found.')
+      return
+    }
+    setError('')
+    startSession(email, 'user')
+    navigate('/dashboard')
   }
 
   return (
@@ -88,9 +88,6 @@ function SignIn() {
 
           <div className="mt-8 text-center text-sm text-slate-500">
             Don't have an account? <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/register">Register</Link>
-          </div>
-          <div className="mt-3 text-center text-sm text-slate-500">
-            Administrator? <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/admin/login">Admin sign in</Link>
           </div>
         </div>
       </div>

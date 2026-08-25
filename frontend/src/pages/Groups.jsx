@@ -1,22 +1,18 @@
 import { useState } from 'react'
 import AppLayout from '../components/AppLayout.jsx'
-
-const groups = [
-  { name: 'Friends', members: 6, balance: '₹1,250 owed to you', color: 'bg-[#e6f8f4] text-[#117d72]' },
-  { name: 'Goa Trip', members: 4, balance: 'You owe ₹2,500', color: 'bg-[#fff6ed] text-[#b6631e]' },
-  { name: 'Home', members: 3, balance: 'Settled up', color: 'bg-[#eef5ff] text-[#3569a8]' },
-  { name: 'College', members: 8, balance: '₹500 owed to you', color: 'bg-[#f5efff] text-[#7651a8]' },
-]
+import { getGroups, saveGroups } from '../storage.js'
 
 function Groups() {
   const [showForm, setShowForm] = useState(false)
   const [groupName, setGroupName] = useState('')
-  const [groupList, setGroupList] = useState(groups)
+  const [groupList, setGroupList] = useState(getGroups)
 
   const createGroup = (event) => {
     event.preventDefault()
     if (!groupName.trim()) return
-    setGroupList([...groupList, { name: groupName.trim(), members: 1, balance: 'Settled up', color: 'bg-slate-100 text-slate-600' }])
+    const nextGroups = [...groupList, { name: groupName.trim(), members: 1, balance: 'Settled up', color: 'bg-slate-100 text-slate-600' }]
+    setGroupList(nextGroups)
+    saveGroups(nextGroups)
     setGroupName('')
     setShowForm(false)
   }

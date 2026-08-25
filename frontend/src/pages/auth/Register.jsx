@@ -29,7 +29,7 @@ function Register() {
     
     try{
     setError("");
-    const res = await register({name:fullName, email:email, password:password}); 
+    await register({name:fullName, email:email, password:password});
     toast.success("Register successful!");
     navigate("/login");
   }catch (error) {

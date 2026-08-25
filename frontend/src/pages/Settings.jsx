@@ -1,15 +1,19 @@
 import { useState } from 'react'
 import AppLayout from '../components/AppLayout.jsx'
-import { currentUser } from '../mockData.js'
+import { allowedEmail, getProfile, getSession, saveProfile, startSession } from '../auth.js'
 
 function Settings() {
-  const [name, setName] = useState(currentUser.name)
-  const [email, setEmail] = useState(currentUser.email)
+  const profile = getProfile()
+  const [name, setName] = useState(profile.name)
+  const [email, setEmail] = useState(profile.email)
   const [currency, setCurrency] = useState('INR (₹)')
   const [saved, setSaved] = useState(false)
 
   const saveSettings = (event) => {
     event.preventDefault()
+    if (!name.trim() || !allowedEmail.test(email)) return
+    saveProfile({ ...profile, name: name.trim(), email: email.trim() })
+    startSession(email.trim(), getSession()?.role || 'user')
     setSaved(true)
     window.setTimeout(() => setSaved(false), 2500)
   }

@@ -1,6 +1,6 @@
 export const currentUser = {
   name: 'Gaurish Powar',
-  email: 'gaurish@example.com',
+  email: 'gaurish@gmail.com',
   initials: 'GP',
 }
 
@@ -53,6 +53,7 @@ export const recentSettlements = [
     group: 'Friends',
     date: 'Today',
     amount: 1000,
+    status: 'pending',
   },
   {
     id: 2,
@@ -61,6 +62,7 @@ export const recentSettlements = [
     group: 'Goa Trip',
     date: '18 Aug 2026',
     amount: 750,
+    status: 'pending',
   },
   {
     id: 3,
@@ -69,5 +71,6 @@ export const recentSettlements = [
     group: 'College',
     date: '15 Aug 2026',
     amount: 500,
+    status: 'pending',
   },
 ]

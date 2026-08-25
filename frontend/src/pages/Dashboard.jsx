@@ -1,5 +1,7 @@
 import AppLayout from '../components/AppLayout.jsx'
-import { currentUser, summary, recentExpenses, recentSettlements } from '../mockData.js'
+import { useNavigate } from 'react-router-dom'
+import { summary, recentExpenses, recentSettlements } from '../mockData.js'
+import { getProfile } from '../auth.js'
 
 const formatINR = (amount) => {
   const sign = amount < 0 ? '-' : ''
@@ -7,7 +9,11 @@ const formatINR = (amount) => {
 }
 
 function Dashboard() {
-  const firstName = currentUser.name.split(' ')[0]
+  const profile = getProfile()
+  const firstName = profile.name.split(' ')[0]
+  const navigate = useNavigate()
+  const expenseTotal = recentExpenses.reduce((total, expense) => total + Math.abs(expense.yourShare), 0)
+  const largestExpense = recentExpenses.reduce((largest, expense) => Math.max(largest, Math.abs(expense.yourShare)), 0)
 
   return (
     <AppLayout>
@@ -18,8 +24,8 @@ function Dashboard() {
             <p className="mt-2 text-sm text-slate-500">Here's what's happening with your expenses today.</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <button className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-[#102a43] shadow-sm transition hover:border-[#159a8c] hover:text-[#117d72]">+ Add Expense</button>
-            <button className="rounded-xl bg-[#159a8c] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#159a8c]/20 transition hover:bg-[#117d72]">+ Create Group</button>
+            <button className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-[#102a43] shadow-sm transition hover:border-[#159a8c] hover:text-[#117d72]" onClick={() => navigate('/expenses')}>+ Add Expense</button>
+            <button className="rounded-xl bg-[#159a8c] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#159a8c]/20 transition hover:bg-[#117d72]" onClick={() => navigate('/groups')}>+ Create Group</button>
           </div>
         </div>
 
@@ -46,11 +52,33 @@ function Dashboard() {
           </div>
         </div>
 
+        <section className="mt-8 overflow-hidden rounded-2xl bg-[#102a43] text-white shadow-sm">
+          <div className="flex flex-col justify-between gap-5 px-5 py-5 sm:flex-row sm:items-center sm:px-6">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#7dd8ca]">Spending pulse</p>
+              <h2 className="mt-2 text-xl font-bold">Your share this month</h2>
+              <p className="mt-1 text-sm text-slate-300">Across {recentExpenses.length} recent expenses</p>
+            </div>
+            <div className="text-left sm:text-right">
+              <div className="text-3xl font-bold">{formatINR(expenseTotal)}</div>
+              <div className="mt-1 text-xs font-semibold text-[#7dd8ca]">Largest share {formatINR(largestExpense)}</div>
+            </div>
+          </div>
+          <div className="flex h-20 items-end gap-3 border-t border-white/10 px-5 pb-5 pt-4 sm:px-6">
+            {recentExpenses.map((expense) => (
+              <div className="flex min-w-0 flex-1 flex-col items-center gap-2" key={expense.id}>
+                <div className="w-full rounded-t-md bg-[#47c5b0]" style={{ height: `${Math.max(22, (Math.abs(expense.yourShare) / largestExpense) * 100)}%` }} />
+                <span className="truncate text-[10px] font-semibold text-slate-400">{expense.group}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <div className="mt-8 grid gap-6 xl:grid-cols-2">
           <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
               <h2 className="text-lg font-bold text-[#102a43]">Recent Expenses</h2>
-              <a className="text-sm font-bold text-[#117d72] hover:text-[#102a43]" href="#expenses">
+              <a className="text-sm font-bold text-[#117d72] hover:text-[#102a43]" href="/expenses">
                 View All
               </a>
             </div>
@@ -79,7 +107,7 @@ function Dashboard() {
           <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
               <h2 className="text-lg font-bold text-[#102a43]">Recent Settlements</h2>
-              <a className="text-sm font-bold text-[#117d72] hover:text-[#102a43]" href="#settlements">
+              <a className="text-sm font-bold text-[#117d72] hover:text-[#102a43]" href="/settlements">
                 View All
               </a>
             </div>
