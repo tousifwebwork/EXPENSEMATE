@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import toast from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router-dom'
+import { login } from '../../config/auth/API'
 
 function SignIn() {
   const navigate = useNavigate()
@@ -7,15 +9,22 @@ function SignIn() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!email || !password) {
-      setError('Please enter both email and password.')
+      toast.error('Please enter both email and password.')
       return
     }
-    setError('')
-    // Mock sign in — no backend yet
-    navigate('/dashboard')
+    try{
+    setError("");
+    const res = await login({email,password, }); 
+    localStorage.setItem("token", res.data.token);
+    toast.success("Login successful!");
+    navigate("/dashboard");
+  }catch (error) {
+    const message =error.response?.data?.message || "Something went wrong"; 
+    toast.error(message);
+  }
   }
 
   return (

@@ -1,11 +1,18 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { currentUser } from '../mockData.js'
+import { logout } from '../config/auth/API.js'
+import toast from 'react-hot-toast'
+
 
 function Sidebar() {
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    navigate('/signin')
+  const handleLogout = async () => {
+    const res = await logout();
+    console.log(res.data)
+    localStorage.removeItem("token");
+    toast.success("Logged out successfully");
+    navigate('/logout')
   }
 
   return (

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { register } from '../../config/auth/API'
+import toast from 'react-hot-toast'
 
 function Register() {
   const navigate = useNavigate()
@@ -9,20 +11,33 @@ function Register() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!fullName || !email || !password || !confirmPassword) {
-      setError('Please fill in all fields.')
+      toast.error('Please fill in all fields.')
       return
     }
+    if (password.length < 6) {
+      toast.error('Passwords Cannot be less than 6 Characters.')
+      return
+    } 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.')
+      toast.error('Passwords do not match.')
       return
-    }
-    setError('')
-    // Mock registration — no backend yet
-    navigate('/signin')
+    } 
+    
+    try{
+    setError("");
+    const res = await register({name:fullName, email:email, password:password}); 
+    toast.success("Register successful!");
+    navigate("/login");
+  }catch (error) {
+    const message =error.response?.data?.message || "Something went wrong"; 
+    toast.error(message);
   }
+  }
+
 
   return (
     <div className="min-h-screen bg-[#f4f7fb] px-4 py-8 sm:px-6 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(420px,0.75fr)] lg:gap-16 lg:px-20 lg:py-10">
