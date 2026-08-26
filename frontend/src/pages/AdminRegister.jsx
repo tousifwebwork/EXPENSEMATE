@@ -1,3 +1,5 @@
+// Creates a new admin account (separate from regular user accounts).
+// See pages/AdminSignIn.jsx for the matching login page.
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { allowedEmail, registerAdmin } from '../auth.js'
@@ -29,7 +31,7 @@ function AdminRegister() {
       return
     }
     if (!registerAdmin({ name: name.trim(), email: email.trim(), password })) {
-      setError('An admin account with this email already exists.')
+      setError('This email already has an ExpenseMate account. Use a different email.')
       return
     }
     navigate('/admin/login')

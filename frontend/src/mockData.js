@@ -1,8 +1,7 @@
-export const currentUser = {
-  name: 'Gaurish Powar',
-  email: 'gaurish@gmail.com',
-  initials: 'GP',
-}
+// Placeholder data so the app has something to show before a real
+// backend exists. Dashboard.jsx reads summary/recentExpenses/
+// recentSettlements directly; storage.js uses recentExpenses and
+// recentSettlements as the starting point for localStorage.
 
 export const summary = {
   totalBalance: 12500,

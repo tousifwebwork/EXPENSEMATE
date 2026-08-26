@@ -1,3 +1,6 @@
+// Shows who owes whom and lets the user mark a settlement as paid.
+// "Mark settled" just flips a status flag in localStorage — there's
+// no real money movement here, it's a demo of the UI flow.
 import { useState } from 'react'
 import AppLayout from '../components/AppLayout.jsx'
 import { getSettlements, saveSettlements } from '../storage.js'

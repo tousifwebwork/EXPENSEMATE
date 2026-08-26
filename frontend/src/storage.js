@@ -1,3 +1,6 @@
+// Small localStorage helpers for groups/expenses/settlements, so data
+// the user adds in the app survives a page refresh. The first time
+// each key is read, it falls back to the sample data in mockData.js.
 import { recentExpenses, recentSettlements } from './mockData.js'
 
 const read = (key, fallback) => {
@@ -22,3 +25,6 @@ const defaultGroups = [
 
 export const getGroups = () => read('expensemate-groups', defaultGroups)
 export const saveGroups = (groups) => localStorage.setItem('expensemate-groups', JSON.stringify(groups))
+
+export const getAuditLog = () => read('expensemate-audit-log', [])
+export const saveAuditLog = (entries) => localStorage.setItem('expensemate-audit-log', JSON.stringify(entries))

@@ -1,8 +1,12 @@
+// The landing page after login: quick totals, a small spending chart,
+// and previews of recent expenses/settlements. All the numbers here
+// come from mockData.js — swap that for a real API call later.
 import AppLayout from '../components/AppLayout.jsx'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { summary, recentExpenses, recentSettlements } from '../mockData.js'
 import { getProfile } from '../auth.js'
 
+// Turns -450 into "-₹450" and 1200 into "₹1,200" (Indian digit grouping).
 const formatINR = (amount) => {
   const sign = amount < 0 ? '-' : ''
   return `${sign}₹${Math.abs(amount).toLocaleString('en-IN')}`
@@ -78,9 +82,9 @@ function Dashboard() {
           <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
               <h2 className="text-lg font-bold text-[#102a43]">Recent Expenses</h2>
-              <a className="text-sm font-bold text-[#117d72] hover:text-[#102a43]" href="/expenses">
+              <Link className="text-sm font-bold text-[#117d72] hover:text-[#102a43]" to="/expenses">
                 View All
-              </a>
+              </Link>
             </div>
             {recentExpenses.map((expense) => (
               <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 last:border-0" key={expense.id}>
@@ -107,9 +111,9 @@ function Dashboard() {
           <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
               <h2 className="text-lg font-bold text-[#102a43]">Recent Settlements</h2>
-              <a className="text-sm font-bold text-[#117d72] hover:text-[#102a43]" href="/settlements">
+              <Link className="text-sm font-bold text-[#117d72] hover:text-[#102a43]" to="/settlements">
                 View All
-              </a>
+              </Link>
             </div>
             {recentSettlements.map((settlement) => (
               <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 last:border-0" key={settlement.id}>

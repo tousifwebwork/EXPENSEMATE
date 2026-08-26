@@ -1,3 +1,6 @@
+// Shows every expense, lets the user filter by group, and add a new one.
+// "Your share" is positive when someone owes you and negative when you
+// owe them — see the "Balance" dropdown in the add-expense form below.
 import { useState } from 'react'
 import AppLayout from '../components/AppLayout.jsx'
 import { getExpenses, saveExpenses } from '../storage.js'

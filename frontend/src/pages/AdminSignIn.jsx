@@ -1,3 +1,6 @@
+// Separate sign-in for admins, kept apart from the regular user login
+// so admin and user accounts never mix. Same mock-auth pattern as
+// pages/Login.jsx, just backed by a different localStorage list.
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { allowedEmail, authenticateAdmin, startSession } from '../auth.js'
@@ -26,7 +29,7 @@ function AdminSignIn() {
 
     startSession(email, 'admin')
     setError('')
-    navigate('/dashboard')
+    navigate('/admin/dashboard')
   }
 
   return (

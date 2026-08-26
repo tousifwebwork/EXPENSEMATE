@@ -1,3 +1,5 @@
+// Lets the signed-in user edit their display name/email and pick a
+// default currency. Saved straight to localStorage via auth.js.
 import { useState } from 'react'
 import AppLayout from '../components/AppLayout.jsx'
 import { allowedEmail, getProfile, getSession, saveProfile, startSession } from '../auth.js'

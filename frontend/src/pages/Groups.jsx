@@ -1,3 +1,6 @@
+// Lists the user's groups as cards and lets them create a new one.
+// Groups are saved to localStorage via storage.js so they survive a
+// page refresh, but there's still no real backend behind this.
 import { useState } from 'react'
 import AppLayout from '../components/AppLayout.jsx'
 import { getGroups, saveGroups } from '../storage.js'
