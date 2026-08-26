@@ -1,10 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { currentUser } from '../mockData.js'
 import { logout } from '../config/auth/authAPI.js'
 import toast from 'react-hot-toast'
 import {getProfile} from "../config/user/userAPI.js";
 import { useEffect, useState } from 'react';
-
+import { FaUserFriends } from "react-icons/fa";
 
 
 function Sidebar() {
@@ -63,6 +62,9 @@ function Sidebar() {
         </NavLink>
         <NavLink className={({ isActive }) => `rounded-xl px-3 py-3 text-sm font-semibold transition ${isActive ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`} to="/groups">
           👥 <span className="ml-2">Groups</span>
+        </NavLink>
+        <NavLink className={({ isActive }) =>`rounded-xl px-3 py-3 text-sm font-semibold transition flex items-center gap-2 ${isActive? 'bg-white/10 text-white': 'text-slate-300 hover:bg-white/10 hover:text-white'}`}to="/friends">
+         <FaUserFriends /> <span>Friends</span>
         </NavLink>
         <NavLink className={({ isActive }) => `rounded-xl px-3 py-3 text-sm font-semibold transition ${isActive ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`} to="/expenses">
           🧾 <span className="ml-2">Expenses</span>
