@@ -2,18 +2,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AppLayout from "../components/AppLayout.jsx";
+import { useNavigate } from "react-router-dom";
 
 import {searchUsers,sendRequest,respondToRequest,cancelRequest,getPendingRequests,getFriends,removeFriend,
 } from "../config/friends/friendAPI.js";
 
 const SEARCH_DEBOUNCE_MS = 400;
-
+ 
 const getErrorMessage = (error, fallback) => error?.response?.data?.message || fallback;
 
 const initials = (name = "") => name.slice(0, 1).toUpperCase();
 
 function Friends() {
   const token = localStorage.getItem("token");
+    const navigate = useNavigate();
 
   // ----- data state -----
   const [search, setSearch] = useState("");
@@ -473,10 +475,8 @@ function Friends() {
               const busy = isProcessing(friend._id);
 
               return (
-                <article
-                  key={friend._id}
-                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                >
+                <article key={friend._id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                  
                   <div className="flex items-center gap-3">
                     <div className="grid size-11 place-items-center rounded-full bg-[#e6f8f4] font-bold text-[#117d72]">
                       {initials(friend.name)}
@@ -488,13 +488,20 @@ function Friends() {
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleRemoveFriend(friend._id)}
-                    disabled={busy}
-                    className="mt-4 w-full rounded-xl bg-red-50 px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-50"
-                  >
-                    {busy ? "..." : "Remove Friend"}
-                  </button>
+                  <div className="mt-5 flex w-full flex-row gap-3">
+                    
+                    <button onClick={() => handleRemoveFriend(friend._id)} disabled={busy}
+                      className="flex-1 whitespace-nowrap rounded-xl bg-red-50 px-3 py-2 text-sm font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-50">
+                     {busy ? "..." : "Remove Friend"}
+                    </button>
+
+                    <button onClick={() => navigate(`/viewprofile/${friend._id}`)}
+                      className="flex-1 whitespace-nowrap rounded-xl bg-blue-50 px-3 py-2 text-sm font-bold text-blue-600 transition hover:bg-blue-100">
+                     View Profile
+                    </button>
+
+                  </div>
+                                    
                 </article>
               );
             })}

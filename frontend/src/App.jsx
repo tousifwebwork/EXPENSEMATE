@@ -8,6 +8,7 @@ import Settlements from './pages/Settlements.jsx'
 import Profile from './pages/Profile.jsx'
 import Friends from "./pages/Friends.jsx"
 import Protected from './pages/protected/Protected.jsx'
+import ViewProfile from './pages/ViewProfile.jsx'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
       <Route path="/expenses" element={<Expenses />} />
       <Route path="/settlements" element={<Settlements />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/viewprofile/:userId" element={<ViewProfile />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
       </Route>
 
