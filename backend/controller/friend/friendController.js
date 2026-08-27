@@ -1,31 +1,75 @@
 const FriendRequest = require("../../model/friendRequestModel");
 const User = require("../../model/userModel");
 
-
-// SEARCH USERS (by name or email)
+ 
 exports.searchUsers = async (req, res) => {
   try {
     const { query } = req.query;
-    if (!query) {
+    const userId = req.user.userId;
+
+    if (!query || !query.trim()) {
       return res.status(400).json({ success: false, message: "Search query is required" });
     }
 
-    const users = await User.find({
-      _id: { $ne: req.user.userId },
-      $or: [
-        { name: { $regex: query, $options: "i" } },
-        { email: { $regex: query, $options: "i" } },
-      ],
-    }).select("name email profileId profileImage");
+    const trimmedQuery = query.trim();
 
-    res.status(200).json({ success: true, users });
+    const users = await User.find({
+      _id: { $ne: userId },
+      $or: [
+        { name: { $regex: trimmedQuery, $options: "i" } },
+        { email: { $regex: trimmedQuery, $options: "i" } },
+      ],
+    })
+      .select("name email profileId profileImage")
+      .limit(20);
+
+    if (users.length === 0) {
+      return res.status(200).json({ success: true, users: [] });
+    }
+
+    const userIds = users.map((u) => u._id);
+
+    // Fetch every request (any status) between the current user and any
+    // of the found users, in either direction, in a single query.
+    const requests = await FriendRequest.find({
+      $or: [
+        { sender: userId, receiver: { $in: userIds } },
+        { receiver: userId, sender: { $in: userIds } },
+      ],
+    });
+
+    const relationshipByUserId = new Map();
+    requests.forEach((r) => {
+      const isSender = r.sender.toString() === userId;
+      const otherId = isSender ? r.receiver.toString() : r.sender.toString();
+
+      if (r.status === "accepted") {
+        relationshipByUserId.set(otherId, { status: "friends", requestId: r._id.toString() });
+      } else if (r.status === "pending") {
+        relationshipByUserId.set(otherId, {
+          status: isSender ? "pending_sent" : "pending_received",
+          requestId: r._id.toString(),
+        });
+      }
+      // declined -> intentionally not stored, so it resolves to "none" below
+    });
+
+    const usersWithRelationship = users.map((u) => ({
+      _id: u._id,
+      name: u.name,
+      email: u.email,
+      profileId: u.profileId,
+      profileImage: u.profileImage,
+      relationship: relationshipByUserId.get(u._id.toString()) || { status: "none", requestId: null },
+    }));
+
+    res.status(200).json({ success: true, users: usersWithRelationship });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-
-// SEND FRIEND REQUEST
+ 
 exports.sendRequest = async (req, res) => {
   try {
     const senderId = req.user.userId;
@@ -45,11 +89,27 @@ exports.sendRequest = async (req, res) => {
     }
 
     const existing = await FriendRequest.findOne({
-      $or: [{ sender: senderId, receiver: receiver._id },{ sender: receiver._id, receiver: senderId },],
+      $or: [
+        { sender: senderId, receiver: receiver._id },
+        { sender: receiver._id, receiver: senderId },
+      ],
     });
 
     if (existing) {
-      return res.status(400).json({ success: false, message: "Friend request already exists" });
+      if (existing.status === "pending") {
+        return res.status(400).json({ success: false, message: "Friend request already pending" });
+      }
+      if (existing.status === "accepted") {
+        return res.status(400).json({ success: false, message: "You are already friends" });
+      }
+
+      // status === "declined" -> allow resending by resetting the same document
+      existing.sender = senderId;
+      existing.receiver = receiver._id;
+      existing.status = "pending";
+      await existing.save();
+
+      return res.status(201).json({ success: true, message: "Friend request sent", request: existing });
     }
 
     const request = await FriendRequest.create({ sender: senderId, receiver: receiver._id });
@@ -61,7 +121,6 @@ exports.sendRequest = async (req, res) => {
 };
 
 
-// ACCEPT / DECLINE REQUEST
 exports.respondToRequest = async (req, res) => {
   try {
     const { requestId } = req.params;
