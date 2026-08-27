@@ -5,11 +5,9 @@ import './index.css'
 import App from './App.jsx'
 import { Toaster } from "react-hot-toast"
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <Toaster />
-    <BrowserRouter>
+createRoot(document.getElementById('root')).render( 
+  <BrowserRouter>
+      <Toaster />
       <App />
-    </BrowserRouter>
-  </StrictMode>,
+  </BrowserRouter> 
 )

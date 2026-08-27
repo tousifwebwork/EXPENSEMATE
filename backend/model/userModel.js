@@ -9,6 +9,12 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, default: "" },
     preferredCurrency: { type: String, default: "INR" },
     profileId: { type: String, required: true, unique: true },
+    about: { type: String, default: "", trim: true, maxlength: 300 },
+    address: {
+      landmark: { type: String, default: "", trim: true },
+      state: { type: String, default: "", trim: true },
+      country: { type: String, default: "", trim: true },
+    },
     status: {
       type: String,
       enum: ["active", "deactivated", "blocked"],

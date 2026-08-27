@@ -20,5 +20,6 @@ const authHeader = (token) => ({
 export const getProfile = (token) => {return API.get("/profile", authHeader(token));};
 export const updateProfile = (token, data) => {return API.patch("/profile", data, authHeader(token));};
 export const changePassword = (token, data) => {return API.patch("/change-password", data, authHeader(token));};
+export const getUserById = (userId, token) => {return API.get(`/individual/${userId}`, authHeader(token));};
 
 export default API;
