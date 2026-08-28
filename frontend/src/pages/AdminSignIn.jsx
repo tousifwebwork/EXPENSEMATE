@@ -73,7 +73,7 @@ function AdminSignIn() {
           </form>
 
           <div className="mt-8 text-center text-sm text-slate-500">
-            <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/admin/register">Register admin account</Link>
+            <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/admin/register">Admin Register?</Link>
             <span className="mx-2">·</span>
             <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/login">User sign in</Link>
           </div>

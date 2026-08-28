@@ -98,7 +98,7 @@ function Login() {
             Don't have an account? <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/register">Register</Link>
           </div>
           <div className="mt-3 text-center text-sm text-slate-500">
-            Administrator? <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/admin/login">Admin sign in</Link>
+            Administrator? <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/admin/login">Admin Login in</Link>
           </div>
         </div>
       </div>
