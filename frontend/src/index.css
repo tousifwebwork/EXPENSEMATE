@@ -1,24 +1,18 @@
+/* This one line turns on every Tailwind utility class used across the
+   app (things like "flex", "rounded-xl", "text-slate-500", etc).
+   Without it, those class names are just plain text to the browser. */
 @import "tailwindcss";
 
-:root {
-	font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-	color: #172033;
-	background: #f4f7fb;
-	font-synthesis: none;
-	text-rendering: optimizeLegibility;
-}
-
-* {
-	box-sizing: border-box;
-}
-
+/* A couple of small global tweaks that plain Tailwind classes don't cover. */
 body {
-	min-width: 320px;
-	min-height: 100vh;
-	margin: 0;
+  margin: 0;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
 }
 
-button,
-input {
-	font: inherit;
+/* Used by Dashboard.jsx to color a positive vs negative "your share" amount. */
+.positive {
+  color: #117d72;
+}
+.negative {
+  color: #b6631e;
 }

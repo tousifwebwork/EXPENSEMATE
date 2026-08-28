@@ -1,36 +1,30 @@
 import { useState } from 'react'
-import toast from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router-dom'
-import { login } from '../../config/auth/authAPI'
-import { FaEye,FaEyeSlash  } from "react-icons/fa";
-
+import { allowedEmail, authenticateUser, startSession } from '../auth.js'
 
 function SignIn() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [eye, seteye] = useState(false)
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     if (!email || !password) {
-      toast.error('Please enter both email and password.')
+      setError('Please enter both email and password.')
       return
     }
-    try{
-    setError("");
-    const res = await login({email,password, }); 
-    localStorage.setItem("token", res.data.token);
-    toast.success("Login successful!");
-    navigate("/dashboard");
-  }catch (error) {
-    const message =error.response?.data?.message || "Something went wrong"; 
-    toast.error(message);
-  }
-  }
-  function eye_handle(){
-    seteye(!eye);
+    if (!allowedEmail.test(email)) {
+      setError('Please use a Gmail, Outlook, or Yahoo email address.')
+      return
+    }
+    if (!authenticateUser(email, password)) {
+      setError('No matching user account was found.')
+      return
+    }
+    setError('')
+    startSession(email, 'user')
+    navigate('/dashboard')
   }
 
   return (
@@ -73,23 +67,16 @@ function SignIn() {
             />
           </div>
 
-          <div className='relative '>
+          <div>
             <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="password">Password</label>
             <input
               className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
               id="password"
-              type={eye ? "text" : "password"}
+              type="password"
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <button
-              type="button" onClick={eye_handle}
-              className="absolute right-4 bottom-3 text-slate-500 hover:text-[#159a8c]">
-              {eye ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-            </button>
-            
-            
           </div>
 
           {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</div>}
@@ -101,9 +88,6 @@ function SignIn() {
 
           <div className="mt-8 text-center text-sm text-slate-500">
             Don't have an account? <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/register">Register</Link>
-          </div>
-          <div className="mt-3 text-center text-sm text-slate-500">
-            Administrator? <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/admin/login">Admin sign in</Link>
           </div>
         </div>
       </div>

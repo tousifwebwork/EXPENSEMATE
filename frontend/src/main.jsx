@@ -3,11 +3,17 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
-import { Toaster } from "react-hot-toast"
 
+<<<<<<< HEAD
 createRoot(document.getElementById('root')).render( 
   <BrowserRouter>
       <Toaster />
+=======
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    {/* BrowserRouter turns on URL-based navigation for the whole app. */}
+    <BrowserRouter>
+>>>>>>> origin/trial
       <App />
   </BrowserRouter> 
 )

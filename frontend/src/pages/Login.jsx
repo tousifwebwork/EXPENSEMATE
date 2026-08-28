@@ -1,40 +1,41 @@
+// Login page for a regular (non-admin) user.
+// This is "mock mode": there's no real backend. authenticateUser() just
+// checks the browser's localStorage for an account created on /register.
+// Swap the calls to auth.js for real API calls once a backend exists.
 import { useState } from 'react'
-import toast from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router-dom'
-import { login } from '../../config/auth/authAPI'
-import { FaEye,FaEyeSlash  } from "react-icons/fa";
+import { allowedEmail, authenticateUser, startSession } from '../auth.js'
 
-
-function SignIn() {
+function Login() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [eye, seteye] = useState(false)
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
+
     if (!email || !password) {
-      toast.error('Please enter both email and password.')
+      setError('Please enter both email and password.')
       return
     }
-    try{
-    setError("");
-    const res = await login({email,password, }); 
-    localStorage.setItem("token", res.data.token);
-    toast.success("Login successful!");
-    navigate("/dashboard");
-  }catch (error) {
-    const message =error.response?.data?.message || "Something went wrong"; 
-    toast.error(message);
-  }
-  }
-  function eye_handle(){
-    seteye(!eye);
+    if (!allowedEmail.test(email)) {
+      setError('Please use a Gmail, Outlook, or Yahoo email address.')
+      return
+    }
+    if (!authenticateUser(email, password)) {
+      setError('No matching user account was found.')
+      return
+    }
+
+    setError('')
+    startSession(email, 'user')
+    navigate('/dashboard')
   }
 
   return (
     <div className="min-h-screen bg-[#f4f7fb] px-4 py-8 sm:px-6 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(420px,0.75fr)] lg:gap-16 lg:px-20 lg:py-10">
+      {/* Left side: brand panel, hidden on small screens */}
       <div className="hidden flex-col justify-between rounded-[2rem] bg-[#102a43] p-10 text-white lg:flex">
         <div className="flex items-center gap-3">
           <div className="grid size-10 place-items-center rounded-xl bg-[#47c5b0] text-lg font-bold text-[#102a43]">₹</div>
@@ -48,6 +49,7 @@ function SignIn() {
         <p className="text-sm text-slate-400">Simple tracking for real-life groups.</p>
       </div>
 
+      {/* Right side: the actual login form */}
       <div className="mx-auto flex w-full max-w-md flex-col justify-center lg:max-w-lg">
         <div className="mb-8 flex items-center gap-3 lg:hidden">
           <div className="grid size-10 place-items-center rounded-xl bg-[#102a43] text-lg font-bold text-[#8bded2]">₹</div>
@@ -61,49 +63,42 @@ function SignIn() {
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="email">Email</label>
-            <input
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="email">Email</label>
+              <input
+                className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
 
-          <div className='relative '>
-            <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="password">Password</label>
-            <input
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
-              id="password"
-              type={eye ? "text" : "password"}
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <button
-              type="button" onClick={eye_handle}
-              className="absolute right-4 bottom-3 text-slate-500 hover:text-[#159a8c]">
-              {eye ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="password">Password</label>
+              <input
+                className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</div>}
+
+            <button type="submit" className="w-full rounded-xl bg-[#159a8c] px-4 py-3 font-bold text-white shadow-lg shadow-[#159a8c]/20 transition hover:bg-[#117d72] focus:outline-none focus:ring-4 focus:ring-[#159a8c]/20">
+              Sign In
             </button>
-            
-            
-          </div>
-
-          {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</div>}
-
-          <button type="submit" className="w-full rounded-xl bg-[#159a8c] px-4 py-3 font-bold text-white shadow-lg shadow-[#159a8c]/20 transition hover:bg-[#117d72] focus:outline-none focus:ring-4 focus:ring-[#159a8c]/20">
-            Sign In
-          </button>
           </form>
 
           <div className="mt-8 text-center text-sm text-slate-500">
             Don't have an account? <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/register">Register</Link>
           </div>
           <div className="mt-3 text-center text-sm text-slate-500">
-            Administrator? <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/admin/login">Admin sign in</Link>
+            Administrator? <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/admin/login">Admin Login in</Link>
           </div>
         </div>
       </div>
@@ -111,4 +106,4 @@ function SignIn() {
   )
 }
 
-export default SignIn
+export default Login
