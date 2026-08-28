@@ -4,9 +4,7 @@ import { Toaster } from "react-hot-toast";
 import RequireAuth from "./components/RequireAuth.jsx";
 
 import Login from "./pages/Login.jsx";
-import Register from "./pages/Register.jsx";
-import AdminSignIn from "./pages/AdminSignIn.jsx";
-import AdminRegister from "./pages/AdminRegister.jsx";
+import Register from "./pages/Register.jsx"; 
 
 import Dashboard from "./pages/Dashboard.jsx";
 import Groups from "./pages/Groups.jsx";
@@ -16,8 +14,7 @@ import Expenses from "./pages/Expenses.jsx";
 import Settlements from "./pages/Settlements.jsx";
 import Profile from "./pages/Profile.jsx";
 import ViewProfile from "./pages/ViewProfile.jsx";
-import Settings from "./pages/Settings.jsx";
-import AdminDashboard from "./pages/AdminDashboard.jsx";
+import Settings from "./pages/Settings.jsx"; 
 
 function App() {
   return (
@@ -28,9 +25,7 @@ function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/admin/login" element={<AdminSignIn />} />
-        <Route path="/admin/register" element={<AdminRegister />} />
+        <Route path="/register" element={<Register />} /> 
 
         <Route path="/dashboard" element={<RequireAuth role="user"><Dashboard /></RequireAuth>} />
         <Route path="/groups" element={<RequireAuth role="user"><Groups /></RequireAuth>} />
@@ -41,8 +36,7 @@ function App() {
         <Route path="/profile" element={<RequireAuth role="user"><Profile /></RequireAuth>} />
         <Route path="/viewprofile/:userId" element={<RequireAuth role="user"><ViewProfile /></RequireAuth>} />
         <Route path="/settings" element={<RequireAuth role="user"><Settings /></RequireAuth>} />
-        <Route path="/admin/dashboard" element={<RequireAuth role="admin"><AdminDashboard /></RequireAuth>} />
-
+ 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </>
