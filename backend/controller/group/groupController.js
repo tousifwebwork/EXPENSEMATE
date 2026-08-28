@@ -1,17 +1,21 @@
 
 const Group = require("../../model/groupModel");
-
+const User = require("../../model/userModel");
 
 
 // CREATE GROUP
 exports.createGroup = async (req, res) => {
   try {
     const { name, description, coverImage, baseCurrency } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.userId; 
+    const userModel = await User.findById(userId).select("name");
+    const username = userModel.name;
 
     if (!name) {
       return res.status(400).json({ success: false, message: "Group name is required" });
     }
+        console.log(username)
+
 
     const group = await Group.create({
       name,
@@ -19,16 +23,41 @@ exports.createGroup = async (req, res) => {
       coverImage,
       baseCurrency,
       owner: userId,
-      members: [{ user: userId, role: "owner" }],
-    });
-
+      members: [{ user: userId,userName:username,role: "owner" }],
+    }); 
+    console.log(group)
     res.status(201).json({ success: true, message: "Group created", group });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
+exports.deleteGroup = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.userId;
 
+    const group = await Group.findById(id);
+
+    if (!group) {
+      return res.status(404).json({success: false,message: "Group not found"});
+    }
+
+    const membership = group.members.find((m) => m.user.toString() === userId);
+
+    if (!membership ||(membership.role !== "owner" && membership.role !== "admin")) {
+      return res.status(403).json({success: false,message: "Only owner or admin can delete the group"});
+    }
+    await Group.findByIdAndDelete(id);
+    res.status(200).json({success: true,message: "Group deleted successfully"});
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 
 // GET MY GROUPS (active + archived)
 exports.getMyGroups = async (req, res) => {
@@ -43,8 +72,6 @@ exports.getMyGroups = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-
 
 // GET SINGLE GROUP (with membership check)
 exports.getGroupById = async (req, res) => {
@@ -133,7 +160,7 @@ exports.addMember = async (req, res) => {
       return res.status(400).json({ success: false, message: "User is already a member of the group" });
     }
 
-    group.members.push({ user: newUser._id, role: "member" });
+    group.members.push({ user: newUser._id, userName: newUser.name, role: "member" });
     await group.save();
 
     res.status(200).json({ success: true, message: "Member added", group });

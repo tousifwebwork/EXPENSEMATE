@@ -22,3 +22,8 @@ button,
 input {
 	font: inherit;
 }
+
+
+.Toastify__toast-container {
+  z-index: 99999 !important;
+}
