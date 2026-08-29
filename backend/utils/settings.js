@@ -14,6 +14,7 @@ app.use("/api/auth", require("../router/auth/authRoutes"));
 app.use("/api/user",require("../router/user/userRoutes"));
 app.use("/api/friends",require("../router/friend/friendRoutes"));
 app.use("/api/groups", require("../router/group/groupRoutes"));
+app.use("/api/expenses", require("../router/expense/expenseRoutes"));
 }
 
 module.exports = setup;
