@@ -297,119 +297,75 @@ const ViewGroup = () => {
   }
 
   return (
-    <AppLayout>
+<AppLayout>
 
-      <ToastContainer position="top-right" />
+  <ToastContainer position="top-right" />
 
-      {/* =========================
-          BACK
-      ========================= */}
-      <button
-        onClick={() => navigate("/groups")}
-        className="mb-5 text-sm font-semibold text-[#159a8c]"
-      >
-        ← Back to Groups
-      </button>
+    {/* Back */}
+    <button onClick={() => navigate("/groups")} className="mb-5 text-sm font-semibold text-[#159a8c]">
+       ← Back to Groups
+    </button>
 
-      {/* =========================
-          HEADER
-      ========================= */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* HEADER */}
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#159a8c]">
-            Group
-          </p>
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#159a8c]">
+          Group
+        </p>
 
-          <h1 className="text-3xl font-bold text-[#102a43]">
-            {group.name}
-          </h1>
+        <h1 className="text-3xl font-bold text-[#102a43]">
+          {group.name}
+        </h1>
 
           <p className="mt-2 text-sm text-slate-500">
             {group.description || "No description"}
           </p>
-        </div>
-
-        <div className="flex gap-2">
-
-          {/* ARCHIVE - OWNER ONLY */}
-          {currentUserRole === "owner" && (
-            <button
-              onClick={handleArchive}
-              className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-100"
-            >
-              {group.isArchived
-                ? "Reopen"
-                : "Archive"}
-            </button>
-          )}
-
-          {/* DELETE - OWNER / ADMIN */}
-          {(currentUserRole === "owner" ||
-            currentUserRole === "admin") && (
-            <button
-              onClick={handleDeleteGroup}
-              className="rounded-xl border border-red-500 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-500 hover:text-white"
-            >
-              Delete
-            </button>
-          )}
-
-        </div>
       </div>
 
-      {/* =========================
-          GROUP INFO
-      ========================= */}
-      <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex gap-2">
 
-        <h2 className="text-xl font-bold text-[#102a43]">
-          Group Information
-        </h2>
+      {/* ARCHIVE - OWNER ONLY */}
+      {currentUserRole === "owner" && (
+            <button onClick={handleArchive}
+              className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-100">
+              {group.isArchived ? "Reopen" : "Archive"}
+            </button>
+      )}
 
+      {/* DELETE - OWNER / ADMIN */}
+      {(currentUserRole === "owner" || currentUserRole === "admin") && 
+      (
+        <button onClick={handleDeleteGroup} className="rounded-xl border border-red-500 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-500 hover:text-white">
+          Delete
+        </button>
+      )}
+
+      </div>
+    </div>
+
+      {/* GROUP INFO */}
+    <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 className="text-xl font-bold text-[#102a43]"> Group Information</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-3">
-
           <div>
-            <p className="text-sm text-slate-500">
-              Currency
-            </p>
-
-            <p className="font-bold">
-              {group.baseCurrency}
-            </p>
+            <p className="text-sm text-slate-500">Currency</p>
+            <p className="font-bold">{group.baseCurrency}</p>
           </div>
-
           <div>
-            <p className="text-sm text-slate-500">
-              Members
-            </p>
-
-            <p className="font-bold">
-              {group.members?.length || 0}
-            </p>
+            <p className="text-sm text-slate-500">Members</p>
+            <p className="font-bold">{group.members?.length || 0}</p>
           </div>
-
           <div>
-            <p className="text-sm text-slate-500">
-              Status
-            </p>
-
-            <p className="font-bold">
-              {group.isArchived
-                ? "Archived"
-                : "Active"}
-            </p>
+            <p className="text-sm text-slate-500">Status</p>
+            <p className="font-bold">{group.isArchived? "Archived": "Active"}</p>
           </div>
 
         </div>
-      </div>
+    </div>
 
-      {/* =========================
-          EDIT GROUP
-          OWNER / ADMIN ONLY
-      ========================= */}
-      {(currentUserRole === "owner" ||
-        currentUserRole === "admin") && (
+      {/* EDIT GROUP OWNER / ADMIN ONLY */}
+      {(currentUserRole === "owner" || currentUserRole === "admin") && (
         <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
           <h2 className="text-xl font-bold text-[#102a43]">
@@ -418,40 +374,16 @@ const ViewGroup = () => {
 
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
 
-            <input
-              value={editData.name}
-              onChange={(e) =>
-                setEditData({
-                  ...editData,
-                  name: e.target.value,
-                })
-              }
+            <input value={editData.name} onChange={(e) =>setEditData({...editData,name: e.target.value,}) }
               className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#159a8c]"
-              placeholder="Group name"
-            />
+              placeholder="Group name" />
 
-            <input
-              value={editData.description}
-              onChange={(e) =>
-                setEditData({
-                  ...editData,
-                  description: e.target.value,
-                })
-              }
+            <input value={editData.description} onChange={(e) => setEditData({ ...editData,description: e.target.value,})}
               className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#159a8c]"
-              placeholder="Description"
-            />
+              placeholder="Description"/>
 
-            <select
-              value={editData.baseCurrency}
-              onChange={(e) =>
-                setEditData({
-                  ...editData,
-                  baseCurrency: e.target.value,
-                })
-              }
-              className="rounded-xl border border-slate-300 px-4 py-3"
-            >
+            <select value={editData.baseCurrency}  onChange={(e) =>setEditData({...editData,baseCurrency: e.target.value,})}
+              className="rounded-xl border border-slate-300 px-4 py-3">
               <option value="INR">INR</option>
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
@@ -469,103 +401,52 @@ const ViewGroup = () => {
         </div>
       )}
 
-      {/* =========================
-          MEMBERS
-      ========================= */}
+      {/* MEMBERS  */}
       <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
-        <h2 className="text-xl font-bold text-[#102a43]">
-          Members
-        </h2>
+        <h2 className="text-xl font-bold text-[#102a43]">Members</h2>
 
-        {/* =========================
-            ADD MEMBER
-            OWNER / ADMIN ONLY
-        ========================= */}
-        {(currentUserRole === "owner" ||
-          currentUserRole === "admin") && (
+        {/* ADD MEMBER OWNER / ADMIN ONLY  */}
+        {(currentUserRole === "owner" || currentUserRole === "admin") && 
+        (
           <div className="mt-4 flex gap-2">
-
-            <input
-              value={profileId}
-              onChange={(e) =>
-                setProfileId(e.target.value)
-              }
-              placeholder="Enter Profile ID"
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#159a8c]"
-            />
-
-            <button
-              onClick={handleAddMember}
-              className="rounded-xl bg-[#159a8c] px-5 font-semibold text-white hover:bg-[#117d72]"
-            >
+            <input value={profileId} onChange={(e) =>setProfileId(e.target.value)} placeholder="Enter Profile ID"
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#159a8c]"/>
+            <button onClick={handleAddMember} className="rounded-xl bg-[#159a8c] px-5 font-semibold text-white hover:bg-[#117d72]">
               Add
             </button>
-
           </div>
         )}
 
-        {/* =========================
-            MEMBER LIST
-        ========================= */}
-        <div className="mt-6 space-y-3">
-
-          {group.members?.map((member) => {
-
-            const canManageMember =
-              currentUserRole === "owner" ||
-              (
-                currentUserRole === "admin" &&
-                member.role === "member"
-              );
+        {/*  MEMBER LIST */}
+        <div className="mt-6 space-y-3"> 
+          {
+          group.members?.map((member) => {
+          const canManageMember = currentUserRole === "owner" ||  ( currentUserRole === "admin" && member.role === "member" );
 
             return (
-              <div
-                key={member._id}
-                className="flex flex-col gap-3 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-
+            <div key={member._id}
+            className="flex flex-col gap-3 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
+                
                 {/* MEMBER DETAILS */}
                 <div>
-
-                  <p className="font-bold text-[#102a43]">
-                    {member.user?.name}
-                  </p>
-
-                  <p className="text-sm text-slate-500">
-                    {member.user?.email}
-                  </p>
-
+                  <p className="font-bold text-[#102a43]">{member.user?.name}</p>
+                  <p className="text-sm text-slate-500">{member.user?.email}</p>
                   <span className="text-xs font-semibold text-[#159a8c]">
                     {member.role}
                   </span>
-
                 </div>
-
                 {/* CONTROLS */}
-
                 {canManageMember && (
                   <div className="flex gap-2">
-
-                    {/* ROLE CHANGE
-                        ONLY OWNER CAN CHANGE ROLE
-                    */}
+                    {/* ROLE CHANGE  ONLY OWNER CAN CHANGE ROLE */}
                     {currentUserRole === "owner" &&
                       member.role !== "owner" && (
-                        <select
-                          value={member.role}
-                          onChange={(e) =>
-                            handleRoleChange(
-                              member.user._id,
-                              e.target.value
-                            )
-                          }
-                          className="rounded-lg border border-slate-300 px-2 py-1 text-sm"
-                        >
+                        <select value={member.role} onChange={(e) =>handleRoleChange(member.user._id,e.target.value)}
+                          className="rounded-lg border border-slate-300 px-2 py-1 text-sm">
                           <option value="member">
                             Member
                           </option>
-
                           <option value="admin">
                             Admin
                           </option>
@@ -573,29 +454,24 @@ const ViewGroup = () => {
                     )}
 
                     {/* REMOVE */}
-                    <button
-                      onClick={() =>
-                        handleRemoveMember(
-                          member.user._id
-                        )
-                      }
-                      className="rounded-lg border border-red-500 px-3 py-1 text-sm text-red-600 hover:bg-red-500 hover:text-white"
-                    >
-                      Remove
-                    </button>
+
+                  {member.role !== "owner" && (
+                  <button onClick={() => handleRemoveMember(member.user._id)}
+                   className="rounded-lg border border-red-500 px-3 py-1 text-sm text-red-600 hover:bg-red-500 hover:text-white">
+                    Remove
+                  </button>
+                  )}
 
                   </div>
                 )}
 
-              </div>
+            </div>
             );
           })}
-
         </div>
-
       </div>
 
-    </AppLayout>
+</AppLayout>
   );
 };
 
