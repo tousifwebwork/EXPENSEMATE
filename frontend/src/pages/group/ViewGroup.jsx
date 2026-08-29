@@ -1,69 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-
 import AppLayout from "../../components/AppLayout";
-import {
-  getGroupById,
-  updateGroup,
-  addMember,
-  updateMemberRole,
-  removeMember,
-  toggleArchive,
-  deleteGroup,
-} from "../../config/group/groupAPI";
-
+import {getGroupById,updateGroup,addMember,updateMemberRole,removeMember,toggleArchive,deleteGroup,} from "../../config/group/groupAPI";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ViewGroup = () => {
   const { groupId } = useParams();
   const navigate = useNavigate();
-
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
-
   const [currentUserId, setCurrentUserId] = useState(null);
-
   const [profileId, setProfileId] = useState("");
+  const [editData, setEditData] = useState({name: "",description: "",baseCurrency: "",});
 
-  const [editData, setEditData] = useState({
-    name: "",
-    description: "",
-    baseCurrency: "",
-  });
-
-  // =========================
   // GET GROUP
-  // =========================
   const loadGroup = async () => {
     try {
       const token = localStorage.getItem("token");
-
       if (!token) {
         toast.error("Please login again");
         return;
       }
-
       const decoded = jwtDecode(token);
-
       setCurrentUserId(decoded.userId);
-
       const res = await getGroupById(groupId, token);
-
       setGroup(res.data.group);
-
-      setEditData({
-        name: res.data.group.name,
-        description: res.data.group.description || "",
-        baseCurrency: res.data.group.baseCurrency,
-      });
+      setEditData({name: res.data.group.name,description: res.data.group.description || "",baseCurrency: res.data.group.baseCurrency,});
     } catch (err) {
       console.log(err);
-
-      toast.error(
-        err.response?.data?.message || "Failed to load group"
-      );
+      toast.error(err.response?.data?.message || "Failed to load group");
     } finally {
       setLoading(false);
     }
@@ -73,206 +40,101 @@ const ViewGroup = () => {
     loadGroup();
   }, [groupId]);
 
-  // =========================
   // CURRENT USER MEMBERSHIP
-  // =========================
-  const currentMember = group?.members?.find(
-    (member) =>
-      member.user?._id?.toString() === currentUserId?.toString()
-  );
-
+  const currentMember = group?.members?.find((member) =>member.user?._id?.toString() === currentUserId?.toString());
   const currentUserRole = currentMember?.role;
 
-  // =========================
-  // EDIT GROUP
-  // OWNER / ADMIN ONLY
-  // =========================
+
+  // EDIT GROUP  OWNER / ADMIN ONLY
   const handleUpdateGroup = async () => {
     try {
       const token = localStorage.getItem("token");
-
-      const res = await updateGroup(
-        groupId,
-        editData,
-        token
-      );
-
+      const res = await updateGroup(groupId,editData,token);
       setGroup(res.data.group);
-
       toast.success("Group updated successfully!");
     } catch (err) {
       console.log(err);
-
-      toast.error(
-        err.response?.data?.message ||
-          "Failed to update group"
-      );
+      toast.error(err.response?.data?.message ||"Failed to update group");
     }
   };
 
-  // =========================
-  // ADD MEMBER
-  // OWNER / ADMIN ONLY
-  // =========================
+  // ADD MEMBER OWNER / ADMIN ONLY
   const handleAddMember = async () => {
     if (!profileId.trim()) {
       toast.error("Enter profile ID");
       return;
     }
-
     try {
       const token = localStorage.getItem("token");
-
-      await addMember(
-        groupId,
-        { profileId },
-        token
-      );
-
+      await addMember(groupId,{ profileId },token);
       setProfileId("");
-
-      // Reload populated group
       await loadGroup();
-
       toast.success("Member added successfully!");
     } catch (err) {
       console.log(err);
-
-      toast.error(
-        err.response?.data?.message ||
-          "Failed to add member"
-      );
+      toast.error( err.response?.data?.message || "Failed to add member");
     }
   };
 
-  // =========================
-  // CHANGE ROLE
-  // OWNER ONLY
-  // =========================
+  // CHANGE ROLE OWNER ONLY
   const handleRoleChange = async (memberId, role) => {
     try {
       const token = localStorage.getItem("token");
-
-      await updateMemberRole(
-        groupId,
-        memberId,
-        { role },
-        token
-      );
-
-      // Reload populated group
+      await updateMemberRole(groupId,memberId,{ role },token);
       await loadGroup();
-
       toast.success("Member role updated!");
     } catch (err) {
       console.log(err);
-
-      toast.error(
-        err.response?.data?.message ||
-          "Failed to update role"
-      );
+      toast.error(err.response?.data?.message ||"Failed to update role");
     }
   };
 
-  // =========================
-  // REMOVE MEMBER
-  // OWNER / ADMIN
-  // =========================
-  const handleRemoveMember = async (memberId) => {
-    const confirmRemove = window.confirm(
-      "Do you want to remove this member?"
-    );
-
-    if (!confirmRemove) return;
-
+  // REMOVE MEMBER  OWNER / ADMIN
+  const handleRemoveMember = async (memberId) => { 
+    const confirmRemove = window.confirm("Do you want to remove this member?");
     try {
+      if (!confirmRemove) return;
       const token = localStorage.getItem("token");
-
-      await removeMember(
-        groupId,
-        memberId,
-        token
-      );
-
-      // Reload populated group
+      await removeMember(groupId,memberId,token);
       await loadGroup();
-
       toast.success("Member removed!");
     } catch (err) {
       console.log(err);
-
-      toast.error(
-        err.response?.data?.message ||
-          "Failed to remove member"
-      );
+      toast.error(err.response?.data?.message ||"Failed to remove member");
     }
   };
 
-  // =========================
-  // ARCHIVE / REOPEN
-  // OWNER ONLY
-  // =========================
+  // ARCHIVE / REOPEN  OWNER ONLY
   const handleArchive = async () => {
     try {
       const token = localStorage.getItem("token");
-
-      const res = await toggleArchive(
-        groupId,
-        token
-      );
-
+      const res = await toggleArchive(groupId, token);
       setGroup(res.data.group);
-
       toast.success(res.data.message);
     } catch (err) {
       console.log(err);
-
-      toast.error(
-        err.response?.data?.message ||
-          "Failed to update group status"
-      );
+      toast.error(err.response?.data?.message ||"Failed to update group status");
     }
   };
 
-  // =========================
-  // DELETE GROUP
-  // OWNER / ADMIN
-  // =========================
-  const handleDeleteGroup = async () => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this group?"
-    );
-
+   // DELETE GROUP  OWNER / ADMIN
+   const handleDeleteGroup = async () => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this group?");
     if (!confirmDelete) return;
-
     try {
       const token = localStorage.getItem("token");
-
-      await deleteGroup(
-        groupId,
-        token
-      );
-
-      toast.success(
-        "Group deleted successfully!"
-      );
-
+      await deleteGroup(groupId,token);
+      toast.success("Group deleted successfully!");
       setTimeout(() => {
         navigate("/groups");
       }, 1000);
     } catch (err) {
       console.log(err);
-
-      toast.error(
-        err.response?.data?.message ||
-          "Failed to delete group"
-      );
+      toast.error(err.response?.data?.message ||"Failed to delete group");
     }
   };
 
-  // =========================
   // LOADING
-  // =========================
   if (loading) {
     return (
       <AppLayout>
@@ -282,10 +144,7 @@ const ViewGroup = () => {
       </AppLayout>
     );
   }
-
-  // =========================
   // GROUP NOT FOUND
-  // =========================
   if (!group) {
     return (
       <AppLayout>
@@ -347,7 +206,7 @@ const ViewGroup = () => {
       {/* GROUP INFO */}
     <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <h2 className="text-xl font-bold text-[#102a43]"> Group Information</h2>
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
+        <div className="mt-5 grid gap-4 sm:grid-cols-4">
           <div>
             <p className="text-sm text-slate-500">Currency</p>
             <p className="font-bold">{group.baseCurrency}</p>
@@ -359,6 +218,14 @@ const ViewGroup = () => {
           <div>
             <p className="text-sm text-slate-500">Status</p>
             <p className="font-bold">{group.isArchived? "Archived": "Active"}</p>
+          </div>
+          <div>
+             <p className="text-sm font-semibold text-[#102a43]"> Track a new expense </p>
+             <button 
+             onClick={() => navigate(`/groups/${groupId}/expenses`)}
+             className="mt-2 rounded-xl bg-[#159a8c] px-4 py-2 text-sm font-semibold text-white hover:bg-[#117d72]">
+             + Add Expense
+             </button>
           </div>
 
         </div>
@@ -374,20 +241,30 @@ const ViewGroup = () => {
 
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
 
-            <input value={editData.name} onChange={(e) =>setEditData({...editData,name: e.target.value,}) }
+            <div className="flex flex-col gap-3">
+              <span className="text-gray-600 ml-2">Group Name</span>
+              <input value={editData.name} onChange={(e) =>setEditData({...editData,name: e.target.value,}) }
               className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#159a8c]"
               placeholder="Group name" />
+            </div>
 
-            <input value={editData.description} onChange={(e) => setEditData({ ...editData,description: e.target.value,})}
+            <div className="flex flex-col gap-3">
+              <span className="text-gray-600 ml-2">Group Description</span>
+              <input value={editData.description} onChange={(e) => setEditData({ ...editData,description: e.target.value,})}
               className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#159a8c]"
               placeholder="Description"/>
-
-            <select value={editData.baseCurrency}  onChange={(e) =>setEditData({...editData,baseCurrency: e.target.value,})}
+            </div>
+            
+            <div className="flex flex-col gap-3">
+              <span className="text-gray-600 ml-2">Currency</span>
+              <select value={editData.baseCurrency}  onChange={(e) =>setEditData({...editData,baseCurrency: e.target.value,})}
               className="rounded-xl border border-slate-300 px-4 py-3">
               <option value="INR">INR</option>
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
             </select>
+            </div>
+            
 
           </div>
 
