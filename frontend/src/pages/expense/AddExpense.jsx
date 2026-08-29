@@ -49,10 +49,18 @@ const AddExpense = () => {
 
       setGroup(groupData);
 
+      // ✅ Pre-select all members as participants by default
+      const defaultShares = groupData.members.map((member) => ({
+        user: member.user._id,
+        amount: "",
+        percentage: "",
+      }));
+
       setFormData((prev) => ({
         ...prev,
         currency: groupData.baseCurrency,
         paidBy: groupData.owner?._id || "",
+        shares: defaultShares,
       }));
     } catch (err) {
       console.log(err);
@@ -87,15 +95,18 @@ const AddExpense = () => {
   // SPLIT TYPE CHANGE
   // =========================
 
-  const handleSplitTypeChange = (e) => {
-    const splitType = e.target.value;
-
-    setFormData((prev) => ({
-      ...prev,
-      splitType,
-      shares: [],
-    }));
-  };
+   const handleSplitTypeChange = (e) => {
+  const splitType = e.target.value;
+  setFormData((prev) => ({
+    ...prev,
+    splitType,
+    shares: prev.shares.map((share) => ({
+      user: share.user,
+      amount: "",
+      percentage: "",
+    })), // ✅ keeps who's selected, just clears amounts
+  }));
+};
 
   // =========================
   // MEMBER SELECTION

@@ -1,17 +1,10 @@
  
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
 import AppLayout from "../../components/AppLayout";
-
-import {
-  getGroupExpenses,
-  deleteExpense,
-} from "../../config/expense/expenseAPI";
-
+import {  getGroupExpenses, deleteExpense, } from "../../config/expense/expenseAPI";
 import { getGroupById } from "../../config/group/groupAPI";
-
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const GroupExpenses = () => {
@@ -23,40 +16,37 @@ const GroupExpenses = () => {
 
   const [loading, setLoading] = useState(true);
 
-  // =========================
   // LOAD GROUP + EXPENSES
-  // =========================
-
   const loadData = async () => {
-    try {
-      const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
 
-      if (!token) {
-        toast.error("Please login again");
-        return;
-      }
-
-      const groupRes = await getGroupById(groupId, token);
-      const expenseRes = await getGroupExpenses(groupId, token);
-
-      setGroup(groupRes.data.group);
-      setExpenses(expenseRes.data.expenses || []);
-    } catch (err) {
-      console.log(err);
-
-      toast.error(
-        err.response?.data?.message ||
-          "Failed to load expenses"
-      );
-    } finally {
-      setLoading(false);
+    if (!token) {
+      toast.error("Please login again");
+      return;
     }
-  };
 
-  // =========================
+    const [groupRes, expenseRes] = await Promise.all([
+      getGroupById(groupId, token),
+      getGroupExpenses(groupId, token),
+    ]);
+
+    setGroup(groupRes.data.group);
+    setExpenses(expenseRes.data.expenses || []);
+
+  } catch (err) {
+    console.log(err);
+
+    toast.error(
+      err.response?.data?.message ||
+        "Failed to load expenses"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
   // DELETE EXPENSE
-  // =========================
-
   const handleDeleteExpense = async (expenseId) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this expense?"
@@ -91,74 +81,68 @@ const GroupExpenses = () => {
     loadData();
   }, [groupId]);
 
-  // =========================
   // TOTAL EXPENSE
-  // =========================
+  const totalExpense = expenses.reduce((total, expense) =>total + Number(expense.amount || 0), 0);
 
-  const totalExpense = expenses.reduce(
-    (total, expense) =>
-      total + Number(expense.amount || 0),
-    0
-  );
-
-  // =========================
   // CALCULATE MEMBER BALANCES
-  // =========================
+const calculateBalances = () => {
+  if (!group?.members?.length) return [];
 
-  const calculateBalances = () => {
-    if (!group?.members) return [];
+  const balances = {};
 
-    // Create balance object for every group member
-    const balances = {};
+  // Seed with current members
+  group.members.forEach((member) => {
+    const userId = String(member.user?._id);
+    balances[userId] = {
+      user: member.user,
+      balance: 0,      // net settlement balance (paid - owed)
+      totalPaid: 0,     // how much they fronted in cash
+      totalSpent: 0,    // their own share of expenses (regardless of payer)
+    };
+  });
 
-    group.members.forEach((member) => {
-      const userId = member.user?._id;
+  expenses.forEach((expense) => {
+    const payerId = String(expense.paidBy?._id || expense.paidBy);
 
-      if (userId) {
+    if (!balances[payerId]) {
+      balances[payerId] = {
+        user: expense.paidBy?.name ? expense.paidBy : { _id: payerId, name: "Removed User" },
+        balance: 0,
+        totalPaid: 0,
+        totalSpent: 0,
+      };
+    }
+
+    // Payer fronted this amount
+    balances[payerId].balance += Number(expense.amount || 0);
+    balances[payerId].totalPaid += Number(expense.amount || 0);
+
+    expense.shares?.forEach((share) => {
+      const userId = String(share.user?._id || share.user);
+
+      if (!balances[userId]) {
         balances[userId] = {
-          user: member.user,
+          user: share.user?.name ? share.user : { _id: userId, name: "Removed User" },
           balance: 0,
+          totalPaid: 0,
+          totalSpent: 0,
         };
       }
+
+      // Subtract their share from net balance (settlement math)
+      balances[userId].balance -= Number(share.amount || 0);
+
+      // Track their personal spend, separate from settlement math
+      balances[userId].totalSpent += Number(share.amount || 0);
     });
+  });
 
-    // Process every expense
-    expenses.forEach((expense) => {
-      // Person who paid gets credited
-      const payerId =
-        expense.paidBy?._id || expense.paidBy;
+  return Object.values(balances);
+};
 
-      if (payerId && balances[payerId]) {
-        balances[payerId].balance += Number(
-          expense.amount || 0
-        );
-      }
+const memberBalances = calculateBalances();
 
-      // Each participant gets charged their share
-      expense.shares?.forEach((share) => {
-        const participantId =
-          share.user?._id || share.user;
-
-        if (
-          participantId &&
-          balances[participantId]
-        ) {
-          balances[participantId].balance -= Number(
-            share.amount || 0
-          );
-        }
-      });
-    });
-
-    return Object.values(balances);
-  };
-
-  const memberBalances = calculateBalances();
-
-  // =========================
   // LOADING
-  // =========================
-
   if (loading) {
     return (
       <AppLayout>
@@ -169,10 +153,7 @@ const GroupExpenses = () => {
     );
   }
 
-  // =========================
   // GROUP NOT FOUND
-  // =========================
-
   if (!group) {
     return (
       <AppLayout>
@@ -185,8 +166,7 @@ const GroupExpenses = () => {
 
   return (
     <AppLayout>
-      <ToastContainer position="top-right" />
-
+      
       {/* BACK */}
 
       <button
@@ -251,9 +231,7 @@ const GroupExpenses = () => {
 
             {memberBalances.map((member) => {
 
-              const balance = Number(
-                member.balance || 0
-              );
+              const balance = Number(member.balance || 0);
 
               const roundedBalance =
                 Math.abs(balance) < 0.01
@@ -301,35 +279,29 @@ const GroupExpenses = () => {
                   </div>
 
                   {/* BALANCE */}
+<div className="mt-4 flex items-center justify-between">
+  <span className="text-sm font-medium text-slate-500">Balance</span>
+  <span
+    className={`text-lg font-bold ${
+      roundedBalance > 0
+        ? "text-green-600"
+        : roundedBalance < 0
+        ? "text-red-600"
+        : "text-slate-500"
+    }`}
+  >
+    {roundedBalance > 0 ? "+" : roundedBalance < 0 ? "-" : ""}
+    {group.baseCurrency} {Math.abs(roundedBalance).toFixed(2)}
+  </span>
+</div>
 
-                  <div className="mt-4 flex items-center justify-between">
-
-                    <span className="text-sm font-medium text-slate-500">
-                      Balance
-                    </span>
-
-                    <span
-                      className={`text-lg font-bold ${
-                        roundedBalance > 0
-                          ? "text-green-600"
-                          : roundedBalance < 0
-                          ? "text-red-600"
-                          : "text-slate-500"
-                      }`}
-                    >
-                      {roundedBalance > 0
-                        ? "+"
-                        : roundedBalance < 0
-                        ? "-"
-                        : ""}
-
-                      {group.baseCurrency}{" "}
-                      {Math.abs(
-                        roundedBalance
-                      ).toFixed(2)}
-                    </span>
-
-                  </div>
+{/* TOTAL SPENT — NEW */}
+<div className="mt-2 flex items-center justify-between border-t border-slate-200 pt-2">
+  <span className="text-xs font-medium text-slate-400">Total Spent</span>
+  <span className="text-sm font-semibold text-slate-600">
+    {group.baseCurrency} {Number(member.totalSpent || 0).toFixed(2)}
+  </span>
+</div>
 
                 </div>
               );
@@ -391,7 +363,8 @@ const GroupExpenses = () => {
 
           <div className="space-y-5">
 
-            {expenses.map((expense) => (
+            {
+            expenses.map((expense) => (
 
               <div
                 key={expense._id}
@@ -453,9 +426,7 @@ const GroupExpenses = () => {
 
                 </div>
 
-                {/* =========================
-                    SPLIT DETAILS
-                ========================= */}
+                {/*  SPLIT DETAILS  */}
 
                 <div className="mt-5 rounded-xl bg-slate-50 p-4">
 
@@ -534,33 +505,34 @@ const GroupExpenses = () => {
 
                 </div>
 
-                {/* =========================
-                    ACTION BUTTONS
-                ========================= */}
+                {/*  ACTION BUTTONS  */}
+                {/* <div className="mt-5 flex flex-row  bg-yellow-200 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end"> */}
 
-                <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
+                <div className="flex flex-row justify-between pt-4 mt-5 border-t border-slate-300">
 
-                  <button
-                    onClick={() =>
-                      navigate(
-                        `/groups/${groupId}/expenses/${expense._id}/edit`
-                      )
-                    }
-                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
-                  >
+                  
+                <div>
+                 {expense.notes?.length > 0 && (
+                   <p className="mt-3 text-sm text-slate-500">
+                   <span className="font-semibold text-[#102a43]">
+                    Notes:
+                   </span>{" "}
+                   {expense.notes}
+                  </p>
+                  )}
+                </div>
+
+                  <div className="flex flex-row gap-5">
+                    <button onClick={() => navigate(`/groups/${groupId}/expenses/${expense._id}/edit`)}
+                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">
                     Edit
                   </button>
 
-                  <button
-                    onClick={() =>
-                      handleDeleteExpense(
-                        expense._id
-                      )
-                    }
-                    className="rounded-lg border border-red-500 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-500 hover:text-white"
-                  >
+                  <button  onClick={() =>handleDeleteExpense(expense._id)}
+                    className="rounded-lg border border-red-500 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-500 hover:text-white">
                     Delete
                   </button>
+                  </div>
 
                 </div>
 

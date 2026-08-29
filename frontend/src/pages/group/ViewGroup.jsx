@@ -206,7 +206,7 @@ const ViewGroup = () => {
       {/* GROUP INFO */}
     <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <h2 className="text-xl font-bold text-[#102a43]"> Group Information</h2>
-        <div className="mt-5 grid gap-4 sm:grid-cols-4">
+        <div className="mt-5 grid gap-4 sm:grid-cols-5">
           <div>
             <p className="text-sm text-slate-500">Currency</p>
             <p className="font-bold">{group.baseCurrency}</p>
@@ -220,9 +220,18 @@ const ViewGroup = () => {
             <p className="font-bold">{group.isArchived? "Archived": "Active"}</p>
           </div>
           <div>
-             <p className="text-sm font-semibold text-[#102a43]"> Track a new expense </p>
+             <p className="text-sm font-semibold text-[#102a43]"> Track Record </p>
              <button 
              onClick={() => navigate(`/groups/${groupId}/expenses`)}
+             className="mt-2 rounded-xl bg-[#159a8c] px-4 py-2 text-sm font-semibold text-white hover:bg-[#117d72]">
+             View All
+             </button>
+          </div>
+          
+          <div>
+             <p className="text-sm font-semibold text-[#102a43]"> Track a new expense </p>
+             <button 
+             onClick={() => navigate(`/groups/${groupId}/expenses/add`)}
              className="mt-2 rounded-xl bg-[#159a8c] px-4 py-2 text-sm font-semibold text-white hover:bg-[#117d72]">
              + Add Expense
              </button>
