@@ -506,30 +506,29 @@ const memberBalances = calculateBalances();
                 </div>
 
                 {/*  ACTION BUTTONS  */}
-                {/* <div className="mt-5 flex flex-row  bg-yellow-200 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end"> */}
 
-                <div className="flex flex-row justify-between pt-4 mt-5 border-t border-slate-300">
+                <div className="mt-5 flex flex-col gap-3 border-t border-slate-300 pt-4 sm:flex-row sm:items-center sm:justify-between">
 
-                  
-                <div>
+
+                <div className="min-w-0">
                  {expense.notes?.length > 0 && (
-                   <p className="mt-3 text-sm text-slate-500">
+                   <p className="text-sm text-slate-500">
                    <span className="font-semibold text-[#102a43]">
                     Notes:
                    </span>{" "}
-                   {expense.notes}
+                   <span className="break-words">{expense.notes}</span>
                   </p>
                   )}
                 </div>
 
-                  <div className="flex flex-row gap-5">
+                  <div className="flex flex-row gap-3 sm:shrink-0">
                     <button onClick={() => navigate(`/groups/${groupId}/expenses/${expense._id}/edit`)}
-                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">
+                    className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 sm:flex-initial">
                     Edit
                   </button>
 
                   <button  onClick={() =>handleDeleteExpense(expense._id)}
-                    className="rounded-lg border border-red-500 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-500 hover:text-white">
+                    className="flex-1 rounded-lg border border-red-500 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-500 hover:text-white sm:flex-initial">
                     Delete
                   </button>
                   </div>

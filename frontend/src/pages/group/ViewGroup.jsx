@@ -206,7 +206,7 @@ const ViewGroup = () => {
       {/* GROUP INFO */}
     <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <h2 className="text-xl font-bold text-[#102a43]"> Group Information</h2>
-        <div className="mt-5 grid gap-4 sm:grid-cols-5">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <div>
             <p className="text-sm text-slate-500">Currency</p>
             <p className="font-bold">{group.baseCurrency}</p>
@@ -248,7 +248,7 @@ const ViewGroup = () => {
             Edit Group
           </h2>
 
-          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
             <div className="flex flex-col gap-3">
               <span className="text-gray-600 ml-2">Group Name</span>

@@ -1,12 +1,12 @@
 import { ToastContainer } from 'react-toastify'
-import Sidebar from './Sidebar.jsx'
+import Navbar from './Navbar.jsx'
 
 function AppLayout({ children }) {
   return (
-    <div className="min-h-screen bg-[#f4f7fb] lg:flex">
-      <Sidebar />
+    <div className="min-h-screen bg-[#f4f7fb]">
+      <Navbar />
       <ToastContainer position="top-right" style={{ zIndex: 99999 }} />
-      <main className="min-w-0 flex-1 px-4 py-6 sm:px-8 lg:px-12 lg:py-10">{children}</main>
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</main>
     </div>
   )
 }

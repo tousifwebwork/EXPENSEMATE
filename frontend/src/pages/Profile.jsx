@@ -266,11 +266,11 @@ function Profile() {
                 )}
 
                 <div className="pb-1 text-center sm:text-left">
-                  <h2 className="text-4xl font-bold text-white">
+                  <h2 className="text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
                     {user.name || "Your Name"}
                   </h2>
 
-                  <p className="mt-2  text-sm text-slate-700">
+                  <p className="mt-2 text-sm text-slate-700">
                     {user.email || "Email not provided"}
                   </p>
 

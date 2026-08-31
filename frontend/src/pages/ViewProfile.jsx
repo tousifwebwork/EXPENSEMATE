@@ -221,18 +221,18 @@ const ViewProfile = () => {
                 )}
 
                 <div className="pb-1 text-center sm:text-left">
-                  <h2 className="mb-3 text-4xl font-bold text-white">
+                  <h2 className="mb-2 text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
                     {fullName}
                   </h2>
 
                   <p className="mt-1 flex items-center justify-center gap-2 text-sm text-slate-700 sm:justify-start">
                     <Mail size={15} />
-                    {user.email || "Email not provided"}
+                    <span className="truncate">{user.email || "Email not provided"}</span>
                   </p>
 
                   <p className="mt-1 flex items-center justify-center gap-2 text-xs text-slate-600 sm:justify-start">
                     <Hash size={13} />
-                    {user.profileId || "No Profile ID"}
+                    <span className="truncate">{user.profileId || "No Profile ID"}</span>
                   </p>
                 </div>
               </div>

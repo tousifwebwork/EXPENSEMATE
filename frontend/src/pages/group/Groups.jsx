@@ -420,7 +420,7 @@ const Groups = () => {
       ========================= */}
       <dialog
         id="add_group_modal"
-        className="fixed inset-0 m-auto w-[90%] max-w-md rounded-2xl border-0 p-0 shadow-2xl backdrop:bg-black/40"
+        className="fixed inset-0 m-auto w-[92%] max-w-md rounded-2xl border-0 p-0 shadow-2xl backdrop:bg-black/50"
       >
 
         <div className="bg-white p-6">

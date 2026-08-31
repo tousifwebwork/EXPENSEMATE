@@ -51,26 +51,26 @@ function Register() {
 
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb] px-4 py-8 sm:px-6 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(420px,0.75fr)] lg:gap-16 lg:px-20 lg:py-10">
-      <div className="hidden flex-col justify-between rounded-[2rem] bg-[#102a43] p-10 text-white lg:flex">
+    <div className="min-h-screen bg-[#f4f7fb] px-4 py-8 sm:px-6 lg:grid lg:grid-cols-2 lg:gap-12 lg:px-16 xl:gap-16 xl:px-20 lg:py-10">
+      <div className="hidden flex-col justify-between rounded-[2rem] bg-[#102a43] p-8 text-white lg:flex xl:p-10">
         <div className="flex items-center gap-3">
           <div className="grid size-10 place-items-center rounded-xl bg-[#47c5b0] text-lg font-bold text-[#102a43]">₹</div>
           <span className="text-lg font-bold tracking-tight">ExpenseMate</span>
         </div>
         <div>
           <p className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-[#8bded2]">Make room for life</p>
-          <h1 className="max-w-lg text-5xl font-bold leading-[1.05] tracking-tight">Shared spending, made simple.</h1>
-          <p className="mt-6 max-w-md text-base leading-7 text-slate-300">Create a home for group expenses, settle balances clearly, and keep friendships out of the spreadsheet.</p>
+          <h1 className="max-w-lg text-4xl font-bold leading-tight tracking-tight xl:text-5xl xl:leading-[1.05]">Shared spending, made simple.</h1>
+          <p className="mt-6 max-w-md text-sm leading-7 text-slate-300 xl:text-base">Create a home for group expenses, settle balances clearly, and keep friendships out of the spreadsheet.</p>
         </div>
         <p className="text-sm text-slate-400">Simple tracking for real-life groups.</p>
       </div>
 
       <div className="mx-auto flex w-full max-w-md flex-col justify-center lg:max-w-lg">
-        <div className="mb-8 flex items-center gap-3 lg:hidden">
+        <div className="mb-6 flex items-center gap-3 sm:mb-8 lg:hidden">
           <div className="grid size-10 place-items-center rounded-xl bg-[#102a43] text-lg font-bold text-[#8bded2]">₹</div>
           <span className="text-lg font-bold tracking-tight text-[#102a43]">ExpenseMate</span>
         </div>
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_55px_rgba(16,42,67,0.08)] sm:p-10">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_55px_rgba(16,42,67,0.08)] sm:rounded-3xl sm:p-10">
           <div className="mb-8">
             <p className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-[#159a8c]">Get started</p>
             <h2 className="text-3xl font-bold tracking-tight text-[#102a43]">Create your account</h2>
@@ -105,7 +105,7 @@ function Register() {
           <div className='relative'>
             <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="password">Password</label>
             <input
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
+              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 pr-12 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
               id="password"
               type={eye ? "text" : "password"}
               placeholder="Create a password"
@@ -114,15 +114,17 @@ function Register() {
             />
             <button
               type="button" onClick={eye_handle}
-              className="absolute right-4 bottom-3 text-slate-500 hover:text-[#159a8c]">
-              {eye ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+              className="absolute right-3 top-[2.35rem] text-slate-500 hover:text-[#159a8c]"
+              aria-label={eye ? "Hide password" : "Show password"}
+            >
+              {eye ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
              </button>
           </div>
 
           <div className='relative'>
             <label className="mb-2 block text-sm font-semibold text-slate-700" htmlFor="confirmPassword">Confirm Password</label>
             <input
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
+              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 pr-12 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
               id="confirmPassword"
                type={con_eye ? "text" : "password"}
               placeholder="Re-enter your password"
@@ -131,8 +133,10 @@ function Register() {
             />
             <button
               type="button" onClick={con_eye_handle}
-              className="absolute right-4 bottom-3 text-slate-500 hover:text-[#159a8c]">
-              {con_eye ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+              className="absolute right-3 top-[2.35rem] text-slate-500 hover:text-[#159a8c]"
+              aria-label={con_eye ? "Hide password" : "Show password"}
+            >
+              {con_eye ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
              </button>
           </div>
 

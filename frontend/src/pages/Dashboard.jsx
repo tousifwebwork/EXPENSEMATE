@@ -17,9 +17,9 @@ function Dashboard() {
             <h1 className="text-3xl font-bold tracking-tight text-[#102a43] sm:text-4xl">Welcome back, {firstName} 👋</h1>
             <p className="mt-2 text-sm text-slate-500">Here's what's happening with your expenses today.</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <button className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-[#102a43] shadow-sm transition hover:border-[#159a8c] hover:text-[#117d72]">+ Add Expense</button>
-            <button className="rounded-xl bg-[#159a8c] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#159a8c]/20 transition hover:bg-[#117d72]">+ Create Group</button>
+          <div className="flex flex-wrap gap-2.5 sm:gap-3">
+            <button className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:px-4 sm:py-2.5 sm:text-sm font-bold text-[#102a43] shadow-sm transition hover:border-[#159a8c] hover:text-[#117d72]">+ Add Expense</button>
+            <button className="rounded-xl bg-[#159a8c] px-3.5 py-2 text-xs sm:px-4 sm:py-2.5 sm:text-sm font-bold text-white shadow-lg shadow-[#159a8c]/20 transition hover:bg-[#117d72]">+ Create Group</button>
           </div>
         </div>
 
@@ -67,7 +67,7 @@ function Dashboard() {
                 </div>
                 <div
                   className={`shrink-0 text-sm font-bold ${
-                    expense.yourShare >= 0 ? 'positive' : 'negative'
+                    expense.yourShare >= 0 ? 'text-[#117d72]' : 'text-[#b6631e]'
                   }`}
                 >
                   {formatINR(expense.yourShare)}

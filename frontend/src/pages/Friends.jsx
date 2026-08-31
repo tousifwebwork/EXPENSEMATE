@@ -332,13 +332,13 @@ function Friends() {
                   className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="grid size-11 place-items-center rounded-full bg-[#e6f8f4] font-bold text-[#117d72]">
+                    <div className="grid size-11 shrink-0 place-items-center rounded-full bg-[#e6f8f4] font-bold text-[#117d72]">
                       {initials(user.name)}
                     </div>
 
-                    <div>
-                      <h3 className="font-bold text-[#102a43]">{user.name}</h3>
-                      <p className="text-sm text-slate-500">{user.email}</p>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate font-bold text-[#102a43]">{user.name}</h3>
+                      <p className="truncate text-sm text-slate-500">{user.email}</p>
                     </div>
                   </div>
 
@@ -375,13 +375,13 @@ function Friends() {
                   className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="grid size-11 place-items-center rounded-full bg-[#eef5ff] font-bold text-[#3569a8]">
+                    <div className="grid size-11 shrink-0 place-items-center rounded-full bg-[#eef5ff] font-bold text-[#3569a8]">
                       {initials(user?.name)}
                     </div>
 
-                    <div>
-                      <h3 className="font-bold text-[#102a43]">{user?.name}</h3>
-                      <p className="text-sm text-slate-500">{user?.email}</p>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate font-bold text-[#102a43]">{user?.name}</h3>
+                      <p className="truncate text-sm text-slate-500">{user?.email}</p>
                     </div>
                   </div>
 
@@ -434,13 +434,13 @@ function Friends() {
                   className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="grid size-11 place-items-center rounded-full bg-[#fef3e6] font-bold text-[#b5762c]">
+                    <div className="grid size-11 shrink-0 place-items-center rounded-full bg-[#fef3e6] font-bold text-[#b5762c]">
                       {initials(user?.name)}
                     </div>
 
-                    <div>
-                      <h3 className="font-bold text-[#102a43]">{user?.name}</h3>
-                      <p className="text-sm text-slate-500">{user?.email}</p>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate font-bold text-[#102a43]">{user?.name}</h3>
+                      <p className="truncate text-sm text-slate-500">{user?.email}</p>
                     </div>
                   </div>
 
@@ -478,25 +478,25 @@ function Friends() {
                 <article key={friend._id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                   
                   <div className="flex items-center gap-3">
-                    <div className="grid size-11 place-items-center rounded-full bg-[#e6f8f4] font-bold text-[#117d72]">
+                    <div className="grid size-11 shrink-0 place-items-center rounded-full bg-[#e6f8f4] font-bold text-[#117d72]">
                       {initials(friend.name)}
                     </div>
 
-                    <div>
-                      <h3 className="font-bold text-[#102a43]">{friend.name}</h3>
-                      <p className="text-sm text-slate-500">{friend.email}</p>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate font-bold text-[#102a43]">{friend.name}</h3>
+                      <p className="truncate text-sm text-slate-500">{friend.email}</p>
                     </div>
                   </div>
 
-                  <div className="mt-5 flex w-full flex-row gap-3">
-                    
+                  <div className="mt-4 flex w-full flex-col gap-2 sm:mt-5 sm:flex-row">
+
                     <button onClick={() => handleRemoveFriend(friend._id)} disabled={busy}
-                      className="flex-1 whitespace-nowrap rounded-xl bg-red-50 px-3 py-2 text-sm font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-50">
-                     {busy ? "..." : "Remove Friend"}
+                      className="flex-1 rounded-xl bg-red-50 px-3 py-2 text-sm font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-50">
+                     {busy ? "..." : "Remove"}
                     </button>
 
                     <button onClick={() => navigate(`/viewprofile/${friend._id}`)}
-                      className="flex-1 whitespace-nowrap rounded-xl bg-blue-50 px-3 py-2 text-sm font-bold text-blue-600 transition hover:bg-blue-100">
+                      className="flex-1 rounded-xl bg-blue-50 px-3 py-2 text-sm font-bold text-blue-600 transition hover:bg-blue-100">
                      View Profile
                     </button>
 
