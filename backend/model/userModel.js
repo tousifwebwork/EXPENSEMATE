@@ -20,6 +20,8 @@ const userSchema = new mongoose.Schema(
       enum: ["active", "deactivated", "blocked"],
       default: "active",
     },
+    verificationCode: { type: String, default: "" },
+    verificationCodeExpires: { type: Date, default: null },
   },
   { timestamps: true }
 );

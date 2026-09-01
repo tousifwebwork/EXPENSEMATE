@@ -15,6 +15,7 @@ import Balances from './pages/Balances.jsx'
 import SettlementSuggestions from './pages/SettlementSuggestions.jsx'
 
 import Protected from './pages/protected/Protected.jsx'
+import ForgotPassword from './pages/auth/ForgotPassword.jsx'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* Protected Routes */}
       <Route element={<Protected />}>

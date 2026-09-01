@@ -147,8 +147,11 @@ function Register() {
           </button>
           </form>
 
-          <div className="mt-8 text-center text-sm text-slate-500">
-            Already have an account? <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/signin">Sign In</Link>
+          <div className="mt-5 text-center text-sm text-slate-500">
+            Already have an account? <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/signin">Login In</Link>
+          </div>
+          <div className='mt-1 text-center text-sm text-slate-500'>
+            <Link className="font-bold text-[#117d72] hover:text-[#102a43]" to="/forgot-password">Forgot Password?</Link>
           </div>
         </div>
       </div>
