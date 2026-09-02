@@ -2,8 +2,7 @@ import axios from "axios";
 
 const API = axios.create({
   baseURL: "http://localhost:3000/api/user",
-  headers: {
-    "Content-Type": "application/json",
+  headers: { 
     Accept: "application/json",
   },
 });
@@ -21,5 +20,8 @@ export const getProfile = (token) => {return API.get("/profile", authHeader(toke
 export const updateProfile = (token, data) => {return API.patch("/profile", data, authHeader(token));};
 export const changePassword = (token, data) => {return API.patch("/change-password", data, authHeader(token));};
 export const getUserById = (userId, token) => {return API.get(`/individual/${userId}`, authHeader(token));};
+
+export const updateProfileImage = (token, formData) => {return API.patch("/profile/image", formData, authHeader(token));};
+
 
 export default API;

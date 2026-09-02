@@ -1,8 +1,24 @@
 import { useEffect, useState } from "react";
 import AppLayout from "../components/AppLayout.jsx";
-import {getProfile,updateProfile as updateUserProfile,} from "../config/user/userAPI.js";
+import {
+  getProfile,
+  updateProfile as updateUserProfile,
+  updateProfileImage,
+} from "../config/user/userAPI.js";
 import toast from "react-hot-toast";
-import {User,Mail,Phone,Wallet,Hash,ShieldCheck,Image,FileText,MapPin,Globe,CalendarDays,
+import {
+  User,
+  Mail,
+  Phone,
+  Wallet,
+  Hash,
+  ShieldCheck,
+  Image,
+  FileText,
+  MapPin,
+  Globe,
+  CalendarDays,
+  Camera,
 } from "lucide-react";
 
 function Profile() {
@@ -26,6 +42,7 @@ function Profile() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // ================= GET PROFILE =================
   useEffect(() => {
@@ -54,9 +71,7 @@ function Profile() {
           updatedAt: data.updatedAt || "",
         });
       } catch (error) {
-        console.log(
-          error.response?.data || error.message
-        );
+        console.log(error.response?.data || error.message);
 
         toast.error(
           error.response?.data?.message ||
@@ -70,7 +85,6 @@ function Profile() {
     fetchProfile();
   }, []);
 
-
   // ================= INPUT HANDLER =================
   const handleChange = (field, value) => {
     setUser((prev) => ({
@@ -78,8 +92,6 @@ function Profile() {
       [field]: value,
     }));
   };
-
-
 
   // ================= ADDRESS HANDLER =================
   const handleAddressChange = (field, value) => {
@@ -92,7 +104,42 @@ function Profile() {
     }));
   };
 
+  // ================= PROFILE IMAGE UPLOAD =================
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
 
+    if (!file) return;
+
+    try {
+      setUploadingImage(true);
+
+      const token = localStorage.getItem("token");
+
+      const formData = new FormData();
+      formData.append("profileImage", file);
+
+      const res = await updateProfileImage(token, formData);
+
+      setUser((prev) => ({
+        ...prev,
+        profileImage: res.data.user.profileImage,
+      }));
+
+      toast.success("Profile image updated successfully!");
+    } catch (error) {
+      console.log(error.response?.data || error.message);
+
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to upload profile image."
+      );
+    } finally {
+      setUploadingImage(false);
+
+      // Reset file input
+      e.target.value = "";
+    }
+  };
 
   // ================= UPDATE PROFILE =================
   const handleUpdate = async () => {
@@ -106,7 +153,6 @@ function Profile() {
         email: user.email,
         phone: user.phone,
         preferredCurrency: user.preferredCurrency,
-        profileImage: user.profileImage,
         about: user.about,
         address: {
           landmark: user.address.landmark,
@@ -146,9 +192,7 @@ function Profile() {
         },
       });
     } catch (error) {
-      console.log(
-        error.response?.data || error.message
-      );
+      console.log(error.response?.data || error.message);
 
       toast.error(
         error.response?.data?.message ||
@@ -167,8 +211,6 @@ function Profile() {
     }
   };
 
-
-
   // ================= SAVE =================
   const saveSettings = async (event) => {
     event.preventDefault();
@@ -182,8 +224,6 @@ function Profile() {
     await handleUpdate();
   };
 
-
-
   // ================= DATE FORMAT =================
   const formatDate = (date) => {
     if (!date) return "Not available";
@@ -196,8 +236,6 @@ function Profile() {
       minute: "2-digit",
     });
   };
-
-
 
   // ================= LOADING =================
   if (loading) {
@@ -216,8 +254,6 @@ function Profile() {
     );
   }
 
-
-  
   return (
     <AppLayout>
       <div className="mx-auto max-w-4xl">
@@ -238,7 +274,10 @@ function Profile() {
           </p>
         </div>
 
-        <form  className="mt-8 space-y-6"  onSubmit={saveSettings} >
+        <form
+          className="mt-8 space-y-6"
+          onSubmit={saveSettings}
+        >
 
           {/* ================= PROFILE PREVIEW ================= */}
           <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -249,21 +288,39 @@ function Profile() {
 
               <div className="-mt-14 flex flex-col items-center gap-4 sm:flex-row sm:items-end">
 
-                {/* Profile Image */}
+                {/* PROFILE IMAGE + CAMERA */}
+                <div className="relative">
 
-                {user.profileImage ? (
-                  <img
-                    src={user.profileImage}
-                    alt={user.name}
-                    className="h-28 w-28 rounded-full border-4 border-white object-cover shadow-md"
-                  />
-                ) : (
-                  <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white bg-[#159a8c] text-4xl font-bold text-white shadow-md">
-                    {user.name
-                      ? user.name.charAt(0).toUpperCase()
-                      : "U"}
-                  </div>
-                )}
+                  {user.profileImage ? (
+                    <img
+                      src={user.profileImage}
+                      alt={user.name}
+                      className="h-28 w-28 rounded-full border-4 border-white object-cover shadow-md"
+                    />
+                  ) : (
+                    <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white bg-[#159a8c] text-4xl font-bold text-white shadow-md">
+                      {user.name
+                        ? user.name.charAt(0).toUpperCase()
+                        : "U"}
+                    </div>
+                  )}
+
+                  {/* CAMERA BUTTON */}
+                  <label
+                    className={`absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-[#102a43] text-white shadow-md transition hover:bg-[#159a8c] ${
+                      uploadingImage
+                        ? "cursor-not-allowed opacity-60"
+                        : ""
+                    }`}
+                    title="Change profile picture"
+                  >
+                    <Camera size={17} />
+
+       <input  type="file"  accept="image/*"
+         onChange={handleImageUpload}  disabled={uploadingImage} className="hidden"  />
+               </label>
+
+                </div>
 
                 <div className="pb-1 text-center sm:text-left">
                   <h2 className="text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
@@ -307,7 +364,6 @@ function Profile() {
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
 
               {/* Name */}
-
               <label className="text-sm font-semibold text-slate-700">
                 Full Name
 
@@ -330,7 +386,6 @@ function Profile() {
               </label>
 
               {/* Email */}
-
               <label className="text-sm font-semibold text-slate-700">
                 Email Address
 
@@ -353,7 +408,6 @@ function Profile() {
               </label>
 
               {/* Phone */}
-
               <label className="text-sm font-semibold text-slate-700">
                 Phone Number
 
@@ -376,7 +430,6 @@ function Profile() {
               </label>
 
               {/* Currency */}
-
               <label className="text-sm font-semibold text-slate-700">
                 Preferred Currency
 
@@ -414,7 +467,6 @@ function Profile() {
             </div>
           </section>
 
-
           {/* ================= ABOUT ================= */}
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
 
@@ -445,9 +497,7 @@ function Profile() {
             />
           </section>
 
-
-
-          {/* ================= PROFILE INFORMATION ================= */}
+          {/* ================= ACCOUNT INFORMATION ================= */}
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
 
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
@@ -469,7 +519,6 @@ function Profile() {
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
 
               {/* Profile ID */}
-
               <label className="text-sm font-semibold text-slate-700">
                 Profile ID
 
@@ -488,7 +537,6 @@ function Profile() {
               </label>
 
               {/* Status */}
-
               <label className="text-sm font-semibold text-slate-700">
                 Account Status
 
@@ -508,68 +556,6 @@ function Profile() {
 
             </div>
           </section>
-
-
-          {/* ================= PROFILE IMAGE ================= */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-
-            <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#159a8c]/10 text-[#159a8c]">
-                <Image size={18} />
-              </div>
-
-              <div>
-                <h2 className="text-lg font-bold text-[#102a43]">
-                  Profile Image
-                </h2>
-
-                <p className="text-sm text-slate-500">
-                  Add the URL of your profile image.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6">
-
-              <label className="text-sm font-semibold text-slate-700">
-                Image URL
-
-                <div className="relative">
-                  <Image
-                    size={17}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                  />
-
-                  <input
-                    type="text"
-                    value={user.profileImage}
-                    onChange={(e) =>
-                      handleChange(
-                        "profileImage",
-                        e.target.value
-                      )
-                    }
-                    className="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-11 pr-4 font-normal outline-none transition focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
-                    placeholder="https://example.com/profile.jpg"
-                  />
-                </div>
-              </label>
-
-              {/* Preview */}
-
-              {user.profileImage && (
-                <div className="mt-5 flex justify-center">
-                  <img
-                    src={user.profileImage}
-                    alt="Profile preview"
-                    className="h-32 w-32 rounded-full border-4 border-slate-100 object-cover shadow-sm"
-                  />
-                </div>
-              )}
-
-            </div>
-          </section>
-
 
           {/* ================= ADDRESS ================= */}
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
@@ -593,7 +579,6 @@ function Profile() {
             <div className="mt-6 grid gap-5 sm:grid-cols-3">
 
               {/* Landmark */}
-
               <label className="text-sm font-semibold text-slate-700">
                 Landmark
 
@@ -619,7 +604,6 @@ function Profile() {
               </label>
 
               {/* State */}
-
               <label className="text-sm font-semibold text-slate-700">
                 State
 
@@ -645,7 +629,6 @@ function Profile() {
               </label>
 
               {/* Country */}
-
               <label className="text-sm font-semibold text-slate-700">
                 Country
 
@@ -672,8 +655,6 @@ function Profile() {
 
             </div>
           </section>
-
-
 
           {/* ================= ACCOUNT DATES ================= */}
           <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
@@ -715,8 +696,6 @@ function Profile() {
             </div>
           </section>
 
-
-
           {/* ================= SAVE ================= */}
           <div className="flex items-center justify-end border-t border-slate-200 pt-6">
 
@@ -737,4 +716,3 @@ function Profile() {
 }
 
 export default Profile;
- 

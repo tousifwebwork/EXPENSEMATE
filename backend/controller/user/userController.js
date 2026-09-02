@@ -1,6 +1,8 @@
 const User = require("../../model/userModel");
 const bcrypt = require("bcryptjs");
 
+const cloudinary = require("../../config/cloudinary"); 
+
 
 // GET PROFILE
 exports.getProfile = async (req, res) => {
@@ -62,6 +64,47 @@ exports.getUserById = async (req, res) => {
     res.status(200).json({success: true,user,});
     
   } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+ 
+exports.updateProfileImage = async (req, res) => {
+  try {
+    console.log("FILE:", req.file);
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Profile image is required",
+      });
+    }
+
+    const userId = req.user.userId;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        profileImage: req.file.path,
+      },
+      { new: true }
+    ).select("-password");
+
+    res.status(200).json({
+      success: true,
+      message: "Profile image updated successfully",
+      user,
+    });
+  } catch (error) {
+    console.log("PROFILE IMAGE ERROR:", error);
+      console.error("PROFILE IMAGE ERROR:", error);
+  console.error("ERROR MESSAGE:", error.message);
+  console.error("ERROR STACK:", error.stack);
+
+
     res.status(500).json({
       success: false,
       message: error.message,
