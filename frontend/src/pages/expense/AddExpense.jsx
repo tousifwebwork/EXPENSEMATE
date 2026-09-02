@@ -229,10 +229,10 @@ const AddExpense = () => {
       return;
     }
 
-    if (formData.shares.length === 0) {
-      toast.error("Select at least one participant");
-      return;
-    }
+    if(formData.splitType !== "fullPayment" && formData.shares.length === 0) {
+    toast.error("Select at least one participant");
+   return;
+   }
 
     // =========================
     // PREPARE SHARES
@@ -313,6 +313,10 @@ const AddExpense = () => {
         user: share.user,
         percentage: Number(share.percentage),
       }));
+    }
+
+    if (formData.splitType === "fullPayment") {
+     shares = [];
     }
 
     try {
@@ -616,6 +620,9 @@ const AddExpense = () => {
 
             <option value="percentage">
               Percentage
+            </option>
+            <option value="fullPayment">
+              Full Payment
             </option>
           </select>
 

@@ -297,9 +297,19 @@ const memberBalances = calculateBalances();
 
 {/* TOTAL SPENT — NEW */}
 <div className="mt-2 flex items-center justify-between border-t border-slate-200 pt-2">
-  <span className="text-xs font-medium text-slate-400">Total Spent</span>
+  <span className="text-xs font-medium text-slate-400">Total Spent (user's share of expenses)</span>
   <span className="text-sm font-semibold text-slate-600">
     {group.baseCurrency} {Number(member.totalSpent || 0).toFixed(2)}
+  </span>
+</div>
+<div className="mt-2 flex items-center justify-between border-t border-slate-200 pt-2">
+  <span className="text-xs font-medium text-slate-400">
+    Total Paid
+  </span>
+
+  <span className="text-sm font-semibold text-slate-600">
+    {group.baseCurrency}{" "}
+    {Number(member.totalPaid || 0).toFixed(2)}
   </span>
 </div>
 

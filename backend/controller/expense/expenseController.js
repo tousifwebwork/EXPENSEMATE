@@ -14,8 +14,8 @@ exports.createExpense = async (req, res) => {
     const { groupId, title, description, amount, currency, category, date, paidBy, splitType, shares, notes } = req.body;
 
     // Step 1: Required fields
-    if (!groupId || !title || !amount || !paidBy || !splitType || !shares?.length) {
-      return res.status(400).json({ success: false, message: "Missing required fields" });
+    if (!groupId || !title || !amount || !paidBy || !splitType) {
+     return res.status(400).json({ success: false, message: "Missing required fields", });
     }
     if (amount <= 0) {
       return res.status(400).json({ success: false, message: "Amount must be greater than zero" });
@@ -45,25 +45,43 @@ exports.createExpense = async (req, res) => {
     let finalShares;
 
     if (splitType === "equal") {
-      const participantIds = shares.map((s) => s.user);
-      finalShares = calculateEqualSplit(amount, participantIds);
+  const participantIds = shares.map((s) => s.user);
+  finalShares = calculateEqualSplit(amount, participantIds);
 
-    } else if (splitType === "exact") {
-      const isValid = validateExactSplit(amount, shares);
-      if (!isValid) {
-        return res.status(400).json({ success: false, message: "Exact split amounts must add up to the total" });
-      }
-      finalShares = shares.map((s) => ({ user: s.user, amount: s.amount }));
+} else if (splitType === "exact") {
+  const isValid = validateExactSplit(amount, shares);
 
-    } else if (splitType === "percentage") {
-      finalShares = calculatePercentageSplit(amount, shares);
-      if (!finalShares) {
-        return res.status(400).json({ success: false, message: "Percentages must add up to 100" });
-      }
+  if (!isValid) {
+    return res.status(400).json({
+      success: false,
+      message: "Exact split amounts must add up to the total",
+    });
+  }
 
-    } else {
-      return res.status(400).json({ success: false, message: "Invalid split type" });
-    }
+  finalShares = shares.map((s) => ({
+    user: s.user,
+    amount: s.amount,
+  }));
+
+} else if (splitType === "percentage") {
+  finalShares = calculatePercentageSplit(amount, shares);
+
+  if (!finalShares) {
+    return res.status(400).json({
+      success: false,
+      message: "Percentages must add up to 100",
+    });
+  }
+
+} else if (splitType === "fullPayment") {
+  finalShares = [];
+
+} else {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid split type",
+  });
+}
 
     // Step 5: Save
     const expense = await Expense.create({
@@ -189,7 +207,9 @@ exports.updateExpense = async (req, res) => {
         if (!finalShares) {
           return res.status(400).json({ success: false, message: "Percentages must add up to 100" });
         }
-      } else {
+      }else if (finalSplitType === "fullPayment") {
+       finalShares = [];
+       }else {
         return res.status(400).json({ success: false, message: "Invalid split type" });
       }
 

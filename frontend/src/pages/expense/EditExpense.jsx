@@ -1,4 +1,4 @@
-
+ 
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -98,8 +98,7 @@ const EditExpense = () => {
       console.log(err);
 
       toast.error(
-        err.response?.data?.message ||
-          "Failed to load expense"
+        err.response?.data?.message || "Failed to load expense"
       );
     } finally {
       setLoading(false);
@@ -206,6 +205,7 @@ const EditExpense = () => {
       }));
     }
 
+    // Full payment does not use shares
     return [];
   };
 
@@ -234,12 +234,16 @@ const EditExpense = () => {
       return;
     }
 
-    if (formData.participants.length === 0) {
+    // Participants are not required for fullPayment
+    if (
+      formData.splitType !== "fullPayment" &&
+      formData.participants.length === 0
+    ) {
       toast.error("Select at least one participant");
       return;
     }
 
-    // Validate exact split on frontend
+    // Validate exact split
     if (formData.splitType === "exact") {
       const totalExact = formData.participants.reduce(
         (total, userId) =>
@@ -248,7 +252,10 @@ const EditExpense = () => {
         0
       );
 
-      if (Math.round(totalExact * 100) !== Math.round(Number(formData.amount) * 100)) {
+      if (
+        Math.round(totalExact * 100) !==
+        Math.round(Number(formData.amount) * 100)
+      ) {
         toast.error(
           "Exact split amounts must add up to the total"
         );
@@ -256,7 +263,7 @@ const EditExpense = () => {
       }
     }
 
-    // Validate percentage split on frontend
+    // Validate percentage split
     if (formData.splitType === "percentage") {
       const totalPercentage = formData.participants.reduce(
         (total, userId) =>
@@ -584,128 +591,161 @@ const EditExpense = () => {
             <option value="percentage">
               Percentage
             </option>
+
+            <option value="fullPayment">
+              Full Payment
+            </option>
           </select>
 
         </div>
 
         {/* PARTICIPANTS */}
 
-        <div className="mt-6">
+        {formData.splitType !== "fullPayment" && (
+          <div className="mt-6">
 
-          <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between">
 
-            <label className="text-sm font-semibold text-[#102a43]">
-              Participants
-            </label>
+              <label className="text-sm font-semibold text-[#102a43]">
+                Participants
+              </label>
 
-            <button
-              type="button"
-              onClick={selectAllParticipants}
-              className="text-sm font-semibold text-[#159a8c]"
-            >
-              Select All
-            </button>
+              <button
+                type="button"
+                onClick={selectAllParticipants}
+                className="text-sm font-semibold text-[#159a8c]"
+              >
+                Select All
+              </button>
 
-          </div>
+            </div>
 
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
 
-            {group.members?.map((member) => {
+              {group.members?.map((member) => {
 
-              const userId = member.user._id;
+                const userId = member.user._id;
 
-              const selected =
-                formData.participants.includes(userId);
+                const selected =
+                  formData.participants.includes(userId);
 
-              return (
-                <div
-                  key={userId}
-                  className="rounded-xl border border-slate-200 p-3"
-                >
+                return (
+                  <div
+                    key={userId}
+                    className="rounded-xl border border-slate-200 p-3"
+                  >
 
-                  <label className="flex cursor-pointer items-center gap-3">
+                    <label className="flex cursor-pointer items-center gap-3">
 
-                    <input
-                      type="checkbox"
-                      checked={selected}
-                      onChange={() =>
-                        handleParticipantChange(userId)
-                      }
-                      className="h-4 w-4 accent-[#159a8c]"
-                    />
-
-                    <div>
-                      <p className="font-semibold text-[#102a43]">
-                        {member.user.name}
-                      </p>
-
-                      <p className="text-xs text-slate-500">
-                        {member.role}
-                      </p>
-                    </div>
-
-                  </label>
-
-                  {/* EXACT AMOUNT */}
-
-                  {selected &&
-                    formData.splitType === "exact" && (
                       <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={
-                          formData.exactAmounts[userId] ?? ""
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() =>
+                          handleParticipantChange(userId)
                         }
-                        onChange={(e) =>
-                          handleExactAmountChange(
-                            userId,
-                            e.target.value
-                          )
-                        }
-                        placeholder="Amount owed"
-                        className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#159a8c]"
+                        className="h-4 w-4 accent-[#159a8c]"
                       />
-                    )}
 
-                  {/* PERCENTAGE */}
+                      <div>
+                        <p className="font-semibold text-[#102a43]">
+                          {member.user.name}
+                        </p>
 
-                  {selected &&
-                    formData.splitType === "percentage" && (
-                      <div className="relative mt-3">
+                        <p className="text-xs text-slate-500">
+                          {member.role}
+                        </p>
+                      </div>
 
+                    </label>
+
+                    {/* EXACT AMOUNT */}
+
+                    {selected &&
+                      formData.splitType === "exact" && (
                         <input
                           type="number"
                           min="0"
-                          max="100"
                           step="0.01"
                           value={
-                            formData.percentages[userId] ?? ""
+                            formData.exactAmounts[userId] ?? ""
                           }
                           onChange={(e) =>
-                            handlePercentageChange(
+                            handleExactAmountChange(
                               userId,
                               e.target.value
                             )
                           }
-                          placeholder="Percentage"
-                          className="w-full rounded-lg border border-slate-300 px-3 py-2 pr-10 text-sm outline-none focus:border-[#159a8c]"
+                          placeholder="Amount owed"
+                          className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#159a8c]"
                         />
+                      )}
 
-                        <span className="absolute right-3 top-2 text-sm text-slate-400">
-                          %
-                        </span>
+                    {/* PERCENTAGE */}
 
-                      </div>
-                    )}
+                    {selected &&
+                      formData.splitType === "percentage" && (
+                        <div className="relative mt-3">
 
-                </div>
-              );
-            })}
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            value={
+                              formData.percentages[userId] ?? ""
+                            }
+                            onChange={(e) =>
+                              handlePercentageChange(
+                                userId,
+                                e.target.value
+                              )
+                            }
+                            placeholder="Percentage"
+                            className="w-full rounded-lg border border-slate-300 px-3 py-2 pr-10 text-sm outline-none focus:border-[#159a8c]"
+                          />
+
+                          <span className="absolute right-3 top-2 text-sm text-slate-400">
+                            %
+                          </span>
+
+                        </div>
+                      )}
+
+                  </div>
+                );
+              })}
+
+            </div>
 
           </div>
+        )}
 
-        </div>
+        {/* FULL PAYMENT SUMMARY */}
+
+        {formData.splitType === "fullPayment" &&
+          Number(formData.amount) > 0 && (
+            <div className="mt-5 rounded-xl bg-slate-50 p-4">
+
+              <p className="text-sm font-semibold text-[#102a43]">
+                Full Payment
+              </p>
+
+              <p className="mt-1 text-sm text-slate-500">
+                <span className="font-semibold text-[#159a8c]">
+                  {group.members?.find(
+                    (member) =>
+                      member.user._id === formData.paidBy
+                  )?.user.name || "Selected member"}
+                </span>{" "}
+                paid the full{" "}
+                <span className="font-semibold">
+                  {Number(formData.amount).toFixed(2)}
+                </span>{" "}
+                amount.
+              </p>
+
+            </div>
+          )}
 
         {/* SPLIT SUMMARY */}
 
@@ -801,4 +841,4 @@ const EditExpense = () => {
   );
 };
 
-export default EditExpense;
+export default EditExpense; 
