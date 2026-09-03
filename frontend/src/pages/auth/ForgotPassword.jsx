@@ -1,8 +1,7 @@
- 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Eye, EyeOff, ArrowRight, Shield, Sparkles, CheckCircle2, Lock, Mail, KeyRound } from 'lucide-react'
 
 import {
   sendVerificationCode,
@@ -137,7 +136,7 @@ function ForgotPassword() {
       toast.success("Password reset successfully!");
 
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate("/groups");
       }, 1000);
 
     } catch (error) {
@@ -154,381 +153,427 @@ function ForgotPassword() {
 
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb] px-4 py-8 sm:px-6 lg:grid lg:grid-cols-2 lg:gap-12 lg:px-16 xl:gap-16 xl:px-20 lg:py-10">
+    <div className="min-h-screen bg-[#fafaf9] flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-5xl grid lg:grid-cols-12 overflow-hidden rounded-3xl bg-white border border-stone-200/80 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.07)]">
 
-      {/* ==========================================
-          LEFT SIDE
-      ========================================== */}
+        {/* ==========================================
+            LEFT SIDE
+        ========================================== */}
 
-      <div className="hidden flex-col justify-between rounded-[2rem] bg-[#102a43] p-8 text-white lg:flex xl:p-10">
+        <div className="relative hidden lg:flex lg:col-span-5 flex-col justify-between p-10 xl:p-12 bg-[#121f28] text-white overflow-hidden">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-[#159a8c]/20 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-[#47c5b0]/10 blur-3xl pointer-events-none" />
 
-        <div className="flex items-center gap-3">
-
-          <div className="grid size-10 place-items-center rounded-xl bg-[#47c5b0] text-lg font-bold text-[#102a43]">
-            ₹
+          {/* Top Logo */}
+          <div className="relative z-10 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] shadow-md shadow-[#159a8c]/20 text-white font-bold text-lg tracking-tight">
+              ₹
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold tracking-tight text-white">ExpenseMate</span>
+              <span className="text-[10px] uppercase tracking-widest font-medium text-stone-400">Financial Suite</span>
+            </div>
           </div>
 
-          <span className="text-lg font-bold tracking-tight">
-            ExpenseMate
-          </span>
+          {/* Middle Value Proposition */}
+          <div className="relative z-10 my-auto py-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#159a8c]/15 text-[#8bded2] text-xs font-semibold mb-6 border border-[#159a8c]/20">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Account Recovery</span>
+            </div>
+            <h1 className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white leading-tight">
+              Regain access to your account securely.
+            </h1>
+            <p className="mt-4 text-sm leading-relaxed text-stone-300">
+              Verify your email address, create a secure new password, and restore full access to your expense management dashboard.
+            </p>
 
-        </div>
-
-
-        <div>
-
-          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-[#8bded2]">
-            Account Recovery
-          </p>
-
-          <h1 className="max-w-lg text-4xl font-bold leading-tight tracking-tight xl:text-5xl xl:leading-[1.05]">
-            Get back into your account.
-          </h1>
-
-          <p className="mt-6 max-w-md text-sm leading-7 text-slate-300 xl:text-base">
-            Verify your email, create a new password, and get back to
-            managing your expenses.
-          </p>
-
-        </div>
-
-
-        <p className="text-sm text-slate-400">
-          Simple tracking for real-life groups.
-        </p>
-
-      </div>
-
-
-      {/* ==========================================
-          RIGHT SIDE
-      ========================================== */}
-
-      <div className="mx-auto flex w-full max-w-md flex-col justify-center lg:max-w-lg">
-
-        {/* MOBILE LOGO */}
-
-        <div className="mb-6 flex items-center gap-3 sm:mb-8 lg:hidden">
-
-          <div className="grid size-10 place-items-center rounded-xl bg-[#102a43] text-lg font-bold text-[#8bded2]">
-            ₹
+            <div className="mt-8 space-y-3.5">
+              {[
+                'Email-based identity verification',
+                'Secure password reset process',
+                'Instant account restoration'
+              ].map((feature, i) => (
+                <div key={i} className="flex items-center gap-2.5 text-xs text-stone-200">
+                  <CheckCircle2 className="w-4 h-4 text-[#47c5b0] shrink-0" />
+                  <span>{feature}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <span className="text-lg font-bold tracking-tight text-[#102a43]">
-            ExpenseMate
-          </span>
-
+          {/* Bottom Footer note */}
+          <div className="relative z-10 pt-6 border-t border-white/10 flex items-center justify-between text-xs text-stone-400">
+            <span>Encrypted verification</span>
+            <span className="flex items-center gap-1 text-stone-400">
+              <Shield className="w-3.5 h-3.5 text-[#47c5b0]" /> Secure reset
+            </span>
+          </div>
         </div>
 
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_55px_rgba(16,42,67,0.08)] sm:rounded-3xl sm:p-10">
+        {/* ==========================================
+            RIGHT SIDE
+        ========================================== */}
+
+        <div className="lg:col-span-7 p-6 sm:p-10 lg:p-12 xl:p-14 flex flex-col justify-center bg-white">
+
+          {/* MOBILE LOGO */}
+
+          <div className="flex lg:hidden items-center gap-3 mb-8">
+
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] text-white font-bold text-lg">
+              ₹
+            </div>
+
+            <span className="text-xl font-bold tracking-tight text-[#1a1a1a]">
+              ExpenseMate
+            </span>
+
+          </div>
 
 
-          {/* ==========================================
-              STEP 1
-          ========================================== */}
-
-          {step === 1 && (
-
-            <>
-
-              <div className="mb-8">
-
-                <p className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-[#159a8c]">
-                  Account Recovery
-                </p>
-
-                <h2 className="text-3xl font-bold tracking-tight text-[#102a43]">
-                  Forgot Password?
-                </h2>
-
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Enter your registered email and we'll send you a
-                  verification code.
-                </p>
-
-              </div>
+          <div className="max-w-md w-full mx-auto animate-fade-in-up">
 
 
-              <form
-                className="space-y-5"
-                onSubmit={handleSendCode}
-              >
+            {/* ==========================================
+                STEP 1
+            ========================================== */}
 
-                <div>
+            {step === 1 && (
 
-                  <label
-                    className="mb-2 block text-sm font-semibold text-slate-700"
-                    htmlFor="email"
-                  >
-                    Email
-                  </label>
+              <>
 
-                  <input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
-                  />
+                <div className="mb-8">
+
+                  <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#159a8c] mb-1.5">
+                    Account Recovery
+                  </span>
+
+                  <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1a1a1a]">
+                    Forgot your password?
+                  </h2>
+
+                  <p className="mt-2 text-sm text-stone-500">
+                    Enter your registered email and we'll send you a verification code.
+                  </p>
 
                 </div>
 
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full rounded-xl bg-[#159a8c] px-4 py-3 font-bold text-white shadow-lg shadow-[#159a8c]/20 transition hover:bg-[#117d72] focus:outline-none focus:ring-4 focus:ring-[#159a8c]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                <form
+                  className="space-y-5"
+                  onSubmit={handleSendCode}
                 >
 
-                  {loading
-                    ? "Sending..."
-                    : "Send Verification Code"}
+                  <div>
 
-                </button>
+                    <label
+                      className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2"
+                      htmlFor="email"
+                    >
+                      Email Address
+                    </label>
 
-              </form>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                        <Mail className="w-4 h-4" />
+                      </div>
+                      <input
+                        id="email"
+                        type="email"
+                        placeholder="name@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm placeholder:text-stone-400 transition-all duration-200 focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none"
+                        required
+                      />
+                    </div>
 
-            </>
-
-          )}
-
-
-          {/* ==========================================
-              STEP 2
-          ========================================== */}
-
-          {step === 2 && (
-
-            <>
-
-              <div className="mb-8">
-
-                <p className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-[#159a8c]">
-                  Verify Email
-                </p>
-
-                <h2 className="text-3xl font-bold tracking-tight text-[#102a43]">
-                  Enter Verification Code
-                </h2>
-
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  We sent a verification code to:
-                </p>
-
-                <p className="mt-1 font-semibold text-[#102a43]">
-                  {email}
-                </p>
-
-              </div>
+                  </div>
 
 
-              <form
-                className="space-y-5"
-                onSubmit={handleVerifyCode}
-              >
-
-                <div>
-
-                  <label
-                    className="mb-2 block text-sm font-semibold text-slate-700"
-                    htmlFor="verifCode"
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-[#159a8c] px-5 py-3.5 text-sm font-semibold text-white shadow-sm shadow-[#159a8c]/30 hover:bg-[#117d72] active:scale-[0.99] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                   >
-                    Verification Code
-                  </label>
 
-                  <input
-                    id="verifCode"
-                    type="text"
-                    placeholder="Enter verification code"
-                    value={verifCode}
-                    onChange={(e) =>
-                      setVerifCode(e.target.value.toUpperCase())
-                    }
-                    maxLength={5}
-                    className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-center text-lg font-bold uppercase tracking-[0.3em] text-slate-900 outline-none transition placeholder:text-sm placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
-                  />
+                    <span>{loading
+                      ? "Sending..."
+                      : "Send Verification Code"}</span>
+                    {!loading && <ArrowRight className="w-4 h-4" />}
+
+                  </button>
+
+                </form>
+
+              </>
+
+            )}
+
+
+            {/* ==========================================
+                STEP 2
+            ========================================== */}
+
+            {step === 2 && (
+
+              <>
+
+                <div className="mb-8">
+
+                  <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#159a8c] mb-1.5">
+                    Verify Email
+                  </span>
+
+                  <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1a1a1a]">
+                    Enter verification code
+                  </h2>
+
+                  <p className="mt-2 text-sm text-stone-500">
+                    We sent a verification code to:
+                  </p>
+
+                  <p className="mt-1 font-semibold text-[#1a1a1a]">
+                    {email}
+                  </p>
 
                 </div>
 
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full rounded-xl bg-[#159a8c] px-4 py-3 font-bold text-white shadow-lg shadow-[#159a8c]/20 transition hover:bg-[#117d72] focus:outline-none focus:ring-4 focus:ring-[#159a8c]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                <form
+                  className="space-y-5"
+                  onSubmit={handleVerifyCode}
                 >
 
-                  {loading
-                    ? "Verifying..."
-                    : "Verify Code"}
+                  <div>
 
-                </button>
+                    <label
+                      className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2"
+                      htmlFor="verifCode"
+                    >
+                      Verification Code
+                    </label>
 
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                        <KeyRound className="w-4 h-4" />
+                      </div>
+                      <input
+                        id="verifCode"
+                        type="text"
+                        placeholder="Enter 5-digit code"
+                        value={verifCode}
+                        onChange={(e) =>
+                          setVerifCode(e.target.value.toUpperCase())
+                        }
+                        maxLength={5}
+                        className="w-full pl-10 pr-4 py-3 text-center rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-lg font-bold uppercase tracking-[0.3em] placeholder:text-sm placeholder:font-normal placeholder:tracking-normal placeholder:text-stone-400 transition-all duration-200 focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none"
+                        required
+                      />
+                    </div>
 
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="w-full text-sm font-semibold text-[#117d72] hover:text-[#102a43]"
-                >
-                  Change Email
-                </button>
-
-              </form>
-
-            </>
-
-          )}
-
-
-          {/* ==========================================
-              STEP 3
-          ========================================== */}
-
-          {step === 3 && (
-
-            <>
-
-              <div className="mb-8">
-
-                <p className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-[#159a8c]">
-                  New Password
-                </p>
-
-                <h2 className="text-3xl font-bold tracking-tight text-[#102a43]">
-                  Reset Password
-                </h2>
-
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Create a new password for your account.
-                </p>
-
-              </div>
+                  </div>
 
 
-              <form
-                className="space-y-5"
-                onSubmit={handleResetPassword}
-              >
-
-
-                {/* NEW PASSWORD */}
-
-                <div className="relative">
-
-                  <label
-                    className="mb-2 block text-sm font-semibold text-slate-700"
-                    htmlFor="newPassword"
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-[#159a8c] px-5 py-3.5 text-sm font-semibold text-white shadow-sm shadow-[#159a8c]/30 hover:bg-[#117d72] active:scale-[0.99] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                   >
+
+                    <span>{loading
+                      ? "Verifying..."
+                      : "Verify Code"}</span>
+                    {!loading && <ArrowRight className="w-4 h-4" />}
+
+                  </button>
+
+
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="w-full text-sm font-medium text-[#159a8c] hover:text-[#117d72] transition-colors"
+                  >
+                    Change Email Address
+                  </button>
+
+                </form>
+
+              </>
+
+            )}
+
+
+            {/* ==========================================
+                STEP 3
+            ========================================== */}
+
+            {step === 3 && (
+
+              <>
+
+                <div className="mb-8">
+
+                  <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#159a8c] mb-1.5">
                     New Password
-                  </label>
+                  </span>
 
-                  <input
-                    id="newPassword"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter new password"
-                    value={newPassword}
-                    onChange={(e) =>
-                      setNewPassword(e.target.value)
-                    }
-                    className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 pr-12 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
-                  />
+                  <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1a1a1a]">
+                    Reset your password
+                  </h2>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowPassword(!showPassword)
-                    }
-                    className="absolute right-3 top-[2.35rem] text-slate-500 hover:text-[#159a8c]"
-                  >
-
-                    {showPassword
-                      ? <FaEyeSlash size={18} />
-                      : <FaEye size={18} />
-                    }
-
-                  </button>
+                  <p className="mt-2 text-sm text-stone-500">
+                    Create a new secure password for your account.
+                  </p>
 
                 </div>
 
 
-                {/* CONFIRM PASSWORD */}
-
-                <div className="relative">
-
-                  <label
-                    className="mb-2 block text-sm font-semibold text-slate-700"
-                    htmlFor="confirmPassword"
-                  >
-                    Confirm New Password
-                  </label>
-
-                  <input
-                    id="confirmPassword"
-                    type={
-                      showConfirmPassword
-                        ? "text"
-                        : "password"
-                    }
-                    placeholder="Re-enter new password"
-                    value={confirmPassword}
-                    onChange={(e) =>
-                      setConfirmPassword(e.target.value)
-                    }
-                    className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 pr-12 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowConfirmPassword(
-                        !showConfirmPassword
-                      )
-                    }
-                    className="absolute right-3 top-[2.35rem] text-slate-500 hover:text-[#159a8c]"
-                  >
-
-                    {showConfirmPassword
-                      ? <FaEyeSlash size={18} />
-                      : <FaEye size={18} />
-                    }
-
-                  </button>
-
-                </div>
-
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full rounded-xl bg-[#159a8c] px-4 py-3 font-bold text-white shadow-lg shadow-[#159a8c]/20 transition hover:bg-[#117d72] focus:outline-none focus:ring-4 focus:ring-[#159a8c]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                <form
+                  className="space-y-5"
+                  onSubmit={handleResetPassword}
                 >
 
-                  {loading
-                    ? "Resetting Password..."
-                    : "Reset Password"}
 
-                </button>
+                  {/* NEW PASSWORD */}
 
-              </form>
+                  <div>
 
-            </>
+                    <label
+                      className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2"
+                      htmlFor="newPassword"
+                    >
+                      New Password
+                    </label>
 
-          )}
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                        <Lock className="w-4 h-4" />
+                      </div>
+                      <input
+                        id="newPassword"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Create new password"
+                        value={newPassword}
+                        onChange={(e) =>
+                          setNewPassword(e.target.value)
+                        }
+                        className="w-full pl-10 pr-11 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm placeholder:text-stone-400 transition-all duration-200 focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none"
+                        required
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowPassword(!showPassword)
+                        }
+                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-stone-400 hover:text-stone-700 transition-colors"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+
+                        {showPassword
+                          ? <EyeOff className="w-4 h-4" />
+                          : <Eye className="w-4 h-4" />
+                        }
+
+                      </button>
+                    </div>
+
+                  </div>
 
 
-          {/* BACK TO LOGIN */}
+                  {/* CONFIRM PASSWORD */}
 
-          <div className="mt-6 text-center text-sm text-slate-500">
+                  <div>
 
-            Remember your password?{" "}
+                    <label
+                      className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2"
+                      htmlFor="confirmPassword"
+                    >
+                      Confirm New Password
+                    </label>
 
-            <Link
-              className="font-bold text-[#117d72] hover:text-[#102a43]"
-              to="/login"
-            >
-              Login
-            </Link>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                        <Lock className="w-4 h-4" />
+                      </div>
+                      <input
+                        id="confirmPassword"
+                        type={
+                          showConfirmPassword
+                            ? "text"
+                            : "password"
+                        }
+                        placeholder="Re-enter new password"
+                        value={confirmPassword}
+                        onChange={(e) =>
+                          setConfirmPassword(e.target.value)
+                        }
+                        className="w-full pl-10 pr-11 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm placeholder:text-stone-400 transition-all duration-200 focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none"
+                        required
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowConfirmPassword(
+                            !showConfirmPassword
+                          )
+                        }
+                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-stone-400 hover:text-stone-700 transition-colors"
+                        aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                      >
+
+                        {showConfirmPassword
+                          ? <EyeOff className="w-4 h-4" />
+                          : <Eye className="w-4 h-4" />
+                        }
+
+                      </button>
+                    </div>
+
+                  </div>
+
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-[#159a8c] px-5 py-3.5 text-sm font-semibold text-white shadow-sm shadow-[#159a8c]/30 hover:bg-[#117d72] active:scale-[0.99] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                  >
+
+                    <span>{loading
+                      ? "Resetting Password..."
+                      : "Reset Password"}</span>
+                    {!loading && <ArrowRight className="w-4 h-4" />}
+
+                  </button>
+
+                </form>
+
+              </>
+
+            )}
+
+
+            {/* BACK TO LOGIN */}
+
+            <div className="mt-8 pt-6 border-t border-stone-100 text-center">
+
+              <p className="text-sm text-stone-500">
+                Remember your password?{' '}
+
+                <Link
+                  className="font-semibold text-[#159a8c] hover:text-[#117d72] transition-colors"
+                  to="/login"
+                >
+                  Sign in instead
+                </Link>
+              </p>
+
+            </div>
 
           </div>
 
@@ -540,4 +585,4 @@ function ForgotPassword() {
   );
 }
 
-export default ForgotPassword; 
+export default ForgotPassword;

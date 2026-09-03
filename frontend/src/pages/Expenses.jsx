@@ -2,41 +2,154 @@ import { useState } from 'react'
 import AppLayout from '../components/AppLayout.jsx'
 import { recentExpenses } from '../mockData.js'
 
-const formatINR = (amount) => `${amount < 0 ? '-' : ''}₹${Math.abs(amount).toLocaleString('en-IN')}`
+import {
+  Receipt,
+  Filter,
+  Plus,
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+  Users,
+} from 'lucide-react'
+
+const formatINR = (amount) =>
+  `${amount < 0 ? '-' : ''}₹${Math.abs(amount).toLocaleString('en-IN')}`
 
 function Expenses() {
   const [filter, setFilter] = useState('All')
   const filters = ['All', 'Friends', 'Trip', 'Goa Trip', 'Home']
-  const visibleExpenses = filter === 'All' ? recentExpenses : recentExpenses.filter((expense) => expense.group === filter)
+  const visibleExpenses =
+    filter === 'All'
+      ? recentExpenses
+      : recentExpenses.filter((expense) => expense.group === filter)
 
   return (
     <AppLayout>
-      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-        <div>
-          <p className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-[#159a8c]">Activity</p>
-          <h1 className="text-3xl font-bold tracking-tight text-[#102a43]">Expenses</h1>
-          <p className="mt-2 text-sm text-slate-500">Review your share of every group expense.</p>
-        </div>
-        <button className="rounded-xl bg-[#159a8c] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#159a8c]/20 hover:bg-[#117d72]">+ Add Expense</button>
-      </div>
-
-      <div className="mt-8 flex gap-2 overflow-x-auto pb-1">
-        {filters.map((item) => (
-          <button className={`shrink-0 rounded-full px-4 py-2 text-sm font-bold transition ${filter === item ? 'bg-[#102a43] text-white' : 'bg-white text-slate-500 hover:text-[#102a43]'}`} key={item} onClick={() => setFilter(item)}>{item}</button>
-        ))}
-      </div>
-
-      <section className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        {visibleExpenses.length ? visibleExpenses.map((expense) => (
-          <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-5 last:border-0" key={expense.id}>
-            <div className="flex min-w-0 items-center gap-4">
-              <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-slate-100 text-xl">{expense.icon}</div>
-              <div className="min-w-0"><h2 className="truncate text-sm font-bold text-[#172033]">{expense.title}</h2><p className="mt-1 text-xs text-slate-500">{expense.group} · {expense.date}</p></div>
+      <div className="mx-auto max-w-5xl space-y-8 animate-fade-in-up">
+        {/* ================= HEADER ================= */}
+        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#159a8c]/10 text-[#159a8c] text-xs font-semibold uppercase tracking-wider mb-3">
+              <Receipt className="w-3.5 h-3.5" />
+              <span>Activity</span>
             </div>
-            <div className={`shrink-0 text-sm font-bold ${expense.yourShare >= 0 ? 'text-[#117d72]' : 'text-[#b6631e]'}`}>{formatINR(expense.yourShare)}</div>
+
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1a1a1a]">
+              Expenses
+            </h1>
+
+            <p className="mt-2 text-sm text-stone-500">
+              Review your share of every group expense
+            </p>
           </div>
-        )) : <p className="px-5 py-12 text-center text-sm text-slate-500">No expenses in this group yet.</p>}
-      </section>
+
+          <button className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#159a8c] px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-[#159a8c]/30 hover:bg-[#117d72] active:scale-[0.99] transition-all">
+            <Plus className="w-4 h-4" />
+            <span>Add Expense</span>
+          </button>
+        </div>
+
+        {/* ================= FILTERS ================= */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-stone-500 shrink-0">
+            <Filter className="w-3.5 h-3.5" />
+            <span>Filter</span>
+          </div>
+
+          <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+            {filters.map((item) => (
+              <button
+                className={`shrink-0 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
+                  filter === item
+                    ? 'bg-[#159a8c] text-white shadow-sm shadow-[#159a8c]/20'
+                    : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:border-stone-300'
+                }`}
+                key={item}
+                onClick={() => setFilter(item)}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ================= EXPENSES LIST ================= */}
+        <section className="overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-sm">
+          {visibleExpenses.length ? (
+            <div className="divide-y divide-stone-100">
+              {visibleExpenses.map((expense, index) => (
+                <article
+                  key={expense.id}
+                  className="flex items-center justify-between gap-4 px-6 sm:px-8 py-6 hover:bg-stone-50/50 transition-colors"
+                  style={{
+                    animationDelay: `${index * 30}ms`,
+                  }}
+                >
+                  {/* Left Side: Icon + Details */}
+                  <div className="flex min-w-0 items-center gap-4 flex-1">
+                    {/* Icon */}
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-stone-100 to-stone-50 text-2xl border border-stone-200/60">
+                      {expense.icon}
+                    </div>
+
+                    {/* Details */}
+                    <div className="min-w-0 flex-1">
+                      <h2 className="truncate text-sm font-bold text-[#1a1a1a]">
+                        {expense.title}
+                      </h2>
+
+                      <div className="mt-1.5 flex items-center gap-3 text-xs text-stone-500">
+                        <span className="inline-flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          <span>{expense.group}</span>
+                        </span>
+
+                        <span className="text-stone-300">·</span>
+
+                        <span className="inline-flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          <span>{expense.date}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Side: Amount */}
+                  <div className="shrink-0">
+                    {expense.yourShare >= 0 ? (
+                      <div className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200/60 px-4 py-2">
+                        <TrendingUp className="w-4 h-4 text-emerald-600" />
+                        <span className="text-sm font-bold text-emerald-700">
+                          {formatINR(expense.yourShare)}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="inline-flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200/60 px-4 py-2">
+                        <TrendingDown className="w-4 h-4 text-amber-600" />
+                        <span className="text-sm font-bold text-amber-700">
+                          {formatINR(expense.yourShare)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="px-6 py-16 text-center">
+              <Receipt className="w-12 h-12 text-stone-300 mx-auto mb-4" />
+              <p className="text-sm font-medium text-stone-600">
+                No expenses found
+              </p>
+              <p className="text-xs text-stone-400 mt-1">
+                {filter === 'All'
+                  ? 'Start by adding your first expense'
+                  : `No expenses in ${filter} yet`}
+              </p>
+            </div>
+          )}
+        </section>
+      </div>
     </AppLayout>
   )
 }

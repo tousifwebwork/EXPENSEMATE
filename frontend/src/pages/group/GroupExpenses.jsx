@@ -1,548 +1,570 @@
- 
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
-import AppLayout from "../../components/AppLayout";
+import AppLayout from '../../components/AppLayout'
 import {
   getGroupExpenses,
   deleteExpense,
-} from "../../config/expense/expenseAPI";
-import { getGroupById } from "../../config/group/groupAPI";
+} from '../../config/expense/expenseAPI'
+import { getGroupById } from '../../config/group/groupAPI'
 
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
+import {
+  ArrowLeft,
+  Plus,
+  Receipt,
+  Users,
+  TrendingUp,
+  DollarSign,
+  Calendar,
+  Eye,
+  Edit3,
+  Trash2,
+  Image as ImageIcon,
+  X,
+  Sparkles,
+  ArrowRightLeft,
+  CheckCircle2,
+  AlertCircle,
+  ChevronRight,
+  Wallet,
+  FileText,
+} from 'lucide-react'
 
 const GroupExpenses = () => {
-  const { groupId } = useParams();
-  const navigate = useNavigate();
+  const { groupId } = useParams()
+  const navigate = useNavigate()
 
-  const [group, setGroup] = useState(null);
-  const [expenses, setExpenses] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Selected receipt for large preview modal
-  const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [group, setGroup] = useState(null)
+  const [expenses, setExpenses] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selectedReceipt, setSelectedReceipt] = useState(null)
 
   // =========================
   // LOAD GROUP + EXPENSES
   // =========================
-
   const loadData = async () => {
     try {
-      const token = localStorage.getItem("token");
-
+      const token = localStorage.getItem('token')
       if (!token) {
-        toast.error("Please login again");
-        return;
+        toast.error('Please login again')
+        return
       }
 
       const [groupRes, expenseRes] = await Promise.all([
         getGroupById(groupId, token),
         getGroupExpenses(groupId, token),
-      ]);
+      ])
 
-      setGroup(groupRes.data.group);
-      setExpenses(expenseRes.data.expenses || []);
+      setGroup(groupRes.data.group)
+      setExpenses(expenseRes.data.expenses || [])
     } catch (err) {
-      console.log(err);
-
-      toast.error(
-        err.response?.data?.message || "Failed to load expenses"
-      );
+      console.log(err)
+      toast.error(err.response?.data?.message || 'Failed to load expenses')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // =========================
   // DELETE EXPENSE
   // =========================
-
-  const handleDeleteExpense = async (expenseId) => {
+  const handleDeleteExpense = async (expenseId, expenseTitle) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this expense?"
-    );
-
-    if (!confirmDelete) return;
+      `Are you sure you want to delete "${expenseTitle}"? This action cannot be undone.`
+    )
+    if (!confirmDelete) return
 
     try {
-      const token = localStorage.getItem("token");
-
+      const token = localStorage.getItem('token')
       if (!token) {
-        toast.error("Please login again");
-        return;
+        toast.error('Please login again')
+        return
       }
 
-      await deleteExpense(expenseId, token);
-
-      toast.success("Expense deleted successfully!");
-
-      await loadData();
+      await deleteExpense(expenseId, token)
+      toast.success('Expense deleted successfully!')
+      await loadData()
     } catch (err) {
-      console.log(err);
-
-      toast.error(
-        err.response?.data?.message || "Failed to delete expense"
-      );
+      console.log(err)
+      toast.error(err.response?.data?.message || 'Failed to delete expense')
     }
-  };
+  }
 
   // =========================
   // EDIT RECEIPT
   // =========================
-
   const handleEditReceipt = (expense) => {
-    navigate(`/groups/${groupId}/expenses/${expense._id}/edit`);
-  };
+    navigate(`/groups/${groupId}/expenses/${expense._id}/edit`)
+  }
 
   // =========================
   // LOAD DATA
   // =========================
-
   useEffect(() => {
-    loadData();
-  }, [groupId]);
+    loadData()
+  }, [groupId])
 
   // =========================
   // TOTAL EXPENSE
   // =========================
-
   const totalExpense = expenses.reduce(
     (total, expense) => total + Number(expense.amount || 0),
     0
-  );
+  )
 
   // =========================
   // CALCULATE MEMBER BALANCES
   // =========================
-
   const calculateBalances = () => {
-    if (!group?.members?.length) return [];
+    if (!group?.members?.length) return []
 
-    const balances = {};
+    const balances = {}
 
     // Seed with current members
     group.members.forEach((member) => {
-      const userId = String(member.user?._id);
-
-      if (!userId || userId === "undefined") return;
+      const userId = String(member.user?._id)
+      if (!userId || userId === 'undefined') return
 
       balances[userId] = {
         user: member.user,
         balance: 0,
         totalPaid: 0,
         totalSpent: 0,
-      };
-    });
+      }
+    })
 
     expenses.forEach((expense) => {
-      const payerId = String(
-        expense.paidBy?._id || expense.paidBy
-      );
-
-      if (!payerId || payerId === "undefined") return;
+      const payerId = String(expense.paidBy?._id || expense.paidBy)
+      if (!payerId || payerId === 'undefined') return
 
       // Add removed payer if necessary
       if (!balances[payerId]) {
         balances[payerId] = {
           user: expense.paidBy?.name
             ? expense.paidBy
-            : {
-                _id: payerId,
-                name: "Removed User",
-              },
+            : { _id: payerId, name: 'Removed User' },
           balance: 0,
           totalPaid: 0,
           totalSpent: 0,
-        };
+        }
       }
 
-      // Payer fronted this amount
-      balances[payerId].balance += Number(expense.amount || 0);
-
-      balances[payerId].totalPaid += Number(expense.amount || 0);
+      balances[payerId].balance += Number(expense.amount || 0)
+      balances[payerId].totalPaid += Number(expense.amount || 0)
 
       // Process shares
       expense.shares?.forEach((share) => {
-        const userId = String(
-          share.user?._id || share.user
-        );
-
-        if (!userId || userId === "undefined") return;
+        const userId = String(share.user?._id || share.user)
+        if (!userId || userId === 'undefined') return
 
         if (!balances[userId]) {
           balances[userId] = {
             user: share.user?.name
               ? share.user
-              : {
-                  _id: userId,
-                  name: "Removed User",
-                },
+              : { _id: userId, name: 'Removed User' },
             balance: 0,
             totalPaid: 0,
             totalSpent: 0,
-          };
+          }
         }
 
-        // Subtract their share
-        balances[userId].balance -= Number(
-          share.amount || 0
-        );
+        balances[userId].balance -= Number(share.amount || 0)
+        balances[userId].totalSpent += Number(share.amount || 0)
+      })
+    })
 
-        // Track personal spending
-        balances[userId].totalSpent += Number(
-          share.amount || 0
-        );
-      });
-    });
+    return Object.values(balances)
+  }
 
-    return Object.values(balances);
-  };
-
-  const memberBalances = calculateBalances();
+  const memberBalances = calculateBalances()
 
   // =========================
   // CALCULATE OVERALL SETTLEMENT
   // =========================
-
   const calculateOverallSettlements = () => {
-    const settlements = {};
+    const settlements = {}
 
     expenses.forEach((expense) => {
-      if (!expense.paidBy || !expense.shares?.length) {
-        return;
-      }
+      if (!expense.paidBy || !expense.shares?.length) return
 
-      const payer = expense.paidBy;
+      const payer = expense.paidBy
 
       expense.shares.forEach((share) => {
-        if (!share.user) return;
+        if (!share.user) return
 
-        // Don't create:
-        // Tousif should receive ₹500 from Tousif
+        // Don't create self-payments
         if (
-          String(share.user?._id || share.user) !==
-String(expense.paidBy?._id || expense.paidBy)
+          String(share.user?._id || share.user) ===
+          String(expense.paidBy?._id || expense.paidBy)
         ) {
-          return;
+          return
         }
 
-        const receiverId = String(payer._id || payer);
-const senderId = String(share.user._id || share.user);
-
-        const key = `${receiverId}-${senderId}`;
+        const receiverId = String(payer._id || payer)
+        const senderId = String(share.user._id || share.user)
+        const key = `${receiverId}-${senderId}`
 
         if (!settlements[key]) {
           settlements[key] = {
-             receiver: payer.name || "Unknown User",
-          sender: share.user.name || "Unknown User",
+            receiver: payer.name || 'Unknown User',
+            sender: share.user.name || 'Unknown User',
             amount: 0,
-            currency:
-              expense.currency || group.baseCurrency,
-          };
+            currency: expense.currency || group.baseCurrency,
+          }
         }
 
-        settlements[key].amount += Number(
-          share.amount || 0
-        );
-      });
-    });
+        settlements[key].amount += Number(share.amount || 0)
+      })
+    })
 
-    return Object.values(settlements);
-  };
+    return Object.values(settlements)
+  }
 
-  const overallSettlements =
-    calculateOverallSettlements();
+  const overallSettlements = calculateOverallSettlements()
 
-  // =========================
-  // GROUP SETTLEMENTS
-  // =========================
-
-  const groupedSettlements = {};
-
+  // Group settlements by receiver
+  const groupedSettlements = {}
   overallSettlements.forEach((settlement) => {
     if (!groupedSettlements[settlement.receiver]) {
-      groupedSettlements[settlement.receiver] = [];
+      groupedSettlements[settlement.receiver] = []
     }
+    groupedSettlements[settlement.receiver].push(settlement)
+  })
 
-    groupedSettlements[settlement.receiver].push(
-      settlement
-    );
-  });
+  const getInitials = (name) => {
+    if (!name) return 'U'
+    return name
+      .split(' ')
+      .filter(Boolean)
+      .map((w) => w[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }
 
   // =========================
   // LOADING
   // =========================
-
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex min-h-[50vh] items-center justify-center">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#159a8c]" />
+        <div className="max-w-6xl mx-auto space-y-6 animate-pulse">
+          <div className="h-6 w-32 rounded-lg bg-stone-200" />
+          <div className="h-10 w-3/4 rounded-xl bg-stone-200" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-32 rounded-3xl bg-stone-100" />
+            ))}
+          </div>
+          <div className="h-64 rounded-3xl bg-stone-100" />
         </div>
       </AppLayout>
-    );
+    )
   }
 
   // =========================
   // GROUP NOT FOUND
   // =========================
-
   if (!group) {
     return (
       <AppLayout>
-        <div className="flex min-h-[50vh] items-center justify-center px-4">
-          <p className="text-center text-slate-500">
-            Group not found
+        <div className="py-20 text-center max-w-md mx-auto">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100 text-stone-400 mb-4">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-bold text-[#1a1a1a]">Group Not Found</h2>
+          <p className="mt-2 text-sm text-stone-500">
+            The group you're looking for doesn't exist or you don't have access.
           </p>
+          <button
+            onClick={() => navigate('/groups')}
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#159a8c] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[#117d72] transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Groups</span>
+          </button>
         </div>
       </AppLayout>
-    );
+    )
   }
 
   return (
     <AppLayout>
-      <div className="w-full min-w-0">
+      <div className="max-w-6xl mx-auto space-y-8 animate-fade-in-up">
         {/* =========================
-            BACK
+            BREADCRUMBS
         ========================= */}
-
-        <button
-          type="button"
-          onClick={() => navigate("/groups")}
-          className="mb-5 inline-flex items-center text-sm font-semibold text-[#159a8c] transition hover:text-[#117d72]"
-        >
-          ← Back to Groups
-        </button>
+        <div className="flex items-center gap-2 text-xs font-medium text-stone-500">
+          <button
+            onClick={() => navigate('/groups')}
+            className="inline-flex items-center gap-1.5 hover:text-[#159a8c] transition-colors cursor-pointer"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Groups</span>
+          </button>
+          <ChevronRight className="w-3 h-3 text-stone-300" />
+          <button
+            onClick={() => navigate(`/groups/${groupId}`)}
+            className="hover:text-[#159a8c] transition-colors cursor-pointer truncate max-w-xs"
+          >
+            {group.name}
+          </button>
+          <ChevronRight className="w-3 h-3 text-stone-300" />
+          <span className="text-stone-900 font-semibold">Expenses</span>
+        </div>
 
         {/* =========================
             HEADER
         ========================= */}
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#159a8c]/10 text-[#159a8c] text-xs font-semibold uppercase tracking-wider mb-3">
+              <Receipt className="w-3.5 h-3.5" />
+              <span>Track Record</span>
+            </div>
 
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#159a8c] sm:text-sm">
-              Expenses
-            </p>
-
-            <h1 className="mt-1 break-words text-2xl font-bold text-[#102a43] sm:text-3xl">
-              {group.name}
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1a1a1a]">
+              {group.name} Expenses
             </h1>
 
-            <p className="mt-2 max-w-2xl break-words text-sm text-slate-500">
-              {group.description ||
-                "Track your group expenses"}
+            <p className="mt-2 text-sm text-stone-500 max-w-2xl">
+              {group.description || 'Monitor all transactions and view real-time balance updates.'}
             </p>
           </div>
 
           <button
-            type="button"
-            onClick={() =>
-              navigate(
-                `/groups/${groupId}/expenses/add`
-              )
-            }
-            className="w-full shrink-0 rounded-xl bg-[#159a8c] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#117d72] sm:w-auto"
+            onClick={() => navigate(`/groups/${groupId}/expenses/add`)}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#159a8c] px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-[#159a8c]/30 hover:bg-[#117d72] active:scale-[0.99] transition-all cursor-pointer"
           >
-            + Add Expense
+            <Plus className="w-4 h-4" />
+            <span>Add Expense</span>
           </button>
+        </div>
+
+        {/* =========================
+            STATS ROW
+        ========================= */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* TOTAL EXPENSES */}
+          <div className="rounded-3xl border border-stone-200/80 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between text-stone-400">
+              <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Total Expenses
+              </span>
+              <TrendingUp className="w-4 h-4 text-[#159a8c]" />
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl font-extrabold text-[#1a1a1a]">
+                {group.baseCurrency} {totalExpense.toFixed(2)}
+              </span>
+            </div>
+            <div className="mt-1 text-xs text-stone-400">
+              {expenses.length} {expenses.length === 1 ? 'transaction' : 'transactions'}
+            </div>
+          </div>
+
+          {/* MEMBERS COUNT */}
+          <div className="rounded-3xl border border-stone-200/80 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between text-stone-400">
+              <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Active Members
+              </span>
+              <Users className="w-4 h-4 text-[#159a8c]" />
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl font-extrabold text-[#1a1a1a]">
+                {memberBalances.length}
+              </span>
+            </div>
+            <div className="mt-1 text-xs text-stone-400">
+              People with activity
+            </div>
+          </div>
+
+          {/* SETTLEMENT STATUS */}
+          <div className="rounded-3xl border border-stone-200/80 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between text-stone-400">
+              <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">
+                Settlement Status
+              </span>
+              <ArrowRightLeft className="w-4 h-4 text-[#159a8c]" />
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              {Object.keys(groupedSettlements).length === 0 ? (
+                <span className="text-lg font-bold text-emerald-600 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span>All Settled</span>
+                </span>
+              ) : (
+                <span className="text-2xl font-extrabold text-[#1a1a1a]">
+                  {overallSettlements.length}
+                </span>
+              )}
+            </div>
+            <div className="mt-1 text-xs text-stone-400">
+              {Object.keys(groupedSettlements).length === 0
+                ? 'No pending payments'
+                : 'Pending settlements'}
+            </div>
+          </div>
         </div>
 
         {/* =========================
             MEMBER BALANCES
         ========================= */}
-
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-          <div className="mb-5">
-            <h2 className="text-lg font-bold text-[#102a43] sm:text-xl">
-              Member Balances
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              See who owes money and who should receive money.
+        <section className="rounded-3xl border border-stone-200/80 bg-white p-6 sm:p-8 shadow-sm">
+          <div className="pb-6 border-b border-stone-100">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#159a8c] mb-1">
+              <Wallet className="w-3.5 h-3.5" />
+              <span>Financial Overview</span>
+            </div>
+            <h2 className="text-xl font-bold text-[#1a1a1a]">Member Balances</h2>
+            <p className="mt-1 text-sm text-stone-500">
+              Track who owes money and who should receive payments.
             </p>
           </div>
 
           {memberBalances.length === 0 ? (
-            <p className="text-sm text-slate-500">
-              No members found.
-            </p>
+            <p className="mt-6 text-sm text-stone-500">No member activity yet.</p>
           ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {memberBalances.map((member) => {
-                const balance = Number(
-                  member.balance || 0
-                );
-
-                const roundedBalance =
-                  Math.abs(balance) < 0.01
-                    ? 0
-                    : balance;
+                const balance = Number(member.balance || 0)
+                const roundedBalance = Math.abs(balance) < 0.01 ? 0 : balance
 
                 return (
                   <div
                     key={member.user?._id || member.user}
-                    className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-4"
+                    className="rounded-2xl border border-stone-200/80 bg-stone-50/50 p-4 hover:shadow-sm transition-shadow"
                   >
                     {/* USER */}
-
-                    <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex items-center gap-3">
                       {member.user.profileImage ? (
                         <img
                           src={member.user.profileImage}
                           alt={member.user.name}
-                          className="h-10 w-10 shrink-0 rounded-full object-cover"
+                          className="h-12 w-12 rounded-2xl object-cover ring-1 ring-stone-200"
                         />
                       ) : (
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#159a8c]/10 font-bold text-[#159a8c]">
-                          {member.user.name
-                            ?.charAt(0)
-                            ?.toUpperCase() || "U"}
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#159a8c]/15 text-[#159a8c] font-bold text-sm">
+                          {getInitials(member.user.name)}
                         </div>
                       )}
 
-                      <div className="min-w-0">
-                        <p className="truncate font-bold text-[#102a43]">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-bold text-[#1a1a1a] text-sm">
                           {member.user.name}
                         </p>
-
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-stone-500">
                           {roundedBalance > 0
-                            ? "Should receive"
+                            ? 'Should receive'
                             : roundedBalance < 0
-                            ? "Owes"
-                            : "Settled"}
+                            ? 'Owes group'
+                            : 'Settled up'}
                         </p>
                       </div>
                     </div>
 
                     {/* BALANCE */}
+                    <div className="mt-4 pt-4 border-t border-stone-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">
+                          Balance
+                        </span>
+                        <span
+                          className={`text-lg font-extrabold ${
+                            roundedBalance > 0
+                              ? 'text-emerald-600'
+                              : roundedBalance < 0
+                              ? 'text-red-600'
+                              : 'text-stone-500'
+                          }`}
+                        >
+                          {roundedBalance > 0 ? '+' : roundedBalance < 0 ? '-' : ''}
+                          {group.baseCurrency} {Math.abs(roundedBalance).toFixed(2)}
+                        </span>
+                      </div>
 
-                    <div className="mt-4 flex items-center justify-between gap-3">
-                      <span className="text-sm font-medium text-slate-500">
-                        Balance
-                      </span>
-
-                      <span
-                        className={`text-right text-base font-bold sm:text-lg ${
-                          roundedBalance > 0
-                            ? "text-green-600"
-                            : roundedBalance < 0
-                            ? "text-red-600"
-                            : "text-slate-500"
-                        }`}
-                      >
-                        {roundedBalance > 0
-                          ? "+"
-                          : roundedBalance < 0
-                          ? "-"
-                          : ""}
-
-                        {group.baseCurrency}{" "}
-                        {Math.abs(
-                          roundedBalance
-                        ).toFixed(2)}
-                      </span>
-                    </div>
-
-                    {/* TOTAL PAID */}
-
-                    <div className="mt-2 flex items-center justify-between gap-3 border-t border-slate-200 pt-2">
-                      <span className="text-xs font-medium text-slate-400">
-                        Total Paid
-                      </span>
-
-                      <span className="text-right text-sm font-semibold text-slate-600">
-                        {group.baseCurrency}{" "}
-                        {Number(
-                          member.totalPaid || 0
-                        ).toFixed(2)}
-                      </span>
+                      <div className="mt-2 flex items-center justify-between text-xs">
+                        <span className="text-stone-400">Total Paid</span>
+                        <span className="font-semibold text-stone-600">
+                          {group.baseCurrency} {Number(member.totalPaid || 0).toFixed(2)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                );
+                )
               })}
             </div>
           )}
         </section>
 
         {/* =========================
-            TOTAL EXPENSE
-        ========================= */}
-
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-          <p className="text-sm text-slate-500">
-            Total Expenses
-          </p>
-
-          <p className="mt-1 break-words text-2xl font-bold text-[#102a43] sm:text-3xl">
-            {group.baseCurrency}{" "}
-            {totalExpense.toFixed(2)}
-          </p>
-        </section>
-
-        {/* =========================
             OVERALL SETTLEMENT
         ========================= */}
-
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-          <div className="mb-5">
-            <h2 className="text-lg font-bold text-[#102a43] sm:text-xl">
-              Overall Settlement
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              See who should receive money and who they should receive it from.
+        <section className="rounded-3xl border border-stone-200/80 bg-white p-6 sm:p-8 shadow-sm">
+          <div className="pb-6 border-b border-stone-100">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#159a8c] mb-1">
+              <ArrowRightLeft className="w-3.5 h-3.5" />
+              <span>Settlement Plan</span>
+            </div>
+            <h2 className="text-xl font-bold text-[#1a1a1a]">Overall Settlement</h2>
+            <p className="mt-1 text-sm text-stone-500">
+              Simplified payment paths to settle all group balances.
             </p>
           </div>
 
           {Object.keys(groupedSettlements).length === 0 ? (
-            <div className="rounded-xl bg-green-50 p-4 text-sm font-medium text-green-700">
-              ✓ Everyone is settled.
+            <div className="mt-6 rounded-2xl bg-emerald-50/70 border border-emerald-200/60 p-4 flex items-center gap-3">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-emerald-900">
+                  Everyone is settled up!
+                </p>
+                <p className="text-xs text-emerald-700 mt-0.5">
+                  No pending payments in this group.
+                </p>
+              </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              {Object.entries(groupedSettlements).map(
-                ([receiver, settlements]) => (
-                  <div
-                    key={receiver}
-                    className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4"
-                  >
-                    {/* RECEIVER */}
+            <div className="mt-6 space-y-4">
+              {Object.entries(groupedSettlements).map(([receiver, settlements]) => (
+                <div
+                  key={receiver}
+                  className="rounded-2xl border border-stone-200/80 bg-stone-50/50 p-4"
+                >
+                  <p className="font-bold text-[#1a1a1a] mb-3 flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#159a8c]/15 text-[#159a8c] text-xs font-bold">
+                      {getInitials(receiver)}
+                    </span>
+                    <span>{receiver}</span>
+                    <span className="text-stone-500 font-normal text-sm">should receive</span>
+                  </p>
 
-                    <p className="mb-3 break-words font-bold text-[#102a43]">
-                      {receiver} should receive
-                    </p>
+                  <div className="space-y-2">
+                    {settlements.map((settlement, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3"
+                      >
+                        <div className="flex items-center gap-2 text-sm text-stone-600">
+                          <span>from</span>
+                          <span className="font-bold text-[#1a1a1a]">
+                            {settlement.sender}
+                          </span>
+                        </div>
 
-                    {/* PEOPLE WHO OWE */}
-
-                    <div className="space-y-2">
-                      {settlements.map(
-                        (settlement, index) => (
-                          <div
-                            key={index}
-                            className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-white px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4"
-                          >
-                            <p className="min-w-0 break-words text-sm text-slate-600">
-                              from{" "}
-                              <span className="font-semibold text-[#102a43]">
-                                {settlement.sender}
-                              </span>
-                            </p>
-
-                            <span className="shrink-0 font-bold text-[#159a8c]">
-                              {settlement.currency}{" "}
-                              {Number(
-                                settlement.amount || 0
-                              ).toFixed(2)}
-                            </span>
-                          </div>
-                        )
-                      )}
-                    </div>
+                        <span className="font-bold text-[#159a8c] text-base">
+                          {settlement.currency} {Number(settlement.amount || 0).toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                )
-              )}
+                </div>
+              ))}
             </div>
           )}
         </section>
@@ -550,337 +572,257 @@ const senderId = String(share.user._id || share.user);
         {/* =========================
             EXPENSE LIST
         ========================= */}
-
-        <section className="mt-6">
-          <h2 className="mb-4 text-lg font-bold text-[#102a43] sm:text-xl">
-            All Expenses
-          </h2>
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-[#1a1a1a]">All Expenses</h2>
+            {expenses.length > 0 && (
+              <span className="text-xs text-stone-500">
+                {expenses.length} {expenses.length === 1 ? 'entry' : 'entries'}
+              </span>
+            )}
+          </div>
 
           {expenses.length === 0 ? (
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:p-10">
-              <p className="text-sm text-slate-500">
-                No expenses added yet.
+            <div className="rounded-3xl border border-dashed border-stone-200 bg-white p-12 text-center shadow-xs">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100 text-stone-400 mb-4">
+                <FileText className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-bold text-[#1a1a1a]">No expenses yet</h3>
+              <p className="mt-2 text-sm text-stone-500 max-w-sm mx-auto">
+                Start tracking shared costs by adding your first expense transaction.
               </p>
-
               <button
-                type="button"
-                onClick={() =>
-                  navigate(
-                    `/groups/${groupId}/expenses/add`
-                  )
-                }
-                className="mt-4 rounded-xl bg-[#159a8c] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#117d72]"
+                onClick={() => navigate(`/groups/${groupId}/expenses/add`)}
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#159a8c] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#117d72] transition-all cursor-pointer"
               >
-                Add First Expense
+                <Plus className="w-4 h-4" />
+                <span>Add First Expense</span>
               </button>
             </div>
           ) : (
             <div className="space-y-5">
-              {expenses.map((expense) => (
+              {expenses.map((expense, index) => (
                 <article
                   key={expense._id}
-                  className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+                  className="rounded-3xl border border-stone-200/80 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
+                  style={{ animationDelay: `${index * 30}ms` }}
                 >
-                  {/* =========================
-                      TOP SECTION
-                  ========================= */}
-
-                  <div className="flex flex-col gap-6">
-                    {/* DETAILS + RECEIPT */}
-
-                    <div className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
-                      {/* DETAILS */}
-
-                      <div className="min-w-0">
-                        <h3 className="break-words text-lg font-bold text-[#102a43]">
-                          {expense.title}
-                        </h3>
-
-                        <p className="mt-1 break-words text-sm text-slate-500">
-                          {expense.description ||
-                            "No description"}
-                        </p>
-
-                        <p className="mt-3 text-sm text-slate-500">
-                          Paid by{" "}
-                          <span className="font-semibold text-[#102a43]">
-                            {expense.paidBy?.name ||
-                              "Unknown"}
-                          </span>
-                        </p>
-
-                        <p className="mt-1 text-xs text-slate-400">
-                          {expense.date
-                            ? new Date(
-                                expense.date
-                              ).toLocaleDateString()
-                            : "No date"}
-                        </p>
-
-                        {/* EXPENSE SETTLEMENT */}
-
-                        {expense.shares?.length > 0 &&
-                          expense.paidBy && (
-                            <div className="mt-3 space-y-1.5">
-                              {expense.shares
-                                .filter(
-                                  (share) =>
-                                    share.user?._id &&
-                                    String(
-                                      share.user._id
-                                    ) !==
-                                      String(
-                                        expense.paidBy._id
-                                      )
-                                )
-                                .map((share) => (
-                                  <p
-                                    key={
-                                      share._id ||
-                                      share.user._id
-                                    }
-                                    className="break-words text-sm leading-6 text-slate-500"
-                                  >
-                                    <span className="font-semibold text-[#102a43]">
-                                      {
-                                        expense.paidBy
-                                          .name
-                                      }
-                                    </span>{" "}
-                                    should receive{" "}
-                                    <span className="font-semibold text-[#159a8c]">
-                                      {expense.currency ||
-                                        group.baseCurrency}{" "}
-                                      {Number(
-                                        share.amount || 0
-                                      ).toFixed(2)}
-                                    </span>{" "}
-                                    from{" "}
-                                    <span className="font-semibold text-[#102a43]">
-                                      {share.user.name}
-                                    </span>
-                                  </p>
-                                ))}
-                            </div>
+                  {/* TOP SECTION */}
+                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6">
+                    {/* LEFT: EXPENSE DETAILS */}
+                    <div className="space-y-4">
+                      {/* TITLE & AMOUNT */}
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-xl font-bold text-[#1a1a1a] break-words">
+                            {expense.title}
+                          </h3>
+                          {expense.description && (
+                            <p className="mt-1 text-sm text-stone-500 break-words">
+                              {expense.description}
+                            </p>
                           )}
+                        </div>
+
+                        <div className="shrink-0">
+                          <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">
+                            Amount
+                          </p>
+                          <p className="text-2xl font-extrabold text-[#159a8c]">
+                            {expense.currency || group.baseCurrency}{' '}
+                            {Number(expense.amount || 0).toFixed(2)}
+                          </p>
+                        </div>
                       </div>
 
-                      {/* RECEIPT */}
- {/* RECEIPT */}
-<div className="flex w-full flex-col items-start gap-2 md:w-32 md:items-center">
+                      {/* META INFO */}
+                      <div className="flex flex-wrap items-center gap-3 text-xs">
+                        <div className="flex items-center gap-1.5 text-stone-500">
+                          <DollarSign className="w-3.5 h-3.5" />
+                          <span>
+                            Paid by{' '}
+                            <span className="font-semibold text-[#1a1a1a]">
+                              {expense.paidBy?.name || 'Unknown'}
+                            </span>
+                          </span>
+                        </div>
 
-  {expense.receiptUrl ? (
-    <>
-      {/* RECEIPT IMAGE */}
-      <button
-        type="button"
-        onClick={() =>
-          setSelectedReceipt(expense.receiptUrl)
-        }
-        className="group relative h-28 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100 sm:h-32 md:h-24 md:w-32"
-        title="View receipt"
-      >
-        <img
-          src={expense.receiptUrl}
-          alt="Expense receipt"
-          className="h-full w-full object-cover transition duration-200 group-hover:scale-105"
-        /> 
-      </button>
+                        {expense.date && (
+                          <div className="flex items-center gap-1.5 text-stone-500">
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span>
+                              {new Date(expense.date).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })}
+                            </span>
+                          </div>
+                        )}
 
-      {/* RECEIPT ACTIONS */}
-      <div className="flex w-full gap-2 md:w-auto">
+                        {expense.category && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 font-medium capitalize">
+                            {expense.category}
+                          </span>
+                        )}
+                      </div>
 
-        {/* VIEW */}
-        <button
-          type="button"
-          onClick={() =>
-            setSelectedReceipt(expense.receiptUrl)
-          }
-          className="flex flex-1 items-center justify-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-200 md:flex-none"
-          title="View receipt"
-        >
-          👁️
-          <span className="ml-1 hidden sm:inline">
-            View
-          </span>
-        </button>
-
-        {/* EDIT */}
-        <button
-          type="button"
-          onClick={() =>
-            handleEditReceipt(expense)
-          }
-          className="flex flex-1 items-center justify-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-200 md:flex-none"
-          title="Edit receipt"
-        >
-          ✏️
-          <span className="ml-1 hidden sm:inline">
-            Edit
-          </span>
-        </button>
-
-      </div>
-    </>
-  ) : (
-    /* NO RECEIPT */
-    <button
-      type="button"
-      onClick={() =>
-        handleEditReceipt(expense)
-      }
-      className="flex h-28 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 text-slate-400 transition hover:border-[#159a8c] hover:bg-[#159a8c]/5 hover:text-[#159a8c] sm:h-32 md:h-24 md:w-32"
-      title="Add receipt"
-    >
-      <span className="text-2xl">＋</span>
-      <span className="mt-1 text-xs font-semibold">
-        Add Image
-      </span>
-    </button>
-  )}
-
-</div> 
-
+                      {/* SETTLEMENT INFO */}
+                      {expense.shares?.length > 0 && expense.paidBy && (
+                        <div className="rounded-xl bg-stone-50/70 border border-stone-100 p-3 space-y-1.5">
+                          {expense.shares
+                            .filter(
+                              (share) =>
+                                share.user?._id &&
+                                String(share.user._id) !== String(expense.paidBy._id)
+                            )
+                            .map((share) => (
+                              <p
+                                key={share._id || share.user._id}
+                                className="text-xs text-stone-600 leading-relaxed"
+                              >
+                                <span className="font-semibold text-[#1a1a1a]">
+                                  {expense.paidBy.name}
+                                </span>{' '}
+                                should receive{' '}
+                                <span className="font-bold text-[#159a8c]">
+                                  {expense.currency || group.baseCurrency}{' '}
+                                  {Number(share.amount || 0).toFixed(2)}
+                                </span>{' '}
+                                from{' '}
+                                <span className="font-semibold text-[#1a1a1a]">
+                                  {share.user.name}
+                                </span>
+                              </p>
+                            ))}
+                        </div>
+                      )}
                     </div>
 
-                    {/* =========================
-                        AMOUNT
-                    ========================= */}
+                    {/* RIGHT: RECEIPT */}
+                    <div className="flex flex-col items-center gap-2 lg:w-32">
+                      {expense.receiptUrl ? (
+                        <>
+                          <button
+                            onClick={() => setSelectedReceipt(expense.receiptUrl)}
+                            className="group relative h-32 w-full lg:w-32 overflow-hidden rounded-2xl border border-stone-200 bg-stone-100 shadow-xs hover:shadow-md transition-all cursor-pointer"
+                            title="View receipt"
+                          >
+                            <img
+                              src={expense.receiptUrl}
+                              alt="Receipt"
+                              className="h-full w-full object-cover transition duration-200 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                              <Eye className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                          </button>
 
-                    <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                          Amount
-                        </p>
-
-                        <p className="mt-1 text-2xl font-bold text-[#159a8c]">
-                          {expense.currency ||
-                            group.baseCurrency}{" "}
-                          {Number(
-                            expense.amount || 0
-                          ).toFixed(2)}
-                        </p>
-                      </div>
-
-                      <span className="w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold capitalize text-slate-600">
-                        {expense.category || "Other"}
-                      </span>
+                          <div className="flex gap-2 w-full">
+                            <button
+                              onClick={() => setSelectedReceipt(expense.receiptUrl)}
+                              className="flex-1 flex items-center justify-center gap-1 rounded-lg bg-stone-100 hover:bg-stone-200 px-3 py-1.5 text-xs font-medium text-stone-600 transition-colors cursor-pointer"
+                              title="View"
+                            >
+                              <Eye className="w-3 h-3" />
+                              <span>View</span>
+                            </button>
+                            <button
+                              onClick={() => handleEditReceipt(expense)}
+                              className="flex-1 flex items-center justify-center gap-1 rounded-lg bg-stone-100 hover:bg-stone-200 px-3 py-1.5 text-xs font-medium text-stone-600 transition-colors cursor-pointer"
+                              title="Edit"
+                            >
+                              <Edit3 className="w-3 h-3" />
+                              <span>Edit</span>
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => handleEditReceipt(expense)}
+                          className="flex h-32 w-full lg:w-32 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-stone-300 bg-stone-50/50 text-stone-400 transition hover:border-[#159a8c] hover:bg-[#159a8c]/5 hover:text-[#159a8c] cursor-pointer"
+                          title="Add receipt"
+                        >
+                          <ImageIcon className="w-6 h-6 mb-1" />
+                          <span className="text-xs font-semibold">Add Image</span>
+                        </button>
+                      )}
                     </div>
                   </div>
 
-                  {/* =========================
-                      SPLIT DETAILS
-                  ========================= */}
-
-                  <div className="mt-5 rounded-xl bg-slate-50 p-3 sm:p-4">
-                    <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                      <h4 className="font-bold text-[#102a43]">
-                        Split Details
-                      </h4>
-
-                      <span className="w-fit rounded-full bg-[#159a8c]/10 px-3 py-1 text-xs font-semibold capitalize text-[#159a8c]">
-                        {expense.splitType || "Unknown"}{" "}
-                        Split
+                  {/* SPLIT DETAILS */}
+                  <div className="mt-6 pt-6 border-t border-stone-100">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-sm font-bold text-[#1a1a1a]">Split Details</h4>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#159a8c]/10 text-[#159a8c] text-[11px] font-semibold uppercase tracking-wider">
+                        {expense.splitType || 'Unknown'} Split
                       </span>
                     </div>
 
                     {expense.shares?.length > 0 ? (
-                      <div className="space-y-2">
-                        {expense.shares.map(
-                          (share) => (
-                            <div
-                              key={
-                                share._id ||
-                                share.user?._id
-                              }
-                              className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-white px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4"
-                            >
-                              {/* USER */}
-
-                              <div className="min-w-0">
-                                <p className="break-words font-semibold text-[#102a43]">
-                                  {share.user?.name ||
-                                    "Unknown User"}
-                                </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {expense.shares.map((share) => (
+                          <div
+                            key={share._id || share.user?._id}
+                            className="flex items-center justify-between rounded-xl border border-stone-200 bg-stone-50/50 px-3 py-2.5"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-100 text-stone-700 font-bold text-[10px] shrink-0">
+                                {getInitials(share.user?.name)}
                               </div>
-
-                              {/* SHARE */}
-
-                              <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-                                {share.percentage !==
-                                  undefined &&
-                                  share.percentage !==
-                                    null && (
-                                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                                      {
-                                        share.percentage
-                                      }
-                                      %
-                                    </span>
-                                  )}
-
-                                <span className="font-bold text-[#159a8c]">
-                                  {expense.currency ||
-                                    group.baseCurrency}{" "}
-                                  {Number(
-                                    share.amount || 0
-                                  ).toFixed(2)}
-                                </span>
-                              </div>
+                              <span className="text-xs font-semibold text-[#1a1a1a] truncate">
+                                {share.user?.name || 'Unknown'}
+                              </span>
                             </div>
-                          )
-                        )}
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              {share.percentage !== undefined &&
+                                share.percentage !== null && (
+                                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-stone-100 text-stone-600">
+                                    {share.percentage}%
+                                  </span>
+                                )}
+                              <span className="text-xs font-bold text-[#159a8c]">
+                                {expense.currency || group.baseCurrency}{' '}
+                                {Number(share.amount || 0).toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-slate-500">
-                        No split details available.
-                      </p>
+                      <p className="text-sm text-stone-500">No split details available.</p>
                     )}
                   </div>
 
-                  {/* =========================
-                      ACTION BUTTONS
-                  ========================= */}
-
-                  <div className="mt-5 flex flex-col gap-4 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                    {/* NOTES */}
-
+                  {/* NOTES & ACTIONS */}
+                  <div className="mt-6 pt-6 border-t border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       {expense.notes?.length > 0 && (
-                        <p className="break-words text-sm leading-6 text-slate-500">
-                          <span className="font-semibold text-[#102a43]">
-                            Notes:
-                          </span>{" "}
+                        <p className="text-xs text-stone-500 break-words">
+                          <span className="font-semibold text-stone-700">Notes:</span>{' '}
                           {expense.notes}
                         </p>
                       )}
                     </div>
 
-                    {/* ACTIONS */}
-
-                    <div className="grid w-full grid-cols-2 gap-3 sm:w-auto sm:flex sm:flex-row">
+                    <div className="flex gap-2 shrink-0">
                       <button
-                        type="button"
                         onClick={() =>
-                          navigate(
-                            `/groups/${groupId}/expenses/${expense._id}/edit`
-                          )
+                          navigate(`/groups/${groupId}/expenses/${expense._id}/edit`)
                         }
-                        className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100"
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200 bg-white px-4 py-2 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer"
                       >
-                        Edit
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit</span>
                       </button>
 
                       <button
-                        type="button"
-                        onClick={() =>
-                          handleDeleteExpense(
-                            expense._id
-                          )
-                        }
-                        className="rounded-lg border border-red-500 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-500 hover:text-white"
+                        onClick={() => handleDeleteExpense(expense._id, expense.title)}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50/50 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-100/70 transition-colors cursor-pointer"
                       >
-                        Delete
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Delete</span>
                       </button>
                     </div>
                   </div>
@@ -894,44 +836,33 @@ const senderId = String(share.user._id || share.user);
       {/* =========================
           RECEIPT MODAL
       ========================= */}
-
       {selectedReceipt && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-3 sm:p-5"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/80 backdrop-blur-sm p-4 animate-fade-in"
           onClick={() => setSelectedReceipt(null)}
         >
           <div
-            className="relative flex max-h-[95vh] w-full max-w-4xl items-center justify-center overflow-hidden rounded-xl bg-white p-2 shadow-2xl sm:p-3"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
+            className="relative max-h-[95vh] w-full max-w-4xl overflow-hidden rounded-3xl bg-white p-3 shadow-2xl animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* CLOSE BUTTON */}
-
             <button
-              type="button"
-              onClick={() =>
-                setSelectedReceipt(null)
-              }
-              className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/70 text-xl text-white transition hover:bg-black"
+              onClick={() => setSelectedReceipt(null)}
+              className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-stone-900/80 text-white hover:bg-stone-900 transition-colors cursor-pointer"
               title="Close"
             >
-              ×
+              <X className="w-5 h-5" />
             </button>
-
-            {/* RECEIPT IMAGE */}
 
             <img
               src={selectedReceipt}
-              alt="Expense receipt large preview"
-              className="max-h-[90vh] max-w-full rounded-lg object-contain"
+              alt="Receipt preview"
+              className="max-h-[90vh] max-w-full rounded-2xl object-contain mx-auto"
             />
           </div>
         </div>
       )}
     </AppLayout>
-  );
-};
+  )
+}
 
-export default GroupExpenses;
- 
+export default GroupExpenses
