@@ -105,3 +105,49 @@ exports.updateProfileImage = async (req, res) => {
     });
   }
 };
+// DELETE PROFILE
+// DELETE PROFILE IMAGE
+exports.deleteProfileImage = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // No profile image
+    if (!user.profileImage) {
+      return res.status(400).json({
+        success: false,
+        message: "No profile image to delete",
+      });
+    }
+
+    // Delete image from Cloudinary
+    // Only if your stored path is a Cloudinary public_id
+    await cloudinary.uploader.destroy(user.profileImage);
+
+    // Remove image from database
+    user.profileImage = "";
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile image deleted successfully",
+      user,
+    });
+
+  } catch (error) {
+    console.error("Delete profile image error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete profile image",
+    });
+  }
+};

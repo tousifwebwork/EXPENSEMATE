@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { protect  } = require("../../middleware/authMiddleware");
 const upload = require("../../middleware/upload");
-const {getProfile,updateProfile, getUserById,updateProfileImage} = require("../../controller/user/userController") 
+const {getProfile,updateProfile, getUserById,updateProfileImage,deleteProfileImage} = require("../../controller/user/userController") 
 
 
 
@@ -29,5 +29,7 @@ router.patch(
   },
   updateProfileImage
 );
+
+router.delete("/profile/image", protect, deleteProfileImage);
 
 module.exports = router;

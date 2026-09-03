@@ -22,6 +22,7 @@ export const changePassword = (token, data) => {return API.patch("/change-passwo
 export const getUserById = (userId, token) => {return API.get(`/individual/${userId}`, authHeader(token));};
 
 export const updateProfileImage = (token, formData) => {return API.patch("/profile/image", formData, authHeader(token));};
+export const deleteProfileImage = (token) => {return API.delete("/profile/image",authHeader(token));};
 
 
 export default API;

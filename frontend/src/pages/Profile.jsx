@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import AppLayout from "../components/AppLayout.jsx";
+
 import {
   getProfile,
   updateProfile as updateUserProfile,
   updateProfileImage,
+  deleteProfileImage,
 } from "../config/user/userAPI.js";
-import toast from "react-hot-toast";
+
+import toast, { Toaster } from "react-hot-toast";
+
 import {
   User,
   Mail,
@@ -13,12 +17,12 @@ import {
   Wallet,
   Hash,
   ShieldCheck,
-  Image,
   FileText,
   MapPin,
   Globe,
   CalendarDays,
   Camera,
+  Trash2,
 } from "lucide-react";
 
 function Profile() {
@@ -43,6 +47,7 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [deletingImage, setDeletingImage] = useState(false);
 
   // ================= GET PROFILE =================
   useEffect(() => {
@@ -110,6 +115,10 @@ function Profile() {
 
     if (!file) return;
 
+    const toastId = toast.loading(
+      "Uploading profile image..."
+    );
+
     try {
       setUploadingImage(true);
 
@@ -118,26 +127,95 @@ function Profile() {
       const formData = new FormData();
       formData.append("profileImage", file);
 
-      const res = await updateProfileImage(token, formData);
+      const res = await updateProfileImage(
+        token,
+        formData
+      );
 
       setUser((prev) => ({
         ...prev,
         profileImage: res.data.user.profileImage,
       }));
 
-      toast.success("Profile image updated successfully!");
+      toast.success(
+        "Profile image updated successfully!",
+        {
+          id: toastId,
+          duration: 3000,
+        }
+      );
     } catch (error) {
-      console.log(error.response?.data || error.message);
+      console.log(
+        error.response?.data || error.message
+      );
 
       toast.error(
         error.response?.data?.message ||
-          "Failed to upload profile image."
+          "Failed to upload profile image.",
+        {
+          id: toastId,
+          duration: 3000,
+        }
       );
     } finally {
       setUploadingImage(false);
 
-      // Reset file input
       e.target.value = "";
+    }
+  };
+
+  // ================= DELETE PROFILE IMAGE =================
+  const handleDeleteImage = async () => {
+    if (!user.profileImage) {
+      toast.error("No profile image to delete.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete your profile image?"
+    );
+
+    if (!confirmed) return;
+
+    const toastId = toast.loading(
+      "Deleting profile image..."
+    );
+
+    try {
+      setDeletingImage(true);
+
+      const token = localStorage.getItem("token");
+
+      const res = await deleteProfileImage(token);
+
+      setUser((prev) => ({
+        ...prev,
+        profileImage:
+          res.data.user?.profileImage || "",
+      }));
+
+      toast.success(
+        "Profile image deleted successfully!",
+        {
+          id: toastId,
+          duration: 3000,
+        }
+      );
+    } catch (error) {
+      console.log(
+        error.response?.data || error.message
+      );
+
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to delete profile image.",
+        {
+          id: toastId,
+          duration: 3000,
+        }
+      );
+    } finally {
+      setDeletingImage(false);
     }
   };
 
@@ -167,7 +245,8 @@ function Profile() {
         name: data.name || "",
         email: data.email || "",
         phone: data.phone || "",
-        preferredCurrency: data.preferredCurrency || "INR",
+        preferredCurrency:
+          data.preferredCurrency || "INR",
         profileId: data.profileId || "",
         profileImage: data.profileImage || "",
         about: data.about || "",
@@ -181,18 +260,23 @@ function Profile() {
         updatedAt: data.updatedAt || "",
       });
 
-      toast.success("Profile updated successfully!", {
-        duration: 3000,
-        style: {
-          borderRadius: "12px",
-          background: "#102a43",
-          color: "#fff",
-          padding: "14px 18px",
-          fontWeight: "600",
-        },
-      });
+      toast.success(
+        "Profile updated successfully!",
+        {
+          duration: 3000,
+          style: {
+            borderRadius: "12px",
+            background: "#102a43",
+            color: "#fff",
+            padding: "14px 18px",
+            fontWeight: "600",
+          },
+        }
+      );
     } catch (error) {
-      console.log(error.response?.data || error.message);
+      console.log(
+        error.response?.data || error.message
+      );
 
       toast.error(
         error.response?.data?.message ||
@@ -241,6 +325,8 @@ function Profile() {
   if (loading) {
     return (
       <AppLayout>
+        <Toaster position="top-right" />
+
         <div className="flex min-h-[400px] items-center justify-center">
           <div className="text-center">
             <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#159a8c]" />
@@ -256,6 +342,15 @@ function Profile() {
 
   return (
     <AppLayout>
+
+      {/* ================= TOAST ================= */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+        }}
+      />
+
       <div className="mx-auto max-w-4xl">
 
         {/* ================= HEADER ================= */}
@@ -269,8 +364,8 @@ function Profile() {
           </h1>
 
           <p className="mt-2 text-sm text-slate-500">
-            Manage your personal information, contact details,
-            profile, and expense preferences.
+            Manage your personal information, contact
+            details, profile, and expense preferences.
           </p>
         </div>
 
@@ -288,53 +383,96 @@ function Profile() {
 
               <div className="-mt-14 flex flex-col items-center gap-4 sm:flex-row sm:items-end">
 
-                {/* PROFILE IMAGE + CAMERA */}
+                {/* PROFILE IMAGE */}
                 <div className="relative">
 
                   {user.profileImage ? (
                     <img
                       src={user.profileImage}
-                      alt={user.name}
+                      alt={user.name || "Profile"}
                       className="h-28 w-28 rounded-full border-4 border-white object-cover shadow-md"
                     />
                   ) : (
                     <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white bg-[#159a8c] text-4xl font-bold text-white shadow-md">
                       {user.name
-                        ? user.name.charAt(0).toUpperCase()
+                        ? user.name
+                            .charAt(0)
+                            .toUpperCase()
                         : "U"}
                     </div>
                   )}
 
                   {/* CAMERA BUTTON */}
                   <label
-                    className={`absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-[#102a43] text-white shadow-md transition hover:bg-[#159a8c] ${
-                      uploadingImage
+                    className={`absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-[#102a43] text-white shadow-md transition ${
+                      uploadingImage || deletingImage
                         ? "cursor-not-allowed opacity-60"
-                        : ""
+                        : "cursor-pointer hover:bg-[#159a8c]"
                     }`}
-                    title="Change profile picture"
+                    title={
+                      uploadingImage
+                        ? "Uploading..."
+                        : deletingImage
+                        ? "Deleting..."
+                        : "Change profile picture"
+                    }
                   >
                     <Camera size={17} />
 
-       <input  type="file"  accept="image/*"
-         onChange={handleImageUpload}  disabled={uploadingImage} className="hidden"  />
-               </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={
+                        uploadingImage ||
+                        deletingImage
+                      }
+                      className="hidden"
+                    />
+                  </label>
 
                 </div>
 
+                {/* PROFILE DETAILS */}
                 <div className="pb-1 text-center sm:text-left">
-                  <h2 className="text-2xl font-bold text-white sm:text-3xl lg:text-4xl">
+
+                  <h2 className="text-2xl font-bold text-[#102a43] sm:text-3xl lg:text-4xl">
                     {user.name || "Your Name"}
                   </h2>
 
                   <p className="mt-2 text-sm text-slate-700">
-                    {user.email || "Email not provided"}
+                    {user.email ||
+                      "Email not provided"}
                   </p>
 
                   <span className="mt-1 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold capitalize text-emerald-600">
                     <span className="h-2 w-2 rounded-full bg-emerald-500" />
                     {user.status || "Active"}
                   </span>
+
+                  {/* DELETE IMAGE BUTTON */}
+                  {user.profileImage && (
+                    <div className="mt-3">
+
+                      <button
+                        type="button"
+                        onClick={handleDeleteImage}
+                        disabled={
+                          deletingImage ||
+                          uploadingImage
+                        }
+                        className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <Trash2 size={15} />
+
+                        {deletingImage
+                          ? "Deleting..."
+                          : "Remove Profile Image"}
+                      </button>
+
+                    </div>
+                  )}
+
                 </div>
 
               </div>
@@ -346,6 +484,7 @@ function Profile() {
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
 
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#159a8c]/10 text-[#159a8c]">
                 <User size={18} />
               </div>
@@ -359,6 +498,7 @@ function Profile() {
                   Update your basic personal details.
                 </p>
               </div>
+
             </div>
 
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
@@ -368,6 +508,7 @@ function Profile() {
                 Full Name
 
                 <div className="relative">
+
                   <User
                     size={17}
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -377,11 +518,15 @@ function Profile() {
                     type="text"
                     value={user.name}
                     onChange={(e) =>
-                      handleChange("name", e.target.value)
+                      handleChange(
+                        "name",
+                        e.target.value
+                      )
                     }
                     className="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-11 pr-4 font-normal outline-none transition focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
                     placeholder="Enter your full name"
                   />
+
                 </div>
               </label>
 
@@ -390,6 +535,7 @@ function Profile() {
                 Email Address
 
                 <div className="relative">
+
                   <Mail
                     size={17}
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -399,11 +545,15 @@ function Profile() {
                     type="email"
                     value={user.email}
                     onChange={(e) =>
-                      handleChange("email", e.target.value)
+                      handleChange(
+                        "email",
+                        e.target.value
+                      )
                     }
                     className="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-11 pr-4 font-normal outline-none transition focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
                     placeholder="Enter your email"
                   />
+
                 </div>
               </label>
 
@@ -412,6 +562,7 @@ function Profile() {
                 Phone Number
 
                 <div className="relative">
+
                   <Phone
                     size={17}
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -421,11 +572,15 @@ function Profile() {
                     type="text"
                     value={user.phone}
                     onChange={(e) =>
-                      handleChange("phone", e.target.value)
+                      handleChange(
+                        "phone",
+                        e.target.value
+                      )
                     }
                     className="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-11 pr-4 font-normal outline-none transition focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
                     placeholder="Enter your phone number"
                   />
+
                 </div>
               </label>
 
@@ -434,6 +589,7 @@ function Profile() {
                 Preferred Currency
 
                 <div className="relative">
+
                   <Wallet
                     size={17}
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -461,6 +617,7 @@ function Profile() {
                       EUR (€)
                     </option>
                   </select>
+
                 </div>
               </label>
 
@@ -471,6 +628,7 @@ function Profile() {
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
 
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#159a8c]/10 text-[#159a8c]">
                 <FileText size={18} />
               </div>
@@ -484,23 +642,29 @@ function Profile() {
                   Tell others a little about yourself.
                 </p>
               </div>
+
             </div>
 
             <textarea
               value={user.about}
               onChange={(e) =>
-                handleChange("about", e.target.value)
+                handleChange(
+                  "about",
+                  e.target.value
+                )
               }
               rows={5}
               placeholder="Write something about yourself..."
               className="mt-6 w-full resize-none rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
             />
+
           </section>
 
           {/* ================= ACCOUNT INFORMATION ================= */}
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
 
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#159a8c]/10 text-[#159a8c]">
                 <ShieldCheck size={18} />
               </div>
@@ -514,6 +678,7 @@ function Profile() {
                   System-generated account information.
                 </p>
               </div>
+
             </div>
 
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
@@ -523,6 +688,7 @@ function Profile() {
                 Profile ID
 
                 <div className="relative">
+
                   <Hash
                     size={17}
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -533,6 +699,7 @@ function Profile() {
                     readOnly
                     className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-100 py-3 pl-11 pr-4 font-mono text-sm outline-none"
                   />
+
                 </div>
               </label>
 
@@ -541,6 +708,7 @@ function Profile() {
                 Account Status
 
                 <div className="relative">
+
                   <ShieldCheck
                     size={17}
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -551,6 +719,7 @@ function Profile() {
                     readOnly
                     className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-100 py-3 pl-11 pr-4 font-normal capitalize outline-none"
                   />
+
                 </div>
               </label>
 
@@ -561,6 +730,7 @@ function Profile() {
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
 
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#159a8c]/10 text-[#159a8c]">
                 <MapPin size={18} />
               </div>
@@ -574,6 +744,7 @@ function Profile() {
                   Update your location information.
                 </p>
               </div>
+
             </div>
 
             <div className="mt-6 grid gap-5 sm:grid-cols-3">
@@ -583,6 +754,7 @@ function Profile() {
                 Landmark
 
                 <div className="relative">
+
                   <MapPin
                     size={17}
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -600,6 +772,7 @@ function Profile() {
                     className="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-11 pr-4 font-normal outline-none transition focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
                     placeholder="Landmark"
                   />
+
                 </div>
               </label>
 
@@ -608,6 +781,7 @@ function Profile() {
                 State
 
                 <div className="relative">
+
                   <MapPin
                     size={17}
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -625,6 +799,7 @@ function Profile() {
                     className="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-11 pr-4 font-normal outline-none transition focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
                     placeholder="State"
                   />
+
                 </div>
               </label>
 
@@ -633,6 +808,7 @@ function Profile() {
                 Country
 
                 <div className="relative">
+
                   <Globe
                     size={17}
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -650,6 +826,7 @@ function Profile() {
                     className="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-11 pr-4 font-normal outline-none transition focus:border-[#159a8c] focus:bg-white focus:ring-4 focus:ring-[#159a8c]/10"
                     placeholder="Country"
                   />
+
                 </div>
               </label>
 
@@ -661,7 +838,9 @@ function Profile() {
 
             <div className="grid gap-5 sm:grid-cols-2">
 
+              {/* Created */}
               <div className="flex items-center gap-3">
+
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-slate-500 shadow-sm">
                   <CalendarDays size={18} />
                 </div>
@@ -675,9 +854,12 @@ function Profile() {
                     {formatDate(user.createdAt)}
                   </p>
                 </div>
+
               </div>
 
+              {/* Updated */}
               <div className="flex items-center gap-3">
+
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-slate-500 shadow-sm">
                   <CalendarDays size={18} />
                 </div>
@@ -691,6 +873,7 @@ function Profile() {
                     {formatDate(user.updatedAt)}
                   </p>
                 </div>
+
               </div>
 
             </div>
@@ -704,7 +887,9 @@ function Profile() {
               disabled={saving}
               className="rounded-xl bg-[#159a8c] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#159a8c]/20 transition hover:bg-[#117d72] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {saving ? "Saving changes..." : "Save changes"}
+              {saving
+                ? "Saving changes..."
+                : "Save changes"}
             </button>
 
           </div>
