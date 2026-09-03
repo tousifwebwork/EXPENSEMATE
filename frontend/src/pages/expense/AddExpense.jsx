@@ -850,24 +850,7 @@ const AddExpense = () => {
 
         </div>
 
-        {/* NOTES */}
-
-        <div className="mt-6">
-
-          <label className="text-sm font-semibold text-[#102a43]">
-            Notes
-          </label>
-
-          <textarea
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            placeholder="Optional notes"
-            rows="3"
-            className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-[#159a8c]"
-          />
-
-        </div>
+        
 
         {/* BUTTONS */}
 
