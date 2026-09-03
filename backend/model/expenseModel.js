@@ -27,10 +27,9 @@ const expenseSchema = new mongoose.Schema(
         percentage: { type: Number },
       },
     ],
-
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     receiptUrl: { type: String, default: "" },
-    notes: { type: String, default: "" },
+    notes: { type: String, default: "" }, 
   },
   { timestamps: true }
 );

@@ -1,5 +1,4 @@
- 
-import React, { useEffect, useState } from "react";
+ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import AppLayout from "../../components/AppLayout";
@@ -25,6 +24,11 @@ const EditExpense = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Receipt states
+  const [newReceipt, setNewReceipt] = useState(null);
+  const [receiptPreview, setReceiptPreview] = useState(null);
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -142,9 +146,9 @@ const EditExpense = () => {
   const selectAllParticipants = () => {
     if (!group?.members) return;
 
-    const allMemberIds = group.members.map(
-      (member) => member.user._id
-    );
+     const allMemberIds = group.members.map(
+  (member) => member.user?._id || member.user
+);
 
     setFormData((prev) => ({
       ...prev,
@@ -181,6 +185,33 @@ const EditExpense = () => {
   };
 
   // =========================
+  // RECEIPT CHANGE
+  // =========================
+
+  const handleReceiptChange = (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Receipt image must be less than 5MB");
+      e.target.value = "";
+      return;
+    }
+
+    setNewReceipt(file);
+
+    const previewUrl = URL.createObjectURL(file);
+    setReceiptPreview(previewUrl);
+  };
+
+  // =========================
   // BUILD SHARES
   // =========================
 
@@ -205,7 +236,6 @@ const EditExpense = () => {
       }));
     }
 
-    // Full payment does not use shares
     return [];
   };
 
@@ -221,10 +251,7 @@ const EditExpense = () => {
       return;
     }
 
-    if (
-      !formData.amount ||
-      Number(formData.amount) <= 0
-    ) {
+    if (!formData.amount || Number(formData.amount) <= 0) {
       toast.error("Enter a valid amount");
       return;
     }
@@ -234,7 +261,6 @@ const EditExpense = () => {
       return;
     }
 
-    // Participants are not required for fullPayment
     if (
       formData.splitType !== "fullPayment" &&
       formData.participants.length === 0
@@ -243,7 +269,10 @@ const EditExpense = () => {
       return;
     }
 
-    // Validate exact split
+    // =========================
+    // VALIDATE EXACT SPLIT
+    // =========================
+
     if (formData.splitType === "exact") {
       const totalExact = formData.participants.reduce(
         (total, userId) =>
@@ -263,7 +292,10 @@ const EditExpense = () => {
       }
     }
 
-    // Validate percentage split
+    // =========================
+    // VALIDATE PERCENTAGE
+    // =========================
+
     if (formData.splitType === "percentage") {
       const totalPercentage = formData.participants.reduce(
         (total, userId) =>
@@ -273,9 +305,7 @@ const EditExpense = () => {
       );
 
       if (Math.round(totalPercentage * 100) !== 10000) {
-        toast.error(
-          "Percentages must add up to 100%"
-        );
+        toast.error("Percentages must add up to 100%");
         return;
       }
     }
@@ -292,17 +322,64 @@ const EditExpense = () => {
 
       const shares = buildShares();
 
-      const expenseData = {
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        amount: Number(formData.amount),
-        category: formData.category,
-        date: formData.date,
-        paidBy: formData.paidBy,
-        splitType: formData.splitType,
-        shares,
-        notes: formData.notes.trim(),
-      };
+      // =========================
+      // FORM DATA
+      // =========================
+
+      const expenseData = new FormData();
+
+      expenseData.append(
+        "title",
+        formData.title.trim()
+      );
+
+      expenseData.append(
+        "description",
+        formData.description.trim()
+      );
+
+      expenseData.append(
+        "amount",
+        Number(formData.amount)
+      );
+
+      expenseData.append(
+        "category",
+        formData.category
+      );
+
+      expenseData.append(
+        "date",
+        formData.date
+      );
+
+      expenseData.append(
+        "paidBy",
+        formData.paidBy
+      );
+
+      expenseData.append(
+        "splitType",
+        formData.splitType
+      );
+
+      expenseData.append(
+        "shares",
+        JSON.stringify(shares)
+      );
+
+      expenseData.append(
+        "notes",
+        formData.notes.trim()
+      );
+
+      // Add new receipt only if user selected one
+      if (newReceipt) {
+        expenseData.append(
+  "receiptPhoto",
+  newReceipt
+);
+      }
 
       await updateExpense(
         expenseId,
@@ -310,10 +387,14 @@ const EditExpense = () => {
         token
       );
 
-      toast.success("Expense updated successfully!");
+      toast.success(
+        "Expense updated successfully!"
+      );
 
       setTimeout(() => {
-        navigate(`/groups/${groupId}/expenses`);
+        navigate(
+          `/groups/${groupId}/expenses`
+        );
       }, 800);
     } catch (err) {
       console.log(err);
@@ -348,12 +429,19 @@ const EditExpense = () => {
         return;
       }
 
-      await deleteExpense(expenseId, token);
+      await deleteExpense(
+        expenseId,
+        token
+      );
 
-      toast.success("Expense deleted successfully!");
+      toast.success(
+        "Expense deleted successfully!"
+      );
 
       setTimeout(() => {
-        navigate(`/groups/${groupId}/expenses`);
+        navigate(
+          `/groups/${groupId}/expenses`
+        );
       }, 800);
     } catch (err) {
       console.log(err);
@@ -404,7 +492,9 @@ const EditExpense = () => {
 
       <button
         onClick={() =>
-          navigate(`/groups/${groupId}/expenses`)
+          navigate(
+            `/groups/${groupId}/expenses`
+          )
         }
         className="mb-5 text-sm font-semibold text-[#159a8c]"
       >
@@ -431,7 +521,7 @@ const EditExpense = () => {
 
       <form
         onSubmit={handleSubmit}
-        className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+        className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6"
       >
 
         {/* TITLE + AMOUNT */}
@@ -556,8 +646,8 @@ const EditExpense = () => {
 
             {group.members?.map((member) => (
               <option
-                key={member.user._id}
-                value={member.user._id}
+                key={member.user?._id || member.user}
+  value={member.user?._id || member.user}
               >
                 {member.user.name}
               </option>
@@ -605,7 +695,6 @@ const EditExpense = () => {
           <div className="mt-6">
 
             <div className="flex items-center justify-between">
-
               <label className="text-sm font-semibold text-[#102a43]">
                 Participants
               </label>
@@ -617,17 +706,18 @@ const EditExpense = () => {
               >
                 Select All
               </button>
-
             </div>
 
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
 
               {group.members?.map((member) => {
 
-                const userId = member.user._id;
+               const userId = member.user?._id || member.user;
 
                 const selected =
-                  formData.participants.includes(userId);
+                  formData.participants.includes(
+                    userId
+                  );
 
                 return (
                   <div
@@ -641,7 +731,9 @@ const EditExpense = () => {
                         type="checkbox"
                         checked={selected}
                         onChange={() =>
-                          handleParticipantChange(userId)
+                          handleParticipantChange(
+                            userId
+                          )
                         }
                         className="h-4 w-4 accent-[#159a8c]"
                       />
@@ -667,7 +759,9 @@ const EditExpense = () => {
                           min="0"
                           step="0.01"
                           value={
-                            formData.exactAmounts[userId] ?? ""
+                            formData.exactAmounts[
+                              userId
+                            ] ?? ""
                           }
                           onChange={(e) =>
                             handleExactAmountChange(
@@ -683,7 +777,8 @@ const EditExpense = () => {
                     {/* PERCENTAGE */}
 
                     {selected &&
-                      formData.splitType === "percentage" && (
+                      formData.splitType ===
+                        "percentage" && (
                         <div className="relative mt-3">
 
                           <input
@@ -692,7 +787,9 @@ const EditExpense = () => {
                             max="100"
                             step="0.01"
                             value={
-                              formData.percentages[userId] ?? ""
+                              formData.percentages[
+                                userId
+                              ] ?? ""
                             }
                             onChange={(e) =>
                               handlePercentageChange(
@@ -722,7 +819,8 @@ const EditExpense = () => {
 
         {/* FULL PAYMENT SUMMARY */}
 
-        {formData.splitType === "fullPayment" &&
+        {formData.splitType ===
+          "fullPayment" &&
           Number(formData.amount) > 0 && (
             <div className="mt-5 rounded-xl bg-slate-50 p-4">
 
@@ -731,23 +829,32 @@ const EditExpense = () => {
               </p>
 
               <p className="mt-1 text-sm text-slate-500">
+
                 <span className="font-semibold text-[#159a8c]">
                   {group.members?.find(
                     (member) =>
-                      member.user._id === formData.paidBy
-                  )?.user.name || "Selected member"}
+  String(member.user?._id || member.user) ===
+  String(formData.paidBy)
+                  )?.user.name ||
+                    "Selected member"}
                 </span>{" "}
+
                 paid the full{" "}
+
                 <span className="font-semibold">
-                  {Number(formData.amount).toFixed(2)}
+                  {Number(
+                    formData.amount
+                  ).toFixed(2)}
                 </span>{" "}
+
                 amount.
+
               </p>
 
             </div>
           )}
 
-        {/* SPLIT SUMMARY */}
+        {/* EQUAL SPLIT SUMMARY */}
 
         {formData.splitType === "equal" &&
           formData.participants.length > 0 &&
@@ -759,17 +866,197 @@ const EditExpense = () => {
               </p>
 
               <p className="mt-1 text-sm text-slate-500">
+
                 Each participant will owe approximately{" "}
+
                 <span className="font-semibold text-[#159a8c]">
                   {(
                     Number(formData.amount) /
                     formData.participants.length
                   ).toFixed(2)}
                 </span>
+
               </p>
 
             </div>
           )}
+
+        {/* =========================
+            RECEIPT IMAGE
+        ========================= */}
+
+        <div className="mt-6">
+
+          <label className="text-sm font-semibold text-[#102a43]">
+            Receipt Image
+          </label>
+
+          <p className="mt-1 text-xs text-slate-500">
+            Upload a new receipt image to replace the current one.
+          </p>
+
+          <div className="mt-3">
+
+            {/* NEW RECEIPT SELECTED */}
+
+            {newReceipt && receiptPreview ? (
+              <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+
+                <div className="relative">
+
+                  <img
+                    src={receiptPreview}
+                    alt="New receipt preview"
+                    className="h-56 w-full object-contain bg-slate-100"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewReceipt(null);
+
+                      if (receiptPreview) {
+                        URL.revokeObjectURL(
+                          receiptPreview
+                        );
+                      }
+
+                      setReceiptPreview(null);
+                    }}
+                    className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/70 text-xl text-white hover:bg-black"
+                    title="Remove selected image"
+                  >
+                    ×
+                  </button>
+
+                </div>
+
+                <div className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
+
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-[#102a43]">
+                      {newReceipt.name}
+                    </p>
+
+                    <p className="text-xs text-slate-500">
+                      New receipt selected
+                    </p>
+                  </div>
+
+                  <label
+                    htmlFor="receiptUrl"
+                    className="cursor-pointer rounded-lg border border-slate-300 px-4 py-2 text-center text-sm font-semibold text-slate-600 hover:bg-slate-100"
+                  >
+                    Change Image
+
+                    <input
+                      id="receiptUrl"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleReceiptChange}
+                      className="hidden"
+                    />
+                  </label>
+
+                </div>
+
+              </div>
+            ) : expense.receiptUrl ? (
+
+              /* EXISTING RECEIPT */
+
+              <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+
+                <div className="relative">
+
+                  <img
+                    src={expense.receiptUrl}
+                    alt="Current expense receipt"
+                    className="h-56 w-full object-contain bg-slate-100"
+                  />
+
+                  {/* EYE BUTTON */}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelectedReceipt(
+                        expense.receiptUrl
+                      )
+                    }
+                    className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/70 text-lg text-white shadow-lg hover:bg-black"
+                    title="View receipt"
+                  >
+                    👁
+                  </button>
+
+                </div>
+
+                <div className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
+
+                  <div>
+                    <p className="text-sm font-semibold text-[#102a43]">
+                      Current Receipt
+                    </p>
+
+                    <p className="text-xs text-slate-500">
+                      Select a new image below to replace it.
+                    </p>
+                  </div>
+
+                  <label
+                    htmlFor="receiptUrl"
+                    className="cursor-pointer rounded-lg border border-[#159a8c] px-4 py-2 text-center text-sm font-semibold text-[#159a8c] hover:bg-[#159a8c]/5"
+                  >
+                    Change Image
+
+                    <input
+                      id="receiptUrl"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleReceiptChange}
+                      className="hidden"
+                    />
+                  </label>
+
+                </div>
+
+              </div>
+
+            ) : (
+
+              /* NO RECEIPT */
+
+              <label
+                htmlFor="receiptUrl"
+                className="flex min-h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center transition hover:border-[#159a8c] hover:bg-[#159a8c]/5"
+              >
+
+                <span className="text-4xl text-slate-400">
+                  ＋
+                </span>
+
+                <p className="mt-2 text-sm font-semibold text-slate-600">
+                  Add Receipt Image
+                </p>
+
+                <p className="mt-1 text-xs text-slate-400">
+                  PNG, JPG, JPEG up to 5MB
+                </p>
+
+                <input
+                  id="receiptUrl"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleReceiptChange}
+                  className="hidden"
+                />
+
+              </label>
+            )}
+
+          </div>
+        </div>
 
         {/* NOTES */}
 
@@ -814,7 +1101,9 @@ const EditExpense = () => {
             <button
               type="button"
               onClick={() =>
-                navigate(`/groups/${groupId}/expenses`)
+                navigate(
+                  `/groups/${groupId}/expenses`
+                )
               }
               className="rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-600 hover:bg-slate-100"
             >
@@ -836,6 +1125,49 @@ const EditExpense = () => {
         </div>
 
       </form>
+
+      {/* =========================
+          RECEIPT VIEW MODAL
+      ========================= */}
+
+      {selectedReceipt && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-3 sm:p-5"
+          onClick={() =>
+            setSelectedReceipt(null)
+          }
+        >
+
+          <div
+            className="relative flex max-h-[95vh] w-full max-w-4xl items-center justify-center overflow-hidden rounded-xl bg-white p-2 shadow-2xl sm:p-3"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+
+            {/* CLOSE */}
+
+            <button
+              type="button"
+              onClick={() =>
+                setSelectedReceipt(null)
+              }
+              className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/70 text-xl text-white transition hover:bg-black"
+              title="Close"
+            >
+              ×
+            </button>
+
+            <img
+              src={selectedReceipt}
+              alt="Expense receipt large preview"
+              className="max-h-[90vh] max-w-full rounded-lg object-contain"
+            />
+
+          </div>
+
+        </div>
+      )}
 
     </AppLayout>
   );

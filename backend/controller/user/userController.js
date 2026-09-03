@@ -105,8 +105,7 @@ exports.updateProfileImage = async (req, res) => {
     });
   }
 };
-// DELETE PROFILE
-// DELETE PROFILE IMAGE
+ // DELETE PROFILE IMAGE
 exports.deleteProfileImage = async (req, res) => {
   try {
     const userId = req.user.userId;
