@@ -73,23 +73,22 @@ exports.getUserById = async (req, res) => {
 
  
 exports.updateProfileImage = async (req, res) => {
-  try {
-    console.log("FILE:", req.file);
-
+  try { 
     if (!req.file) {
       return res.status(400).json({
         success: false,
         message: "Profile image is required",
       });
-    }
+    } 
+
+    const { path } = req.file;
+ 
 
     const userId = req.user.userId;
 
     const user = await User.findByIdAndUpdate(
       userId,
-      {
-        profileImage: req.file.path,
-      },
+      { profileImage: path },
       { new: true }
     ).select("-password");
 
@@ -98,13 +97,8 @@ exports.updateProfileImage = async (req, res) => {
       message: "Profile image updated successfully",
       user,
     });
+
   } catch (error) {
-    console.log("PROFILE IMAGE ERROR:", error);
-      console.error("PROFILE IMAGE ERROR:", error);
-  console.error("ERROR MESSAGE:", error.message);
-  console.error("ERROR STACK:", error.stack);
-
-
     res.status(500).json({
       success: false,
       message: error.message,
