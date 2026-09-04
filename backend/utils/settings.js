@@ -23,6 +23,7 @@ function setup(app) {
   app.use("/api/groups", require("../router/group/groupRoutes"));
   app.use("/api/expenses", require("../router/expense/expenseRoutes"));
   app.use("/api/balance", require("../router/balance/balanceRoutes"));
+  app.use("/api/settlements", require("../router/settlement/settlementRoutes"));
 }
 
 module.exports = setup;

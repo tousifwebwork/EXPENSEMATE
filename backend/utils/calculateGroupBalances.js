@@ -1,84 +1,59 @@
 const Expense = require("../model/expenseModel");
+const Settlement = require("../model/settlementModel"); // ✅ new import
 
-// Calculates each member's net balance, total paid, and total spent for a group
 async function calculateGroupBalances(group) {
   const balances = {};
 
-  // Seed with current group members
   group.members.forEach((member) => {
-    const userId = member.user._id
-      ? member.user._id.toString()
-      : member.user.toString();
-
-    balances[userId] = {
-      user: member.user,
-      balance: 0,
-      totalPaid: 0,
-      totalSpent: 0,
-    };
+    const userId = member.user._id ? member.user._id.toString() : member.user.toString();
+    balances[userId] = { user: member.user, balance: 0, totalPaid: 0, totalSpent: 0 };
   });
 
+  // ---- EXPENSES (unchanged) ----
   const expenses = await Expense.find({ group: group._id })
     .populate("paidBy", "name profileImage")
     .populate("shares.user", "name profileImage");
 
   expenses.forEach((expense) => {
-    const payerId = expense.paidBy._id
-      ? expense.paidBy._id.toString()
-      : expense.paidBy.toString();
-
-    // Make sure payer exists in balances
+    const payerId = expense.paidBy._id ? expense.paidBy._id.toString() : expense.paidBy.toString();
     if (!balances[payerId]) {
-      balances[payerId] = {
-        user: expense.paidBy,
-        balance: 0,
-        totalPaid: 0,
-        totalSpent: 0,
-      };
+      balances[payerId] = { user: expense.paidBy, balance: 0, totalPaid: 0, totalSpent: 0 };
     }
-
-    // Payer always gets credit for the amount they paid
     balances[payerId].balance += expense.amount;
     balances[payerId].totalPaid += expense.amount;
 
-    // FULL PAYMENT
-    if (expense.splitType === "fullPayment") {
-      group.members.forEach((member) => {
-        const memberId = member.user._id
-          ? member.user._id.toString()
-          : member.user.toString();
-
-        // Everyone except payer owes the full amount
-        if (memberId !== payerId) {
-          balances[memberId].balance -= expense.amount;
-          balances[memberId].totalSpent += expense.amount;
-        }
-      });
-    }
-
-    // NORMAL SPLITS
-    else {
-      expense.shares.forEach((share) => {
-        const userId = share.user._id
-          ? share.user._id.toString()
-          : share.user.toString();
-
-        if (!balances[userId]) {
-          balances[userId] = {
-            user: share.user,
-            balance: 0,
-            totalPaid: 0,
-            totalSpent: 0,
-          };
-        }
-
-        balances[userId].balance -= share.amount;
-        balances[userId].totalSpent += share.amount;
-      });
-    }
+    expense.shares.forEach((share) => {
+      const userId = share.user._id ? share.user._id.toString() : share.user.toString();
+      if (!balances[userId]) {
+        balances[userId] = { user: share.user, balance: 0, totalPaid: 0, totalSpent: 0 };
+      }
+      balances[userId].balance -= share.amount;
+      balances[userId].totalSpent += share.amount;
+    });
   });
 
-  // Round to 2 decimals
+  // ---- SETTLEMENTS (new) ----
+  const settlements = await Settlement.find({ group: group._id })
+    .populate("payer", "name profileImage")
+    .populate("receiver", "name profileImage");
+
+  settlements.forEach((settlement) => {
+    const payerId = settlement.payer._id.toString();
+    const receiverId = settlement.receiver._id.toString();
+
+    // Payer already owed money (negative balance) — paying reduces that debt (moves toward 0, i.e., increases)
+    if (!balances[payerId]) {
+      balances[payerId] = { user: settlement.payer, balance: 0, totalPaid: 0, totalSpent: 0 };
+    }
+    balances[payerId].balance += settlement.amount;
+
+    // Receiver was owed money (positive balance) — receiving payment reduces that credit (moves toward 0, i.e., decreases)
+    if (!balances[receiverId]) {
+      balances[receiverId] = { user: settlement.receiver, balance: 0, totalPaid: 0, totalSpent: 0 };
+    }
+    balances[receiverId].balance -= settlement.amount;
+  });
+
   return Object.values(balances).map((b) => ({
     ...b,
     balance: Math.round(b.balance * 100) / 100,
