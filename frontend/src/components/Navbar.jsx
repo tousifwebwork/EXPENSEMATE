@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import { logout } from '../config/auth/authAPI.js'
 import { getProfile } from '../config/user/userAPI.js'
 import toast from 'react-hot-toast'
@@ -17,6 +18,7 @@ import {
   User as UserIcon,
   Shield,
   Sparkles,
+  PieChart,
 } from 'lucide-react'
 
 function Navbar() {
@@ -122,6 +124,11 @@ function Navbar() {
       label: 'Settlements',
       icon: Handshake,
     },
+    {
+      to: '/dashboard',
+      label: 'Dashboard',
+      icon: PieChart,
+    },
   ]
 
   const getInitials = (name) => {
@@ -151,7 +158,7 @@ function Navbar() {
             to="/groups"
             className="flex items-center gap-3 group shrink-0 transition-opacity hover:opacity-90"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] text-white font-bold text-base shadow-sm shadow-[#159a8c]/25 transition-transform duration-200 group-hover:scale-105">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-[#159a8c] to-[#0e6d63] text-white font-bold text-base shadow-sm shadow-[#159a8c]/25 transition-transform duration-200 group-hover:scale-105">
               ₹
             </div>
             <div className="flex flex-col">
@@ -188,9 +195,10 @@ function Navbar() {
           {/* Right Area: Profile & Actions */}
           <div className="hidden md:flex items-center gap-3">
             <div className="relative" ref={profileDropdownRef}>
-              <button
+              <motion.button
                 type="button"
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                whileTap={{ scale: 0.98 }}
                 className="flex items-center gap-2.5 p-1.5 pl-2.5 rounded-xl border border-stone-200/80 bg-white hover:bg-stone-50 hover:border-stone-300 transition-all duration-150 cursor-pointer text-left"
                 aria-label="User profile menu"
                 aria-expanded={profileMenuOpen}
@@ -207,7 +215,7 @@ function Navbar() {
                   </div>
                 )}
 
-                <div className="hidden lg:block max-w-[120px] truncate">
+                <div className="hidden lg:block max-w-30 truncate">
                   <div className="text-xs font-semibold text-[#1a1a1a] truncate">
                     {user.name || 'Account'}
                   </div>
@@ -218,11 +226,18 @@ function Navbar() {
                     profileMenuOpen ? 'rotate-180 text-stone-700' : ''
                   }`}
                 />
-              </button>
+              </motion.button>
 
               {/* Profile Dropdown Menu */}
-              {profileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-64 rounded-2xl border border-stone-200 bg-white p-2 shadow-xl shadow-stone-900/10 animate-scale-in z-50">
+              <AnimatePresence>
+                {profileMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                    transition={{ duration: 0.16, ease: 'easeOut' }}
+                    className="absolute right-0 mt-2 w-64 rounded-2xl border border-stone-200 bg-white p-2 shadow-xl shadow-stone-900/10 z-50 origin-top-right"
+                  >
                   {/* User info header */}
                   <div className="px-3 py-2.5 border-b border-stone-100 mb-1">
                     <div className="text-sm font-bold text-[#1a1a1a] truncate">
@@ -259,29 +274,38 @@ function Navbar() {
                       <span>Log Out</span>
                     </button>
                   </div>
-                </div>
-              )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
           {/* Mobile Menu Toggle Button */}
           <div className="flex md:hidden items-center gap-2">
-            <button
+            <motion.button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              whileTap={{ scale: 0.94 }}
               className="p-2 rounded-xl border border-stone-200 text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer"
               aria-label="Toggle navigation menu"
               aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+            </motion.button>
           </div>
 
         </div>
       </div>
 
       {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-stone-200 bg-white px-4 pt-3 pb-6 space-y-4 shadow-xl animate-fade-in-down">
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="md:hidden border-t border-stone-200 bg-white px-4 pt-3 pb-6 space-y-4 shadow-xl overflow-hidden"
+          >
           {/* Mobile Profile Card */}
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-stone-50 border border-stone-200/80">
             {user.profileImage ? (
@@ -352,8 +376,9 @@ function Navbar() {
               <span>Log Out</span>
             </button>
           </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }

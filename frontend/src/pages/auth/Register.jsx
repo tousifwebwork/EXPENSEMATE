@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { register } from '../../config/auth/authAPI'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff, ArrowRight, Shield, Sparkles, CheckCircle2, Lock, Mail, User } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 function Register() {
   const navigate = useNavigate()
@@ -47,7 +48,12 @@ function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafaf9] flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className="min-h-screen bg-[#fafaf9] flex items-center justify-center p-4 sm:p-6 lg:p-8"
+    >
       <div className="w-full max-w-5xl grid lg:grid-cols-12 overflow-hidden rounded-3xl bg-white border border-stone-200/80 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.07)]">
 
         {/* Left Side - Brand & Editorial Panel */}
@@ -260,7 +266,7 @@ function Register() {
         </div>
 
       </div>
-    </div>
+    </motion.div>
   )
 }
 

@@ -11,6 +11,7 @@ import {
   Calendar,
   Users,
 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 const formatINR = (amount) =>
   `${amount < 0 ? '-' : ''}₹${Math.abs(amount).toLocaleString('en-IN')}`
@@ -74,12 +75,20 @@ function Expenses() {
         </div>
 
         {/* ================= EXPENSES LIST ================= */}
-        <section className="overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-sm">
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12, duration: 0.3 }}
+          className="overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-sm"
+        >
           {visibleExpenses.length ? (
             <div className="divide-y divide-stone-100">
               {visibleExpenses.map((expense, index) => (
-                <article
+                <motion.article
                   key={expense.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.04, duration: 0.25 }}
                   className="flex items-center justify-between gap-4 px-6 sm:px-8 py-6 hover:bg-stone-50/50 transition-colors"
                   style={{
                     animationDelay: `${index * 30}ms`,
@@ -132,7 +141,7 @@ function Expenses() {
                       </div>
                     )}
                   </div>
-                </article>
+                </motion.article>
               ))}
             </div>
           ) : (
@@ -148,7 +157,7 @@ function Expenses() {
               </p>
             </div>
           )}
-        </section>
+        </motion.section>
       </div>
     </AppLayout>
   )

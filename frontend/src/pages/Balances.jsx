@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Loader2,
 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 const Balances = () => {
   const navigate = useNavigate()
@@ -192,7 +193,12 @@ const Balances = () => {
             {/* SUMMARY CARDS */}
             <div className="grid gap-5 sm:grid-cols-3">
               {/* Total Paid */}
-              <div className="rounded-2xl border border-stone-200/80 bg-gradient-to-br from-emerald-50/50 to-white p-6 shadow-sm">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.28 }}
+                className="rounded-2xl border border-stone-200/80 bg-gradient-to-br from-emerald-50/50 to-white p-6 shadow-sm"
+              >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
                     <TrendingUp className="w-5 h-5" />
@@ -204,10 +210,15 @@ const Balances = () => {
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-emerald-700">
                   ₹{totalPaid.toFixed(2)}
                 </h2>
-              </div>
+              </motion.div>
 
               {/* Total Spent */}
-              <div className="rounded-2xl border border-stone-200/80 bg-gradient-to-br from-amber-50/50 to-white p-6 shadow-sm">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.06, duration: 0.28 }}
+                className="rounded-2xl border border-stone-200/80 bg-gradient-to-br from-amber-50/50 to-white p-6 shadow-sm"
+              >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
                     <TrendingDown className="w-5 h-5" />
@@ -219,10 +230,15 @@ const Balances = () => {
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-amber-700">
                   ₹{totalSpent.toFixed(2)}
                 </h2>
-              </div>
+              </motion.div>
 
               {/* Members */}
-              <div className="rounded-2xl border border-stone-200/80 bg-gradient-to-br from-blue-50/50 to-white p-6 shadow-sm">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.12, duration: 0.28 }}
+                className="rounded-2xl border border-stone-200/80 bg-gradient-to-br from-blue-50/50 to-white p-6 shadow-sm"
+              >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
                     <Users className="w-5 h-5" />
@@ -234,7 +250,7 @@ const Balances = () => {
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-blue-700">
                   {balances.length}
                 </h2>
-              </div>
+              </motion.div>
             </div>
 
             {/* MEMBER BALANCES */}

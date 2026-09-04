@@ -25,6 +25,7 @@ import {
   FolderPlus,
   Compass,
 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 const Groups = () => {
   const [groupInfo, setGroupInfo] = useState({
@@ -332,8 +333,11 @@ const Groups = () => {
               : 'GP'
 
             return (
-              <div
+              <motion.div
                 key={group._id}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.06, duration: 0.3 }}
                 className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-stone-200/80 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:border-stone-300"
                 style={{
                   animationDelay: `${index * 50}ms`,
@@ -428,7 +432,7 @@ const Groups = () => {
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
-              </div>
+              </motion.div>
             )
           })}
         </div>

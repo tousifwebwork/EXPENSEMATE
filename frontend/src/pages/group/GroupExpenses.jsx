@@ -32,6 +32,7 @@ import {
   Wallet,
   FileText,
 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 const GroupExpenses = () => {
   const { groupId } = useParams()
@@ -602,8 +603,11 @@ const GroupExpenses = () => {
           ) : (
             <div className="space-y-5">
               {expenses.map((expense, index) => (
-                <article
+                <motion.article
                   key={expense._id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.04, duration: 0.28 }}
                   className="rounded-3xl border border-stone-200/80 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
                   style={{ animationDelay: `${index * 30}ms` }}
                 >
@@ -826,7 +830,7 @@ const GroupExpenses = () => {
                       </button>
                     </div>
                   </div>
-                </article>
+                </motion.article>
               ))}
             </div>
           )}
@@ -837,12 +841,18 @@ const GroupExpenses = () => {
           RECEIPT MODAL
       ========================= */}
       {selectedReceipt && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/80 backdrop-blur-sm p-4 animate-fade-in"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.18 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/80 backdrop-blur-sm p-4"
           onClick={() => setSelectedReceipt(null)}
         >
-          <div
-            className="relative max-h-[95vh] w-full max-w-4xl overflow-hidden rounded-3xl bg-white p-3 shadow-2xl animate-scale-in"
+          <motion.div
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="relative max-h-[95vh] w-full max-w-4xl overflow-hidden rounded-3xl bg-white p-3 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -858,8 +868,8 @@ const GroupExpenses = () => {
               alt="Receipt preview"
               className="max-h-[90vh] max-w-full rounded-2xl object-contain mx-auto"
             />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
     </AppLayout>
   )

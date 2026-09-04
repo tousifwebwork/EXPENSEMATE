@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { MotionConfig } from 'framer-motion'
 
 import Login from './pages/auth/Login.jsx'
 import Register from './pages/auth/Register.jsx'
@@ -16,10 +17,12 @@ import SettlementSuggestions from './pages/SettlementSuggestions.jsx'
 
 import Protected from './pages/protected/Protected.jsx'
 import ForgotPassword from './pages/auth/ForgotPassword.jsx'
+import Dashboard from './pages/Dashboard.jsx'
 
 function App() {
   return (
-    <Routes>
+    <MotionConfig reducedMotion="user">
+      <Routes>
 
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
@@ -34,6 +37,7 @@ function App() {
         {/* Groups */}
         <Route path="/groups"  element={<Groups />} />
         <Route  path="/groups/:groupId" element={<ViewGroup />} />
+        <Route  path="/dashboard" element={<Dashboard />}/>
 
         {/* Group Expenses */}
         <Route path="/groups/:groupId/expenses" element={<GroupExpenses />}/>
@@ -56,7 +60,8 @@ function App() {
 
       </Route>
 
-    </Routes>
+      </Routes>
+    </MotionConfig>
   )
 }
 

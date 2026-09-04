@@ -29,6 +29,7 @@ import {
   CheckCircle2,
   Loader2,
 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 const SEARCH_DEBOUNCE_MS = 400
 
@@ -410,9 +411,12 @@ function Friends() {
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
-                {searchResults.map((user) => (
-                  <article
+                {searchResults.map((user, index) => (
+                  <motion.article
                     key={user._id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.25 }}
                     className="flex items-center justify-between gap-4 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -432,7 +436,7 @@ function Friends() {
                     </div>
 
                     {renderSearchAction(user)}
-                  </article>
+                  </motion.article>
                 ))}
               </div>
             )}
@@ -467,13 +471,16 @@ function Friends() {
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
-              {incomingRequests.map((request) => {
+              {incomingRequests.map((request, index) => {
                 const user = request.sender || request.user || request.from
                 const busy = isProcessing(request._id)
 
                 return (
-                  <article
+                  <motion.article
                     key={request._id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.25 }}
                     className="rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50/50 to-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
                   >
                     <div className="flex items-center gap-3">
@@ -519,7 +526,7 @@ function Friends() {
                         <span>Decline</span>
                       </button>
                     </div>
-                  </article>
+                  </motion.article>
                 )
               })}
             </div>
@@ -554,13 +561,16 @@ function Friends() {
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
-              {outgoingRequests.map((request) => {
+              {outgoingRequests.map((request, index) => {
                 const user = request.receiver || request.user || request.to
                 const busy = isProcessing(request._id)
 
                 return (
-                  <article
+                  <motion.article
                     key={request._id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.25 }}
                     className="flex items-center justify-between gap-4 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -591,7 +601,7 @@ function Friends() {
                       )}
                       <span>{busy ? 'Cancelling...' : 'Cancel'}</span>
                     </button>
-                  </article>
+                  </motion.article>
                 )
               })}
             </div>
@@ -643,12 +653,15 @@ function Friends() {
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {friends.map((friend) => {
+              {friends.map((friend, index) => {
                 const busy = isProcessing(friend._id)
 
                 return (
-                  <article
+                  <motion.article
                     key={friend._id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.25 }}
                     className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
                   >
                     <div className="flex items-center gap-3 mb-4">
@@ -689,7 +702,7 @@ function Friends() {
                         <span>{busy ? 'Removing...' : 'Remove'}</span>
                       </button>
                     </div>
-                  </article>
+                  </motion.article>
                 )
               })}
             </div>
