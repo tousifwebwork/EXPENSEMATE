@@ -1,5 +1,5 @@
 const express = require("express");
-const setup = require("../utils/settings");
+const setup = require("./utils/settings");
 
 const app = express();
 
