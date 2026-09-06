@@ -420,7 +420,7 @@ function Friends() {
                     className="flex items-center justify-between gap-4 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] text-sm font-bold text-white shadow-sm">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#159a8c] to-[#0e6d63] text-sm font-bold text-white shadow-sm">
                         {getInitials(user.name)}
                       </div>
 

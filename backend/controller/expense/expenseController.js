@@ -117,7 +117,7 @@ exports.createExpense = async (req, res) => {
     }
 
     // Validate participants
-    if (splitType !== "fullPayment") {
+    if (splitType !== "fullPayment" && splitType !== "none") {
       const invalidParticipant = shares.find(
         (share) =>
           !share.user ||
@@ -227,6 +227,11 @@ exports.createExpense = async (req, res) => {
       finalShares = [];
     }
 
+    // PERSONAL CONTRIBUTION
+    else if (splitType === "none") {
+      finalShares = [];
+    }
+
     // =========================
     // INVALID SPLIT
     // =========================
@@ -304,51 +309,60 @@ exports.getGroupExpenses = async (req, res) => {
   try {
     const userId = req.user.userId;
     const { groupId } = req.params;
+    const {
+      search,       // text search on title/description/notes
+      category,
+      payer,
+      participant,
+      splitType,
+      startDate,
+      endDate,
+      sortBy,       // "amount" | "date" | "category" | "updatedAt"
+      sortOrder,    // "asc" | "desc"
+    } = req.query;
 
     const group = await Group.findById(groupId);
-
     if (!group) {
-      return res.status(404).json({
-        success: false,
-        message: "Group not found",
-      });
+      return res.status(404).json({ success: false, message: "Group not found" });
     }
-
     if (!getGroupMembership(group, userId)) {
-      return res.status(403).json({
-        success: false,
-        message:
-          "You are not a member of this group",
-      });
+      return res.status(403).json({ success: false, message: "You are not a member of this group" });
     }
 
-    const expenses = await Expense.find({
-      group: groupId,
-    })
-      .populate(
-        "paidBy",
-        "name profileImage"
-      )
-      .populate(
-        "shares.user",
-        "name profileImage"
-      )
-      .sort({ date: -1 });
+    // ---- BUILD DYNAMIC QUERY ----
+    const query = { group: groupId };
 
-    return res.status(200).json({
-      success: true,
-      expenses,
-    });
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { notes: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (category) query.category = category;
+    if (payer) query.paidBy = payer;
+    if (participant) query["shares.user"] = participant;
+    if (splitType) query.splitType = splitType;
+
+    if (startDate || endDate) {
+      query.date = {};
+      if (startDate) query.date.$gte = new Date(startDate);
+      if (endDate) query.date.$lte = new Date(endDate);
+    }
+
+    // ---- BUILD SORT ----
+    const sortField = ["amount", "date", "category", "updatedAt"].includes(sortBy) ? sortBy : "date";
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
+
+    const expenses = await Expense.find(query)
+      .populate("paidBy", "name profileImage")
+      .populate("shares.user", "name profileImage")
+      .sort({ [sortField]: sortDirection });
+
+    res.status(200).json({ success: true, expenses, count: expenses.length });
   } catch (error) {
-    console.log(
-      "GET GROUP EXPENSES ERROR:",
-      error
-    );
-
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -586,7 +600,7 @@ exports.updateExpense = async (req, res) => {
       // VALIDATE PARTICIPANTS
       // =========================
 
-      if (finalSplitType !== "fullPayment") {
+      if (finalSplitType !== "fullPayment" && finalSplitType !== "none") {
         const invalidParticipant =
           finalRawShares.find(
             (share) =>
@@ -705,6 +719,10 @@ exports.updateExpense = async (req, res) => {
       else if (
         finalSplitType === "fullPayment"
       ) {
+        finalShares = [];
+      }
+
+      else if (finalSplitType === "none") {
         finalShares = [];
       }
 

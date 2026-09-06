@@ -48,6 +48,7 @@ const AddExpense = () => {
     date: new Date().toISOString().split('T')[0],
     paidBy: '',
     splitType: 'equal',
+    isContribution: false,
     shares: [],
     notes: '',
     receiptUrl: null,
@@ -82,8 +83,7 @@ const AddExpense = () => {
         paidBy: groupData.owner?._id || groupData.owner || '',
         shares: defaultShares,
       }))
-    } catch (err) {
-      console.log(err)
+    } catch (err) { 
       toast.error(err.response?.data?.message || 'Failed to load group')
     } finally {
       setLoading(false)
@@ -133,11 +133,21 @@ const AddExpense = () => {
     setFormData((prev) => ({
       ...prev,
       splitType,
+      isContribution: false,
       shares: prev.shares.map((share) => ({
         user: share.user,
         amount: '',
         percentage: '',
       })),
+    }))
+  }
+
+  const handleContributionChange = (isContribution) => {
+    setFormData((prev) => ({
+      ...prev,
+      isContribution,
+      splitType: isContribution ? 'none' : 'equal',
+      shares: isContribution ? [] : prev.shares,
     }))
   }
 
@@ -221,7 +231,7 @@ const AddExpense = () => {
       return
     }
 
-    if (formData.splitType !== 'fullPayment' && formData.shares.length === 0) {
+    if (!formData.isContribution && formData.shares.length === 0) {
       toast.error('Please select at least one participant')
       return
     }
@@ -229,7 +239,9 @@ const AddExpense = () => {
     // Prepare shares
     let shares = []
 
-    if (formData.splitType === 'equal') {
+    if (formData.isContribution) {
+      shares = []
+    } else if (formData.splitType === 'equal') {
       shares = formData.shares.map((share) => ({ user: share.user }))
     }
 
@@ -328,8 +340,7 @@ const AddExpense = () => {
       setTimeout(() => {
         navigate(`/groups/${groupId}/expenses`)
       }, 800)
-    } catch (err) {
-      console.log(err)
+    } catch (err) { 
       toast.error(err.response?.data?.message || 'Failed to add expense')
     } finally {
       setSaving(false)
@@ -676,8 +687,23 @@ const AddExpense = () => {
             </div>
 
             <div className="mt-6 space-y-6">
+              <label className="flex items-start gap-3 rounded-2xl border border-stone-200 bg-stone-50/60 p-4 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.isContribution}
+                  onChange={(e) => handleContributionChange(e.target.checked)}
+                  className="mt-0.5 h-5 w-5 shrink-0 accent-[#159a8c] cursor-pointer rounded"
+                />
+                <span>
+                  <span className="block text-sm font-bold text-[#1a1a1a]">Personal contribution</span>
+                  <span className="mt-0.5 block text-xs text-stone-500">Track this expense without splitting it with the group.</span>
+                </span>
+              </label>
+
+              {!formData.isContribution && (
+                <>
               {/* SPLIT TYPE SELECTOR */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {[
                   {
                     value: 'equal',
@@ -696,13 +722,7 @@ const AddExpense = () => {
                     label: 'Percentage',
                     icon: Percent,
                     desc: 'By percentage',
-                  },
-                  {
-                    value: 'fullPayment',
-                    label: 'Full Payment',
-                    icon: CheckCircle2,
-                    desc: 'One person pays',
-                  },
+                  }, 
                 ].map((option) => {
                   const Icon = option.icon
                   return (
@@ -710,7 +730,7 @@ const AddExpense = () => {
                       key={option.value}
                       type="button"
                       onClick={() => handleSplitTypeChange(option.value)}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+                      className={`flex flex-col   items-center gap-2 p-4 rounded-2xl border-2 transition-all cursor-pointer ${
                         formData.splitType === option.value
                           ? 'border-[#159a8c] bg-[#159a8c]/5 shadow-sm'
                           : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50'
@@ -895,6 +915,8 @@ const AddExpense = () => {
                       </div>
                     </div>
                   )}
+                </>
+              )}
                 </>
               )}
             </div>

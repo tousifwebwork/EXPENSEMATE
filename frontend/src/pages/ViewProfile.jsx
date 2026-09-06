@@ -37,9 +37,7 @@ const ViewProfile = () => {
           return
         }
 
-        const res = await getUserById(userId, token)
-
-        console.log('PROFILE DATA:', res.data.user)
+        const res = await getUserById(userId, token) 
 
         setUser(res.data.user)
       } catch (error) {
