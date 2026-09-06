@@ -1,6 +1,7 @@
 
 const Group = require("../../model/groupModel");
 const User = require("../../model/userModel");
+const createNotification = require("../../utils/createNotification");
 
 
 // CREATE GROUP
@@ -161,6 +162,14 @@ exports.addMember = async (req, res) => {
     }
 
     group.members.push({ user: newUser._id, userName: newUser.name, role: "member" });
+    
+    await createNotification({
+  recipient: newUser._id,
+  type: "group_invite",
+  message: `You were added to the group "${group.name}"`,
+  relatedGroup: group._id,
+  relatedUser: userId,
+    });
     await group.save();
 
     res.status(200).json({ success: true, message: "Member added", group });

@@ -2,6 +2,8 @@ const Settlement = require("../../model/settlementModel");
 const Group = require("../../model/groupModel");
 const getGroupMembership = require("../../utils/getGroupMembership");
 const calculateGroupBalances = require("../../utils/calculateGroupBalances");
+const createNotification = require("../../utils/createNotification");
+
 
 // RECORD SETTLEMENT
 exports.createSettlement = async (req, res) => {
@@ -40,6 +42,14 @@ exports.createSettlement = async (req, res) => {
       note,
       date,
       createdBy: userId,
+    });
+
+    await createNotification({
+  recipient: receiver,
+  type: "settlement_recorded",
+  message: `${req.user.userId === payer ? "You" : "Someone"} recorded a payment of ${group.baseCurrency} ${amount} to you`,
+  relatedGroup: groupId,
+  relatedUser: userId,
     });
 
     res.status(201).json({ success: true, message: "Settlement recorded", settlement });

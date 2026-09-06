@@ -1,6 +1,6 @@
 const FriendRequest = require("../../model/friendRequestModel");
 const User = require("../../model/userModel");
-
+const createNotification = require("../../utils/createNotification");
  
 exports.searchUsers = async (req, res) => {
   try {
@@ -113,6 +113,12 @@ exports.sendRequest = async (req, res) => {
     }
 
     const request = await FriendRequest.create({ sender: senderId, receiver: receiver._id });
+    await createNotification({
+      recipient: receiver._id,
+      type: "friend_request",
+      message: `You have a new friend request`,
+      relatedUser: senderId,
+    });
 
     res.status(201).json({ success: true, message: "Friend request sent", request });
   } catch (error) {
@@ -146,6 +152,16 @@ exports.respondToRequest = async (req, res) => {
     }
 
     request.status = action === "accept" ? "accepted" : "declined";
+
+    if (action === "accept") {
+  await createNotification({
+    recipient: request.sender,
+    type: "friend_accepted",
+    message: `Your friend request was accepted`,
+    relatedUser: userId,
+  });
+}
+
     await request.save();
 
     res.status(200).json({ success: true, message: `Request ${request.status}`, request });

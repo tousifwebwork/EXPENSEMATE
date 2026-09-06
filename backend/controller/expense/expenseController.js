@@ -1,6 +1,7 @@
  const Expense = require("../../model/expenseModel");
 const Group = require("../../model/groupModel");
 const getGroupMembership = require("../../utils/getGroupMembership");
+const createNotification = require("../../utils/createNotification");
 
 const {
   calculateEqualSplit,
@@ -260,6 +261,22 @@ exports.createExpense = async (req, res) => {
 
       notes: "",
     });
+
+    const notifyUserIds = finalShares
+  .map((s) => s.user.toString())
+  .filter((id) => id !== userId); // don't notify yourself
+
+for (const recipientId of notifyUserIds) {
+  await createNotification({
+    recipient: recipientId,
+    type: "expense_added",
+    message: `${title} (${currency || group.baseCurrency} ${amount}) was added in "${group.name}"`,
+    relatedGroup: groupId,
+    relatedUser: userId,
+  });
+}
+
+
 
     return res.status(201).json({
       success: true,

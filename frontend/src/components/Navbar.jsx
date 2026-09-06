@@ -20,6 +20,7 @@ import {
   Sparkles,
   PieChart,
 } from 'lucide-react'
+import NotificationBell from './NotificationBell.jsx'
 
 function Navbar() {
   const navigate = useNavigate()
@@ -128,7 +129,7 @@ function Navbar() {
       to: '/dashboard',
       label: 'Dashboard',
       icon: PieChart,
-    },
+    }, 
   ]
 
   const getInitials = (name) => {
@@ -147,9 +148,8 @@ function Navbar() {
       className={`sticky top-0 z-50 transition-all duration-200 ${
         scrolled
           ? 'bg-white/95 backdrop-blur-md border-b border-stone-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]'
-          : 'bg-white border-b border-stone-200'
-      }`}
-    >
+          : 'bg-white border-b border-stone-200'  }`}  >
+
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
 
@@ -194,6 +194,9 @@ function Navbar() {
 
           {/* Right Area: Profile & Actions */}
           <div className="hidden md:flex items-center gap-3">
+            <div className=''>
+             <NotificationBell />
+            </div>
             <div className="relative" ref={profileDropdownRef}>
               <motion.button
                 type="button"
@@ -282,6 +285,7 @@ function Navbar() {
 
           {/* Mobile Menu Toggle Button */}
           <div className="flex md:hidden items-center gap-2">
+            <NotificationBell />
             <motion.button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               whileTap={{ scale: 0.94 }}
@@ -297,7 +301,7 @@ function Navbar() {
       </div>
 
       {/* Mobile Drawer Menu */}
-      <AnimatePresence>
+      <AnimatePresence> 
         {mobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -332,10 +336,13 @@ function Navbar() {
 
           {/* Mobile Navigation Links */}
           <div className="space-y-1">
+            
             {navLinks.map((link) => {
               const Icon = link.icon
+              
 
               return (
+                <>
                 <NavLink
                   key={link.to}
                   to={link.to}
@@ -351,12 +358,15 @@ function Navbar() {
                   <Icon className="w-4 h-4 shrink-0" />
                   <span>{link.label}</span>
                 </NavLink>
+                </>
               )
             })}
+            
           </div>
 
           {/* Mobile Actions */}
           <div className="pt-2 border-t border-stone-100 space-y-1">
+            <div className=' flex flex-row '>
             <button
               onClick={() => {
                 setMobileMenuOpen(false)
@@ -366,7 +376,8 @@ function Navbar() {
             >
               <Settings className="w-4 h-4 text-stone-400" />
               <span>Profile Settings</span>
-            </button>
+            </button> 
+            </div>
 
             <button
               onClick={handleLogout}

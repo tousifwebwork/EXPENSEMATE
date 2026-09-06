@@ -25,6 +25,7 @@ function setup(app) {
   app.use("/api/balance", require("../router/balance/balanceRoutes"));
   app.use("/api/settlements", require("../router/settlement/settlementRoutes"));
   app.use("/api/dashboard", require("../router/dashboard/dashboardRoutes"));
+  app.use("/api/notifications", require("../router/notification/notificationRoutes"));
 }
 
 module.exports = setup;

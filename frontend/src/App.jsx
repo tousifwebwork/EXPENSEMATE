@@ -13,11 +13,12 @@ import ViewProfile from './pages/ViewProfile.jsx'
 import AddExpense from './pages/expense/AddExpense.jsx'
 import EditExpense from './pages/expense/EditExpense.jsx'
 import Balances from './pages/Balances.jsx'
-import SettlementSuggestions from './pages/SettlementSuggestions.jsx'
-
+import SettlementSuggestions from './pages/SettlementSuggestions.jsx' 
 import Protected from './pages/protected/Protected.jsx'
 import ForgotPassword from './pages/auth/ForgotPassword.jsx'
 import Dashboard from './pages/Dashboard.jsx'
+import NotificationBell from './components/NotificationBell.jsx'
+import Notifications from './pages/notification/Notifications.jsx'
 
 function App() {
   return (
@@ -43,6 +44,8 @@ function App() {
         <Route path="/groups/:groupId/expenses" element={<GroupExpenses />}/>
         <Route path="/groups/:groupId/expenses/add" element={<AddExpense />}/>
         <Route path="/groups/:groupId/expenses/:expenseId/edit" element={<EditExpense />}/>
+
+        <Route path="/notifications" element={<Notifications />} />
 
         {/* Friends */}
         <Route path="/friends" element={<Friends />}/>
