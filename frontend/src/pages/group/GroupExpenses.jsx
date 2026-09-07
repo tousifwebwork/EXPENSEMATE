@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import axios from 'axios'
 
 import AppLayout from '../../components/AppLayout'
 import {
@@ -11,26 +12,7 @@ import { getGroupById } from '../../config/group/groupAPI'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
-import {
-  ArrowLeft,
-  Plus,
-  Receipt,
-  Users,
-  TrendingUp,
-  DollarSign,
-  Calendar,
-  Eye,
-  Edit3,
-  Trash2,
-  Image as ImageIcon,
-  X,
-  Sparkles,
-  ArrowRightLeft,
-  CheckCircle2,
-  AlertCircle,
-  ChevronRight,
-  Wallet,
-  FileText,
+import {ArrowLeft,Plus,Receipt,Users,TrendingUp,DollarSign,Calendar,Eye,Edit3,Trash2,Image as ImageIcon,X,Sparkles,ArrowRightLeft,CheckCircle2,AlertCircle,ChevronRight,Wallet,FileText,Download,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -42,6 +24,7 @@ const GroupExpenses = () => {
   const [expenses, setExpenses] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedReceipt, setSelectedReceipt] = useState(null)
+  const [exportLoading, setExportLoading] = useState(false)
 
   // =========================
   // LOAD GROUP + EXPENSES
@@ -68,6 +51,62 @@ const GroupExpenses = () => {
       setLoading(false)
     }
   }
+
+  // =========================
+  // EXPORT CSV
+  // =========================
+  const handleExportCSV = async () => {
+  try {
+    setExportLoading(true);
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("Please login again");
+      return;
+    }
+
+    const API_URL = import.meta.env.DEV
+      ? import.meta.env.VITE_API_URL_DEV
+      : import.meta.env.VITE_API_URL_PROD;
+
+    const response = await axios.get(
+      `${API_URL}/api/reports/group/${groupId}/expenses/export`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "blob",
+      }
+    );
+
+    const url = window.URL.createObjectURL(
+      new Blob([response.data], { type: "text/csv" })
+    );
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `expenses-${group?.name || "export"}.csv`
+    );
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+
+    toast.success("CSV exported successfully!");
+  } catch (err) {
+    console.error(err);
+    toast.error(
+      err.response?.data?.message || "Failed to export CSV"
+    );
+  } finally {
+    setExportLoading(false);
+  }
+};
 
   // =========================
   // DELETE EXPENSE
@@ -336,13 +375,23 @@ const GroupExpenses = () => {
             </p>
           </div>
 
-          <button
-            onClick={() => navigate(`/groups/${groupId}/expenses/add`)}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#159a8c] px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-[#159a8c]/30 hover:bg-[#117d72] active:scale-[0.99] transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Expense</span>
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleExportCSV}
+              disabled={exportLoading}
+              className="inline-flex items-center gap-2 rounded-xl border border-[#159a8c] bg-white px-5 py-3 text-sm font-semibold text-[#159a8c] shadow-sm hover:bg-[#159a8c]/5 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className={`w-4 h-4 ${exportLoading ? 'animate-spin' : ''}`} />
+              <span>{exportLoading ? 'Exporting...' : 'Export CSV'}</span>
+            </button>
+            <button
+              onClick={() => navigate(`/groups/${groupId}/expenses/add`)}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#159a8c] px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-[#159a8c]/30 hover:bg-[#117d72] active:scale-[0.99] transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Expense</span>
+            </button>
+          </div>
         </div>
 
         {/* =========================
