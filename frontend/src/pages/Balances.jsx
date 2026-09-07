@@ -16,6 +16,10 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
+const API_URL = import.meta.env.DEV
+  ? import.meta.env.VITE_API_URL_DEV
+  : import.meta.env.VITE_API_URL_PROD
+
 const Balances = () => {
   const navigate = useNavigate()
 
@@ -36,7 +40,7 @@ const Balances = () => {
       try {
         setLoadingGroups(true)
 
-        const res = await axios.get('http://localhost:3000/api/groups', {
+        const res = await axios.get(`${API_URL}/api/groups`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -67,7 +71,7 @@ const Balances = () => {
         setError('')
 
         const res = await axios.get(
-          `http://localhost:3000/api/balance/group/${selectedGroup}`,
+          `${API_URL}/api/balance/group/${selectedGroup}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
