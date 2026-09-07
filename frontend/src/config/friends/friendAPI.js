@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:3000/api/friends",
+  baseURL: [process.env.VITE_API_URL_DEV + "/api/friends", process.env.VITE_API_URL_PROD + "/api/friends"],
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

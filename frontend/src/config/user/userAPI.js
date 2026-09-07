@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:3000/api/user",
+  baseURL: [process.env.VITE_API_URL_DEV + "/api/user", process.env.VITE_API_URL_PROD + "/api/user"],
   headers: { 
     Accept: "application/json",
   },

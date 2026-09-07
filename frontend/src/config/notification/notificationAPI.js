@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api/notifications"; // adjust to your base URL
+const API_URL = [process.env.VITE_API_URL_DEV + "/api/notifications", process.env.VITE_API_URL_PROD + "/api/notifications"]; // adjust to your base URL
 
 export const getNotifications = async (token) => {
   return axios.get(API_URL, {

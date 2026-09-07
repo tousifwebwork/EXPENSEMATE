@@ -7,9 +7,9 @@ function setup(app) {
   connectDB();
 
   app.use(cors({
-    origin: "http://localhost:5173",
+    origin: [process.env.CLIENT_URL_DEV, process.env.CLIENT_URL_PROD], //cors url for dev and prod
     credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }));
  
