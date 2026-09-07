@@ -55,7 +55,7 @@ const GroupExpenses = () => {
   // =========================
   // EXPORT CSV
   // =========================
-  const handleExportCSV = async () => {
+const handleExportCSV = async () => {
   try {
     setExportLoading(true);
 
@@ -80,16 +80,19 @@ const GroupExpenses = () => {
       }
     );
 
-    const url = window.URL.createObjectURL(
-      new Blob([response.data], { type: "text/csv" })
-    );
+    // Check the actual CSV received from backend
+    const csvText = await response.data.text();
+    console.log("ACTUAL CSV:", csvText);
+
+    const blob = new Blob([csvText], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = window.URL.createObjectURL(blob);
 
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute(
-      "download",
-      `expenses-${group?.name || "export"}.csv`
-    );
+    link.download = `expenses-${group?.name || "export"}.csv`;
 
     document.body.appendChild(link);
     link.click();
@@ -99,7 +102,7 @@ const GroupExpenses = () => {
 
     toast.success("CSV exported successfully!");
   } catch (err) {
-    console.error(err);
+    console.error("CSV export error:", err);
     toast.error(
       err.response?.data?.message || "Failed to export CSV"
     );

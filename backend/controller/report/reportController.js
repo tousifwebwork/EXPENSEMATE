@@ -132,6 +132,7 @@ exports.exportExpensesCSV = async (req, res) => {
       .sort({ date: -1 });
 
     // Flatten data for CSV (CSV can't handle nested objects/arrays well)
+    
   const csvData = expenses.map((exp) => ({
   Title: exp.title,
   Amount: exp.amount,
@@ -143,6 +144,8 @@ exports.exportExpensesCSV = async (req, res) => {
     ? new Date(exp.date).toISOString().split("T")[0]
     : "",
 }));
+
+console.log("Expenses to be exported:", csvData);
 
 const fields = [
   "Title",
@@ -157,9 +160,9 @@ const fields = [
 const parser = new Parser({ fields });
 const csv = parser.parse(csvData);
 
-    res.header("Content-Type", "text/csv");
-    res.attachment(`expenses-${group.name}-${Date.now()}.csv`);
-    res.send(csv);
+res.header("Content-Type", "text/csv");
+res.attachment(`expenses-${group.name}-${Date.now()}.csv`);
+res.send(csv);
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
