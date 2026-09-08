@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const {generateProfileId} = require("../../utils/generateProfileId");
 const { verificationCode } = require("../../utils/verificationCode");
-const { sendEmail } = require("../../utils/sendEmail");
+const { sendEmail, sendEmail_to_invite } = require("../../utils/sendEmail");
 
 
 // REGISTER
@@ -240,6 +240,21 @@ exports.resetPassword = async (req, res) => {
   } catch (error) {
     res.status(500).json({success: false,message: error.message, });
 
+  }
+};
+
+
+exports.sendMail_Invite = async (req, res) => {
+  try { 
+    const { email, inviteText } = req.body;
+    const user = await User.findById(req.user.userId);
+    const from = user.email;
+    await sendEmail_to_invite(from, email, inviteText);
+    res.status(200).json({ success: true,message: "Invitation sent successfully",});
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false,  message: "Failed to send invitation",});
   }
 };
 

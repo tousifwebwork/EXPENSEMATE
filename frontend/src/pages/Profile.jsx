@@ -299,9 +299,10 @@ function Profile() {
           {/* ================= PROFILE HERO ================= */}
           <section className="overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-sm">
             {/* BANNER */}
-            <div className="h-32 bg-gradient-to-br from-[#159a8c] via-[#47c5b0] to-[#0e6d63] relative overflow-hidden">
-              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
+            <div class="h-30 bg-linear-to-b from-[#0e6d63] to-white dark:from-[#222020] dark:to-[#0e7167]">
+
             </div>
+
 
             <div className="px-6 sm:px-8 pb-8">
               <div className="-mt-16 flex flex-col sm:flex-row sm:items-end gap-6">
@@ -314,7 +315,7 @@ function Profile() {
                       className="h-32 w-32 rounded-3xl border-4 border-white object-cover shadow-xl"
                     />
                   ) : (
-                    <div className="flex h-32 w-32 items-center justify-center rounded-3xl border-4 border-white bg-gradient-to-br from-[#159a8c] to-[#0e6d63] text-4xl font-bold text-white shadow-xl">
+                    <div className="flex h-32 w-32 items-center justify-center rounded-3xl border-4 border-white bg-linear-to-br from-[#159a8c] to-[#0e6d63] text-4xl font-bold text-white shadow-xl">
                       {getInitials(user.name)}
                     </div>
                   )}

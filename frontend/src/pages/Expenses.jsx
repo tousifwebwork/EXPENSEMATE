@@ -97,7 +97,7 @@ function Expenses() {
                   {/* Left Side: Icon + Details */}
                   <div className="flex min-w-0 items-center gap-4 flex-1">
                     {/* Icon */}
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-stone-100 to-stone-50 text-2xl border border-stone-200/60">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-stone-100 to-stone-50 text-2xl border border-stone-200/60">
                       {expense.icon}
                     </div>
 

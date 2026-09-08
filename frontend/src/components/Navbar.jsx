@@ -4,23 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { logout } from '../config/auth/authAPI.js'
 import { getProfile } from '../config/user/userAPI.js'
 import toast from 'react-hot-toast'
-import {
-  Moon,
-  Sun,
-  Menu,
-  X,
-  ChevronDown,
-  LogOut,
-  UserPlus,
-  Receipt,
-  Handshake,
-  Settings,
-  Users,
-  WalletCards,
-  User as UserIcon,
-  Shield,
-  Sparkles,
-  PieChart,
+import {Moon,Sun,Menu,X,ChevronDown,LogOut,UserPlus,Receipt,Handshake,Settings,Users,WalletCards,User as UserIcon,Shield,Sparkles,PieChart, UserRoundPlus,
 } from 'lucide-react'
 import NotificationBell from './NotificationBell.jsx'
 
@@ -285,6 +269,11 @@ function Navbar() {
                       <Settings className="w-4 h-4 text-stone-400" />
                       <span>Account Settings</span>
                     </button>
+                    <button  onClick={() => {  setProfileMenuOpen(false);  navigate('/invite-email')   }}
+                      className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 rounded-xl hover:bg-stone-100/80 transition-colors cursor-pointer dark:text-stone-200 dark:hover:bg-stone-800">
+                      <UserRoundPlus className="w-4 h-4 text-stone-400" />
+                      <span>Invite Mail</span>
+                    </button>
 
                     <button
                       onClick={handleLogout}
@@ -387,6 +376,7 @@ function Navbar() {
           {/* Mobile Actions */}
           <div className="pt-2 border-t border-stone-100 space-y-1 dark:border-stone-800">
             <div className=' flex flex-row '>
+
             <button
               onClick={() => {
                 setMobileMenuOpen(false)
@@ -397,6 +387,13 @@ function Navbar() {
               <Settings className="w-4 h-4 text-stone-400" />
               <span>Profile Settings</span>
             </button> 
+
+            <button  onClick={() => {  setMobileMenuOpen(false);  navigate('/invite-email')   }}
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 rounded-xl hover:bg-stone-100/80 transition-colors cursor-pointer dark:text-stone-200 dark:hover:bg-stone-800">
+              <UserRoundPlus className="w-4 h-4 text-stone-400" />
+              <span>Invite Mail</span>
+            </button>
+
             </div>
 
             <button

@@ -16,9 +16,9 @@ import Balances from './pages/Balances.jsx'
 import SettlementSuggestions from './pages/SettlementSuggestions.jsx' 
 import Protected from './pages/protected/Protected.jsx'
 import ForgotPassword from './pages/auth/ForgotPassword.jsx'
-import Dashboard from './pages/Dashboard.jsx'
-import NotificationBell from './components/NotificationBell.jsx'
+import Dashboard from './pages/Dashboard.jsx' 
 import Notifications from './pages/notification/Notifications.jsx'
+import InviteEmail from './pages/InviteEmail.jsx'
 
 function App() {
   return (
@@ -46,6 +46,8 @@ function App() {
         <Route path="/groups/:groupId/expenses/:expenseId/edit" element={<EditExpense />}/>
 
         <Route path="/notifications" element={<Notifications />} />
+
+        <Route path="/invite-email" element={<InviteEmail />} />
 
         {/* Friends */}
         <Route path="/friends" element={<Friends />}/>

@@ -34,6 +34,10 @@ export const sendVerificationCode = (email) => {return API.post("/forgot-passwor
 export const verifyCode = (data) => {return API.post("/verify-code", data);};
 
 // STEP 3 - RESET PASSWORD
-export const resetPassword = (data) => {return API.post("/reset-password", data);};   
+export const resetPassword = (data) => {return API.post("/reset-password", data);};
+
+export const sent_email_invite = (data,token) => {return API.post("/invite/mail", data,{headers: {Authorization: `Bearer ${token}`,},});};
+
+
 
 export default API;
