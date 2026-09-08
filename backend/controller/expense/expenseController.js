@@ -1,5 +1,6 @@
  const Expense = require("../../model/expenseModel");
 const Group = require("../../model/groupModel");
+const cloudinary = require("../../config/cloudinary");
 const getGroupMembership = require("../../utils/getGroupMembership");
 const createNotification = require("../../utils/createNotification");
 
@@ -9,6 +10,23 @@ const {
   calculatePercentageSplit,
 } = require("../../utils/calculateSplit");
 
+const uploadReceipt = (buffer) =>
+  new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder: "expense-receipts" },
+      (error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        resolve(result.secure_url);
+      }
+    );
+
+    uploadStream.end(buffer);
+  });
+
 // =========================
 // CREATE EXPENSE
 // =========================
@@ -17,8 +35,9 @@ exports.createExpense = async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    // Cloudinary URL from uploaded receipt
-    const receiptPhoto = req.file ? req.file.path : "";
+    const receiptPhoto = req.file
+      ? await uploadReceipt(req.file.buffer)
+      : "";
 
     let {
       groupId,
@@ -439,9 +458,8 @@ exports.updateExpense = async (req, res) => {
     const userId = req.user.userId;
     const { expenseId } = req.params;
 
-    // New receipt uploaded through Cloudinary
     const receiptPhoto = req.file
-      ? req.file.path
+      ? await uploadReceipt(req.file.buffer)
       : undefined;
 
     let {
@@ -879,3 +897,26 @@ exports.deleteExpense = async (req, res) => {
   }
 };
  
+
+
+// delete recipt
+exports.deleteReceiptPhoto = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { expenseId } = req.params;
+    const expense = await Expense.findById(expenseId);
+    if (!expense) {
+      return res.status(404).json({
+        success: false,
+        message: "Expense not found",
+      });
+    }
+    if (expense.receiptUrl) {
+      expense.receiptUrl = null;
+      await expense.save();
+    }
+    return res.status(200).json({success: true, message: "Receipt deleted",});
+  }catch (error) {
+    console.log( "DELETE RECEIPT ERROR:",error )
+  }
+}

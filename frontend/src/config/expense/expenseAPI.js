@@ -43,3 +43,11 @@ export const updateExpense = (expenseId, expenseData, token) => {
 export const deleteExpense = (expenseId, token) => {
   return API.delete(`/${expenseId}`, authHeader(token));
 };
+
+
+// DELETE photo
+export const deleteReceiptPhoto = (expenseId, token) => {
+  return API.delete(`/${expenseId}/receiptPhoto`, authHeader(token));
+};
+
+

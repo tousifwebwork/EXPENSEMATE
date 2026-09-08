@@ -9,5 +9,6 @@ router.get("/group/:groupId", protect, expenseController.getGroupExpenses);
 router.get("/:expenseId", protect, expenseController.getExpenseById);
 router.patch("/:expenseId", protect,upload.single("receiptPhoto"), expenseController.updateExpense);
 router.delete("/:expenseId", protect, expenseController.deleteExpense);
+router.delete("/:expenseId/receiptPhoto", protect, expenseController.deleteReceiptPhoto);
 
 module.exports = router;
