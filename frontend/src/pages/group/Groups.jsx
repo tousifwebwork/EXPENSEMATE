@@ -5,35 +5,12 @@ import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 import AppLayout from '../../components/AppLayout'
-import {
-  createGroup,
-  getMyGroups,
-  deleteGroup,
-} from '../../config/group/groupAPI'
-
-import {
-  Plus,
-  Users,
-  ArrowRight,
-  Trash2,
-  Sparkles,
-  Layers,
-  Coins,
-  AlignLeft,
-  X,
-  ShieldAlert,
-  FolderPlus,
-  Compass,
-} from 'lucide-react'
+import { createGroup,getMyGroups,deleteGroup} from '../../config/group/groupAPI'
+import {Plus,Users,ArrowRight,Trash2,Sparkles,Layers,Coins,AlignLeft,X,ShieldAlert,FolderPlus,Compass,} from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const Groups = () => {
-  const [groupInfo, setGroupInfo] = useState({
-    name: '',
-    description: '',
-    coverImage: '',
-    baseCurrency: 'INR',
-  })
+  const [groupInfo, setGroupInfo] = useState({name: '',description: '',coverImage: '',baseCurrency: 'INR'})
 
   const [allGroups, setAllGroups] = useState([])
   const [loading, setLoading] = useState(true)
@@ -44,10 +21,8 @@ const Groups = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // =========================
-  // GET CURRENT USER ID
-  // =========================
-  useEffect(() => {
+   // GET CURRENT USER ID
+   useEffect(() => {
     try {
       const token = localStorage.getItem('token')
       if (!token) {
@@ -62,9 +37,7 @@ const Groups = () => {
     }
   }, [])
 
-  // =========================
-  // GET MY GROUPS
-  // =========================
+   // GET MY GROUPS 
   useEffect(() => {
     const handleGetGroup = async () => {
       try {
@@ -89,10 +62,8 @@ const Groups = () => {
     handleGetGroup()
   }, [location.pathname])
 
-  // =========================
-  // CREATE GROUP
-  // =========================
-  const handleCreateGroup = async (e) => {
+   // CREATE GROUP
+   const handleCreateGroup = async (e) => {
     e?.preventDefault()
 
     if (!groupInfo.name.trim()) {
@@ -147,10 +118,8 @@ const Groups = () => {
     }
   }
 
-  // =========================
-  // DELETE GROUP
-  // =========================
-  const handleDeleteGroup = async (id, groupName) => {
+   // DELETE GROUP
+   const handleDeleteGroup = async (id, groupName) => {
     const ask = window.confirm(`Are you sure you want to delete "${groupName}"? This action cannot be undone.`)
     if (!ask) return
 
@@ -197,9 +166,8 @@ const Groups = () => {
     <AppLayout>
       <ToastContainer position="top-right" autoClose={3000} />
 
-      {/* =========================
-          PAGE HEADER
-      ========================= */}
+ 
+          {/* PAGE HEADER   */}
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-8">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#159a8c]/10 text-[#159a8c] text-xs font-semibold uppercase tracking-wider mb-3">
@@ -207,41 +175,35 @@ const Groups = () => {
             <span>Workspace</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1a1a1a]">
+          <h1 className="dark:text-white text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1a1a1a]">
             Your Groups
           </h1>
 
-          <p className="mt-2 text-sm text-stone-500 max-w-xl">
+          <p className="mt-2 text-sm text-stone-500 dark:text-stone-400 max-w-xl">
             Manage shared expenses, view live member balances, and coordinate split payments with ease.
           </p>
         </div>
 
         {/* Action Button */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => {
-              document.getElementById('add_group_modal')?.showModal()
-            }}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#159a8c] px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-[#159a8c]/30 hover:bg-[#117d72] active:scale-[0.99] transition-all duration-150 cursor-pointer"
-          >
+          <button  onClick={() => {document.getElementById('add_group_modal')?.showModal()}}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#159a8c] px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-[#159a8c]/30 hover:bg-[#117d72] active:scale-[0.99] transition-all duration-150 cursor-pointer">
             <Plus className="w-4 h-4" />
             <span>New Group</span>
           </button>
         </div>
       </div>
 
-      {/* =========================
-          SEARCH & FILTER BAR
-      ========================= */}
+      {/*   SEARCH & FILTER BAR  */}
       {allGroups.length > 0 && (
-        <div className="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+        <div className="  mb-6 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
           <div className="relative flex-1 max-w-md">
             <input
               type="text"
               placeholder="Search groups..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-4 pr-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 text-sm placeholder:text-stone-400 focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all"
+              className="w-full rounded-xl border border-stone-200 bg-white pl-4 pr-4 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 outline-none transition-all focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100 dark:placeholder:text-stone-500"
             />
           </div>
           <div className="text-xs font-medium text-stone-500 self-center">
@@ -250,43 +212,39 @@ const Groups = () => {
         </div>
       )}
 
-      {/* =========================
-          GROUPS GRID
-      ========================= */}
+      {/*   GROUPS GRID  */}
       {loading ? (
         /* LOADING SKELETONS */
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className=" grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div
-              key={i}
-              className="rounded-3xl border border-stone-200/80 bg-white p-6 shadow-sm animate-pulse space-y-4"
-            >
+            <div key={i}
+              className="rounded-3xl border border-stone-200/80 bg-white p-6 shadow-sm animate-pulse space-y-4 dark:border-stone-700 dark:bg-stone-800">
               <div className="flex items-center justify-between">
-                <div className="h-12 w-12 rounded-2xl bg-stone-100" />
-                <div className="h-6 w-16 rounded-full bg-stone-100" />
+                <div className="h-12 w-12 rounded-2xl bg-stone-100 dark:bg-stone-700" />
+                <div className="h-6 w-16 rounded-full bg-stone-100 dark:bg-stone-700" />
               </div>
-              <div className="h-6 w-3/4 rounded-lg bg-stone-100 mt-4" />
+              <div className="h-6 w-3/4 rounded-lg bg-stone-100 dark:bg-stone-700 mt-4" />
               <div className="space-y-2">
-                <div className="h-4 w-full rounded bg-stone-100" />
-                <div className="h-4 w-2/3 rounded bg-stone-100" />
+                <div className="h-4 w-full rounded bg-stone-100 dark:bg-stone-700" />
+                <div className="h-4 w-2/3 rounded bg-stone-100 dark:bg-stone-700" />
               </div>
-              <div className="pt-4 border-t border-stone-100 flex justify-between">
-                <div className="h-4 w-20 rounded bg-stone-100" />
-                <div className="h-4 w-24 rounded bg-stone-100" />
+              <div className="pt-4 border-t border-stone-100 dark:border-stone-700 flex justify-between">
+                <div className="h-4 w-20 rounded bg-stone-100 dark:bg-stone-700" />
+                <div className="h-4 w-24 rounded bg-stone-100 dark:bg-stone-700" />
               </div>
             </div>
           ))}
         </div>
       ) : filteredGroups.length === 0 ? (
         /* EMPTY STATE */
-        <div className="text-center py-16 px-4 bg-white rounded-3xl border border-dashed border-stone-200 shadow-xs max-w-2xl mx-auto my-8 animate-fade-in-up">
+        <div className="text-center py-16 px-4 bg-white rounded-3xl border border-dashed border-stone-200 shadow-xs max-w-2xl mx-auto my-8 animate-fade-in-up dark:bg-stone-800 dark:border-stone-700">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#159a8c]/10 text-[#159a8c] mb-4">
             <FolderPlus className="w-8 h-8" />
           </div>
-          <h3 className="text-lg font-bold text-[#1a1a1a]">
+          <h3 className="text-lg font-bold text-[#1a1a1a] dark:text-stone-100">
             {searchQuery ? 'No matching groups found' : 'No groups created yet'}
           </h3>
-          <p className="mt-2 text-sm text-stone-500 max-w-sm mx-auto">
+          <p className="mt-2 text-sm text-stone-500 dark:text-stone-400 max-w-sm mx-auto">
             {searchQuery
               ? `No groups match your search for "${searchQuery}". Try a different keyword.`
               : 'Create a group to start tracking shared expenses with your friends, roommates, or travel partners.'}
@@ -338,7 +296,7 @@ const Groups = () => {
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.06, duration: 0.3 }}
-                className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-stone-200/80 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:border-stone-300"
+                className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-stone-200/80 bg-white p-6 text-stone-900 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-stone-300 hover:shadow-xl dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100 dark:hover:border-stone-600"
                 style={{
                   animationDelay: `${index * 50}ms`,
                 }}
@@ -347,13 +305,13 @@ const Groups = () => {
                 <div>
                   <div className="flex items-start justify-between gap-4">
                     {/* GROUP AVATAR */}
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#159a8c]/15 to-[#0e6d63]/20 text-[#159a8c] font-bold text-base shadow-xs ring-1 ring-[#159a8c]/20">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#159a8c]/15 to-[#0e6d63]/20 text-base font-bold text-[#159a8c] shadow-xs ring-1 ring-[#159a8c]/20">
                       {initials}
                     </div>
 
                     <div className="flex items-center gap-2">
                       {/* CURRENCY BADGE */}
-                      <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-700">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-700 dark:bg-stone-700 dark:text-stone-100">
                         <span className="text-[#159a8c] font-bold">
                           {getCurrencySymbol(group.baseCurrency)}
                         </span>
@@ -376,14 +334,15 @@ const Groups = () => {
                       )}
                     </div>
                   </div>
+                  
 
                   {/* GROUP NAME */}
-                  <h2 className="mt-5 text-xl font-bold tracking-tight text-[#1a1a1a] group-hover:text-[#159a8c] transition-colors">
+                  <h2 className="mt-5 text-xl font-bold tracking-tight text-[#1a1a1a] transition-colors group-hover:text-[#159a8c] dark:text-stone-100">
                     {group.name}
                   </h2>
 
                   {/* DESCRIPTION */}
-                  <p className="mt-2 line-clamp-2 min-h-[2.5rem] text-sm leading-relaxed text-stone-500">
+                  <p className="mt-2 line-clamp-2 min-h-[2.5rem] text-sm leading-relaxed text-stone-500 dark:text-stone-400">
                     {group.description || 'No description provided.'}
                   </p>
 
@@ -393,14 +352,14 @@ const Groups = () => {
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                           currentUserRole === 'owner'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-700/60'
                             : currentUserRole === 'admin'
-                            ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/60'
-                            : 'bg-stone-100 text-stone-600'
+                            ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/60 dark:bg-indigo-900/40 dark:text-indigo-300 dark:border-indigo-700/60'
+                            : 'bg-stone-100 text-stone-600 dark:bg-stone-700 dark:text-stone-100'
                         }`}
                       >
                         <span
-                          className={`w-1.5 h-1.5 rounded-full ${
+                          className={`dark:bg-stone-300 dark:text-black w-1.5 h-1.5 rounded-full ${
                             currentUserRole === 'owner'
                               ? 'bg-emerald-500'
                               : currentUserRole === 'admin'
@@ -415,10 +374,10 @@ const Groups = () => {
                 </div>
 
                 {/* FOOTER */}
-                <div className="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs text-stone-500">
+                <div className="mt-6 flex items-center justify-between border-t border-stone-100 pt-4 dark:border-stone-700">
+                  <div className="flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400">
                     <Users className="w-4 h-4 text-stone-400" />
-                    <span className="font-semibold text-stone-700">
+                    <span className="font-semibold text-stone-700 dark:text-stone-200">
                       {group.members?.length || 0}
                     </span>
                     <span>{group.members?.length === 1 ? 'member' : 'members'}</span>
@@ -443,24 +402,24 @@ const Groups = () => {
       ========================= */}
       <dialog
         id="add_group_modal"
-        className="fixed inset-0 m-auto w-[92%] max-w-lg rounded-3xl border-0 p-0 shadow-2xl backdrop:bg-stone-900/60 backdrop:backdrop-blur-xs open:animate-scale-in"
+        className="fixed inset-0 m-auto w-[92%] max-w-lg rounded-3xl border-0 p-0 shadow-2xl backdrop:bg-stone-900/60 backdrop:backdrop-blur-xs open:animate-scale-in dark:backdrop:bg-black/70"
       >
-        <div className="bg-white p-6 sm:p-8">
+        <div className="bg-white p-6 sm:p-8 dark:bg-stone-900">
           {/* MODAL HEADER */}
-          <div className="flex items-start justify-between pb-4 border-b border-stone-100">
+          <div className="flex items-start justify-between pb-4 border-b border-stone-100 dark:border-stone-700">
             <div>
               <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#159a8c] mb-1">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>New Workspace</span>
               </div>
-              <h3 className="text-xl font-bold text-[#1a1a1a]">
+              <h3 className="text-xl font-bold text-[#1a1a1a] dark:text-stone-100">
                 Create a Group
               </h3>
             </div>
             <form method="dialog">
               <button
                 type="submit"
-                className="p-1.5 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer dark:hover:text-stone-100 dark:hover:bg-stone-700"
                 aria-label="Close dialog"
               >
                 <X className="w-5 h-5" />
@@ -471,7 +430,7 @@ const Groups = () => {
           <form onSubmit={handleCreateGroup} className="mt-6 space-y-4">
             {/* GROUP NAME */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 dark:text-stone-200 mb-2">
                 Group Name
               </label>
               <div className="relative">
@@ -485,7 +444,7 @@ const Groups = () => {
                   }
                   type="text"
                   placeholder="e.g. Goa Trip 2026, Apartment 4B"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm placeholder:text-stone-400 focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm placeholder:text-stone-400 focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100 dark:placeholder:text-stone-500 dark:focus:bg-stone-800"
                   required
                 />
               </div>
@@ -493,7 +452,7 @@ const Groups = () => {
 
             {/* DESCRIPTION */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 dark:text-stone-200 mb-2">
                 Description
               </label>
               <div className="relative">
@@ -510,7 +469,7 @@ const Groups = () => {
                   }
                   type="text"
                   placeholder="e.g. Shared expenses for hotel, travel & meals"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm placeholder:text-stone-400 focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm placeholder:text-stone-400 focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100 dark:placeholder:text-stone-500 dark:focus:bg-stone-800"
                   required
                 />
               </div>
@@ -518,7 +477,7 @@ const Groups = () => {
 
             {/* BASE CURRENCY */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 dark:text-stone-200 mb-2">
                 Base Currency
               </label>
               <div className="relative">
@@ -533,7 +492,7 @@ const Groups = () => {
                       baseCurrency: e.target.value,
                     })
                   }
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all cursor-pointer"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all cursor-pointer dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100 dark:focus:bg-stone-800"
                   required
                 >
                   <option value="INR">INR (₹) - Indian Rupee</option>
@@ -544,11 +503,11 @@ const Groups = () => {
             </div>
 
             {/* BUTTONS */}
-            <div className="mt-8 pt-4 border-t border-stone-100 flex items-center justify-end gap-3">
+            <div className="mt-8 pt-4 border-t border-stone-100 dark:border-stone-700 flex items-center justify-end gap-3">
               <form method="dialog">
                 <button
                   type="submit"
-                  className="rounded-xl border border-stone-200 px-4 py-2.5 text-xs font-semibold text-stone-600 hover:bg-stone-50 transition-colors cursor-pointer"
+                  className="rounded-xl border border-stone-200 px-4 py-2.5 text-xs font-semibold text-stone-600 hover:bg-stone-50 transition-colors cursor-pointer dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-800"
                 >
                   Cancel
                 </button>

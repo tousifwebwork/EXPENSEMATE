@@ -5,6 +5,8 @@ import { logout } from '../config/auth/authAPI.js'
 import { getProfile } from '../config/user/userAPI.js'
 import toast from 'react-hot-toast'
 import {
+  Moon,
+  Sun,
   Menu,
   X,
   ChevronDown,
@@ -30,6 +32,15 @@ function Navbar() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const profileDropdownRef = useRef(null)
+
+  const [toggle, settoggle] = useState(localStorage.getItem('toggle_theme') || 'Light');
+
+  const handleToggle = () => {
+  const newTheme = toggle === 'Light' ? 'Dark' : 'Light'
+  settoggle(newTheme)
+  localStorage.setItem('toggle_theme', newTheme)
+  document.documentElement.classList.toggle('dark', newTheme === 'Dark')
+}
 
   const [user, setUser] = useState({
     name: '',
@@ -143,12 +154,13 @@ function Navbar() {
       .slice(0, 2)
   }
 
+  useEffect(() => {
+  document.documentElement.classList.toggle('dark', toggle === 'Dark')
+}, [toggle])
+
   return (
-    <header
-      className={`sticky top-0 z-50 transition-all duration-200 ${
-        scrolled
-          ? 'bg-white/95 backdrop-blur-md border-b border-stone-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]'
-          : 'bg-white border-b border-stone-200'  }`}  >
+    <header  className={`sticky top-0 z-50 transition-all duration-200 ${scrolled  ? 'bg-white/95 backdrop-blur-md border-b border-stone-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]': 'bg-white border-b border-stone-200'  }
+      dark:bg-[#111817] dark:border-stone-800`}  >
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
@@ -162,7 +174,7 @@ function Navbar() {
               ₹
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-bold tracking-tight text-[#1a1a1a]">
+              <span className="text-lg font-bold tracking-tight text-[#1a1a1a] dark:text-stone-100">
                 ExpenseMate
               </span>
             </div>
@@ -180,8 +192,8 @@ function Navbar() {
                   className={({ isActive }) =>
                     `flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-150 ${
                       isActive
-                        ? 'bg-stone-100 text-[#159a8c] font-bold shadow-xs'
-                        : 'text-stone-600 hover:text-[#1a1a1a] hover:bg-stone-50'
+                        ? 'bg-stone-100 text-[#159a8c] font-bold shadow-xs dark:bg-stone-800 dark:text-[#47c5b0]'
+                        : 'text-stone-600 hover:text-[#1a1a1a] hover:bg-stone-50 dark:text-stone-300 dark:hover:text-stone-100 dark:hover:bg-stone-800'
                     }`
                   }
                 >
@@ -194,15 +206,20 @@ function Navbar() {
 
           {/* Right Area: Profile & Actions */}
           <div className="hidden md:flex items-center gap-3">
-            <div className=''>
+            
+
+            <div className='flex  justify-center items-center gap-5'>
+             { toggle === 'Light' ? <Sun className='w-5 h-5 text-[#159a8c] cursor-pointer' onClick={handleToggle} /> : <Moon className='w-5 h-5 text-[#159a8c] cursor-pointer' onClick={handleToggle} /> }
              <NotificationBell />
             </div>
+
+
             <div className="relative" ref={profileDropdownRef}>
               <motion.button
                 type="button"
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                 whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-2.5 p-1.5 pl-2.5 rounded-xl border border-stone-200/80 bg-white hover:bg-stone-50 hover:border-stone-300 transition-all duration-150 cursor-pointer text-left"
+                className="flex items-center gap-2.5 p-1.5 pl-2.5 rounded-xl border border-stone-200/80 bg-white hover:bg-stone-50 hover:border-stone-300 transition-all duration-150 cursor-pointer text-left dark:border-stone-700 dark:bg-stone-900 dark:hover:bg-stone-800 dark:hover:border-stone-600"
                 aria-label="User profile menu"
                 aria-expanded={profileMenuOpen}
               >
@@ -219,7 +236,7 @@ function Navbar() {
                 )}
 
                 <div className="hidden lg:block max-w-30 truncate">
-                  <div className="text-xs font-semibold text-[#1a1a1a] truncate">
+                  <div className="text-xs font-semibold text-[#1a1a1a] dark:text-stone-100 truncate">
                     {user.name || 'Account'}
                   </div>
                 </div>
@@ -239,11 +256,11 @@ function Navbar() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -4, scale: 0.98 }}
                     transition={{ duration: 0.16, ease: 'easeOut' }}
-                    className="absolute right-0 mt-2 w-64 rounded-2xl border border-stone-200 bg-white p-2 shadow-xl shadow-stone-900/10 z-50 origin-top-right"
+                    className="absolute right-0 mt-2 w-64 rounded-2xl border border-stone-200 bg-white p-2 shadow-xl shadow-stone-900/10 z-50 origin-top-right dark:border-stone-700 dark:bg-stone-900"
                   >
                   {/* User info header */}
-                  <div className="px-3 py-2.5 border-b border-stone-100 mb-1">
-                    <div className="text-sm font-bold text-[#1a1a1a] truncate">
+                  <div className="px-3 py-2.5 border-b border-stone-100 mb-1 dark:border-stone-800">
+                    <div className="text-sm font-bold text-[#1a1a1a] dark:text-stone-100 truncate">
                       {user.name || 'ExpenseMate User'}
                     </div>
                     <div className="text-xs text-stone-500 truncate mt-0.5">
@@ -263,7 +280,7 @@ function Navbar() {
                         setProfileMenuOpen(false)
                         navigate('/profile')
                       }}
-                      className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 rounded-xl hover:bg-stone-100/80 transition-colors cursor-pointer"
+                      className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-medium text-stone-700 rounded-xl hover:bg-stone-100/80 transition-colors cursor-pointer dark:text-stone-200 dark:hover:bg-stone-800"
                     >
                       <Settings className="w-4 h-4 text-stone-400" />
                       <span>Account Settings</span>
@@ -285,11 +302,14 @@ function Navbar() {
 
           {/* Mobile Menu Toggle Button */}
           <div className="flex md:hidden items-center gap-2">
-            <NotificationBell />
+            <div className='flex  justify-center items-center gap-5'>
+             { toggle === 'Light' ? <Sun className='w-5 h-5 text-[#159a8c] cursor-pointer' onClick={handleToggle} /> : <Moon className='w-5 h-5 text-[#159a8c] cursor-pointer' onClick={handleToggle} /> }
+             <NotificationBell />
+            </div>
             <motion.button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               whileTap={{ scale: 0.94 }}
-              className="p-2 rounded-xl border border-stone-200 text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer"
+              className="p-2 rounded-xl border border-stone-200 text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-800"
               aria-label="Toggle navigation menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -308,10 +328,10 @@ function Navbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="md:hidden border-t border-stone-200 bg-white px-4 pt-3 pb-6 space-y-4 shadow-xl overflow-hidden"
+            className="md:hidden border-t border-stone-200 bg-white px-4 pt-3 pb-6 space-y-4 shadow-xl overflow-hidden dark:border-stone-800 dark:bg-[#111817]"
           >
           {/* Mobile Profile Card */}
-          <div className="flex items-center gap-3 p-3 rounded-2xl bg-stone-50 border border-stone-200/80">
+          <div className="flex items-center gap-3 p-3 rounded-2xl bg-stone-50 border border-stone-200/80 dark:bg-stone-900 dark:border-stone-700">
             {user.profileImage ? (
               <img
                 src={user.profileImage}
@@ -325,7 +345,7 @@ function Navbar() {
             )}
 
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-bold text-[#1a1a1a] truncate">
+              <div className="text-sm font-bold text-[#1a1a1a] dark:text-stone-100 truncate">
                 {user.name || 'ExpenseMate User'}
               </div>
               <div className="text-xs text-stone-500 truncate">
@@ -351,7 +371,7 @@ function Navbar() {
                     `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                       isActive
                         ? 'bg-[#159a8c]/10 text-[#159a8c] font-bold'
-                        : 'text-stone-700 hover:bg-stone-50'
+                        : 'text-stone-700 hover:bg-stone-50 dark:text-stone-200 dark:hover:bg-stone-800'
                     }`
                   }
                 >
@@ -365,14 +385,14 @@ function Navbar() {
           </div>
 
           {/* Mobile Actions */}
-          <div className="pt-2 border-t border-stone-100 space-y-1">
+          <div className="pt-2 border-t border-stone-100 space-y-1 dark:border-stone-800">
             <div className=' flex flex-row '>
             <button
               onClick={() => {
                 setMobileMenuOpen(false)
                 navigate('/profile')
               }}
-              className="flex w-full items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-50 transition-colors"
+              className="flex w-full items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-50 transition-colors dark:text-stone-200 dark:hover:bg-stone-800"
             >
               <Settings className="w-4 h-4 text-stone-400" />
               <span>Profile Settings</span>
