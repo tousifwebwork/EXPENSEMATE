@@ -1,5 +1,7 @@
 const express = require("express");
 const setup = require("./utils/settings");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const app = express();
 
