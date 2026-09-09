@@ -5,15 +5,7 @@ const API_URL = import.meta.env.DEV
   : import.meta.env.VITE_API_URL_PROD;
 
 const API = axios.create({
-<<<<<<< HEAD
-  baseURL: `${
-    import.meta.env.MODE === "development"
-      ? import.meta.env.VITE_API_URL_DEV
-      : import.meta.env.VITE_API_URL_PROD
-  }/api/settlements`,
-=======
   baseURL: `${API_URL}/api/settlements`,
->>>>>>> integration
   headers: {
     Accept: "application/json",
   },
