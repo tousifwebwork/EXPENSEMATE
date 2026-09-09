@@ -7,12 +7,16 @@ function setup(app) {
   connectDB();
 
   app.use(cors({
+<<<<<<< HEAD
     origin: [
       "http://localhost:5173",
       process.env.CLIENT_URL,
     ],
+=======
+    origin: [process.env.CLIENT_URL_DEV, process.env.CLIENT_URL_PROD], //cors url for dev and prod
+>>>>>>> integration
     credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }));
  
@@ -29,6 +33,8 @@ function setup(app) {
   app.use("/api/settlements", require("../router/settlement/settlementRoutes"));
   app.use("/api/dashboard", require("../router/dashboard/dashboardRoutes"));
   app.use("/api/notifications", require("../router/notification/notificationRoutes"));
+  app.use("/api/reports", require("../router/report/reportRoutes"));
+  app.use("/api/activity", require("../router/activity/activityRoutes"));
 }
 
 module.exports = setup;

@@ -49,8 +49,7 @@ const AddExpense = () => {
     paidBy: '',
     splitType: 'equal',
     isContribution: false,
-    shares: [],
-    notes: '',
+    shares: [], 
     receiptUrl: null,
   })
 
@@ -327,8 +326,7 @@ const AddExpense = () => {
       expenseData.append('date', formData.date)
       expenseData.append('paidBy', formData.paidBy)
       expenseData.append('splitType', formData.splitType)
-      expenseData.append('shares', JSON.stringify(shares))
-      expenseData.append('notes', formData.notes.trim())
+      expenseData.append('shares', JSON.stringify(shares))  
 
       if (formData.receiptUrl) {
         expenseData.append('receiptPhoto', formData.receiptUrl)
@@ -922,27 +920,6 @@ const AddExpense = () => {
             </div>
           </section>
 
-          {/* NOTES */}
-          <section className="rounded-3xl border border-stone-200/80 bg-white p-6 sm:p-8 shadow-sm">
-            <div className="pb-6 border-b border-stone-100">
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#159a8c] mb-1">
-                <StickyNote className="w-3.5 h-3.5" />
-                <span>Additional Notes</span>
-              </div>
-              <h2 className="text-xl font-bold text-[#1a1a1a]">Notes (Optional)</h2>
-            </div>
-
-            <div className="mt-6">
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                placeholder="Add any additional notes or context about this expense..."
-                rows="4"
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm placeholder:text-stone-400 resize-y focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all"
-              />
-            </div>
-          </section>
 
           {/* ACTIONS */}
           <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-2">

@@ -13,7 +13,7 @@ const pageVariants = {
 
 function AppLayout({ children }) {
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-[#fafaf9] dark:bg-[#111817] dark:text-stone-100">
       <Navbar />
       <motion.main
         initial="hidden"

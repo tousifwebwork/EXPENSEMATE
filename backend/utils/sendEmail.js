@@ -20,5 +20,16 @@ const sendEmail = async (to, code) => {
 
 };
 
+const sendEmail_to_invite = async (from, email, inviteText) => {
 
-module.exports = {sendEmail};
+  await transporter.sendMail({
+    from: from,
+    to: email,
+    subject: "ExpenseMate - Invite",
+    text: inviteText,
+  });
+
+};
+
+
+module.exports = {sendEmail, sendEmail_to_invite};

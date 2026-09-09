@@ -28,8 +28,7 @@ const expenseSchema = new mongoose.Schema(
       },
     ],
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    receiptUrl: { type: String, default: "" },
-    notes: { type: String, default: "" }, 
+    receiptUrl: { type: String, default: "" }, 
   },
   { timestamps: true }
 );

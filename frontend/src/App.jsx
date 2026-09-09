@@ -16,9 +16,10 @@ import Balances from './pages/Balances.jsx'
 import SettlementSuggestions from './pages/SettlementSuggestions.jsx' 
 import Protected from './pages/protected/Protected.jsx'
 import ForgotPassword from './pages/auth/ForgotPassword.jsx'
-import Dashboard from './pages/Dashboard.jsx'
-import NotificationBell from './components/NotificationBell.jsx'
+import Dashboard from './pages/Dashboard.jsx' 
 import Notifications from './pages/notification/Notifications.jsx'
+import InviteEmail from './pages/InviteEmail.jsx'
+import GroupActivity from "./pages/activity/GroupActivity";
 
 function App() {
   return (
@@ -45,12 +46,22 @@ function App() {
         <Route path="/groups/:groupId/expenses/add" element={<AddExpense />}/>
         <Route path="/groups/:groupId/expenses/:expenseId/edit" element={<EditExpense />}/>
 
+        <Route path="/groups/:groupId/activity" element={<GroupActivity />} />
+
+        
         <Route path="/notifications" element={<Notifications />} />
+
+        <Route path="/invite-email" element={<InviteEmail />} />
 
         {/* Friends */}
         <Route path="/friends" element={<Friends />}/>
+
+
         {/* All Expenses */}
         <Route path="/expenses" element={<Expenses />}/>
+
+
+
         {/* Balances */}
         <Route path="/balances" element={<Balances />}/>
         {/* Settlement Suggestions */}

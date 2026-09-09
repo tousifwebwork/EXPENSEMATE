@@ -1,12 +1,20 @@
 
 import axios from "axios";
 
+const API_URL = import.meta.env.DEV
+  ? import.meta.env.VITE_API_URL_DEV
+  : import.meta.env.VITE_API_URL_PROD;
+
 const API = axios.create({
+<<<<<<< HEAD
   baseURL: `${
     import.meta.env.MODE === "development"
       ? import.meta.env.VITE_API_URL_DEV
       : import.meta.env.VITE_API_URL_PROD
   }/api/expenses`,
+=======
+  baseURL: `${API_URL}/api/expenses`,
+>>>>>>> integration
 });
 
 // Authorization header
@@ -42,4 +50,17 @@ export const updateExpense = (expenseId, expenseData, token) => {
 // DELETE EXPENSE
 export const deleteExpense = (expenseId, token) => {
   return API.delete(`/${expenseId}`, authHeader(token));
+};
+
+
+// DELETE photo
+export const deleteReceiptPhoto = (expenseId, token) => {
+  return API.delete(`/${expenseId}/receiptPhoto`, authHeader(token));
+};
+
+
+
+
+export const getMyExpenses = (token) => {
+  return API.get("allexpense/myexpenses", authHeader(token));
 };

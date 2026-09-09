@@ -1,9 +1,11 @@
 const express = require("express");
 
-const {register,login,logout,getMe,verifyCode,sendVerificationCode,resetPassword} = require("../../controller/auth/authController");
+const {register,login,logout,getMe,verifyCode,sendVerificationCode,resetPassword,sendMail_Invite} = require("../../controller/auth/authController");
 const { protect } = require("../../middleware/authMiddleware");
 
 const {registerValidation,loginValidation} = require("../../middleware/validationMiddleware");
+
+
 
 const router = express.Router();
 
@@ -20,5 +22,10 @@ router.post("/forgot-password",sendVerificationCode);
 router.post( "/verify-code", verifyCode);
 // RESET PASSWORD
 router.post("/reset-password",resetPassword);
+
+router.post("/invite/mail",protect , sendMail_Invite);
+
+
+
 
 module.exports = router;

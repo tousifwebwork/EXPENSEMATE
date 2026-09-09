@@ -1,6 +1,10 @@
 import axios from "axios"; 
 
+const API_URL = import.meta.env.DEV
+    ? import.meta.env.VITE_API_URL_DEV
+    : import.meta.env.VITE_API_URL_PROD;
 
+<<<<<<< HEAD
 const API = axios.create({
   baseURL: `${
     import.meta.env.MODE === "development"
@@ -12,6 +16,12 @@ const API = axios.create({
     Accept: "application/json",
   },
 });
+=======
+const API = axios.create({ 
+        baseURL: `${API_URL}/api/groups`, 
+    headers: { "Content-Type": "application/json", Accept: "application/json" } 
+}); 
+>>>>>>> integration
 
 
 const authHeader = (token) => ({ 
