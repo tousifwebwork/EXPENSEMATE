@@ -1,8 +1,141 @@
 
 const Group = require("../../model/groupModel");
 const User = require("../../model/userModel");
+const FriendRequest = require("../../model/friendRequestModel");
+const mongoose = require("mongoose");
 const createNotification = require("../../utils/createNotification");
 const logActivity = require("../../utils/logActivity");
+
+
+// ADD MEMBER
+exports.addMember = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const userId = req.user.userId;
+    const { search } = req.body;
+    const value = typeof search === "string" ? search.trim() : "";
+
+    if (!value) {
+      return res.status(400).json({
+        success: false,
+        message: "Name or Profile ID is required",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid group ID",
+      });
+    }
+
+    const group = await Group.findById(groupId);
+
+    if (!group) {
+      return res.status(404).json({
+        success: false,
+        message: "Group not found"
+      });
+    }
+
+    const membership = group.members.find(
+      (m) => m.user.toString() === userId
+    );
+
+    if (
+      !membership ||
+      (membership.role !== "owner" && membership.role !== "admin")
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to add members",
+      });
+    }
+
+    // Profile IDs are stored uppercase; names are matched exactly, case-insensitively.
+    const escapedName = value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const newUser = await User.findOne({
+      $or: [
+        { profileId: value.toUpperCase() },
+        { name: { $regex: `^${escapedName}$`, $options: "i" } },
+      ],
+    });
+
+    if (!newUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    const friendship = await FriendRequest.findOne({
+      $or: [
+        { sender: userId, receiver: newUser._id },
+        { sender: newUser._id, receiver: userId },
+      ],
+      status: "accepted",
+    });
+
+    if (!friendship) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only add your friends to the group"
+      });
+    }
+
+    const alreadyMember = group.members.some(
+      (member) => member.user.toString() === newUser._id.toString()
+    );
+
+    if (alreadyMember) {
+      return res.status(400).json({
+        success: false,
+        message: "User is already a member of the group",
+      });
+    }
+
+    group.members.push({
+      user: newUser._id,
+      userName: newUser.name,
+      role: "member"
+    });
+
+    await group.save();
+
+    await createNotification({
+      recipient: newUser._id,
+      type: "group_invite",
+      message: `You were added to the group "${group.name}"`,
+      relatedGroup: group._id,
+      relatedUser: userId
+    });
+
+    await logActivity({
+      group: groupId,
+      actor: userId,
+      action: "member_added",
+      description: `added ${newUser.name} to the group`
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Member added",
+      group,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+}; 
+
+
+
+
+
+
 
 
 // CREATE GROUP
@@ -139,56 +272,7 @@ exports.updateGroup = async (req, res) => {
 
 
 
-// ADD MEMBER (using their profileId — reusing your friend-code pattern!)
-exports.addMember = async (req, res) => {
-  try {
-    const User = require("../../model/userModel");
-    const { groupId } = req.params;
-    const userId = req.user.userId;
-    const { profileId } = req.body;
 
-    const group = await Group.findById(groupId);
-    if (!group) {
-      return res.status(404).json({ success: false, message: "Group not found" });
-    }
-
-    const membership = group.members.find((m) => m.user.toString() === userId);
-    if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
-      return res.status(403).json({ success: false, message: "Not authorized to add members" });
-    }
-
-    const newUser = await User.findOne({ profileId: profileId?.toUpperCase() });
-    if (!newUser) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
-
-    const alreadyMember = group.members.some((m) => m.user.toString() === newUser._id.toString());
-    if (alreadyMember) {
-      return res.status(400).json({ success: false, message: "User is already a member of the group" });
-    }
-
-    group.members.push({ user: newUser._id, userName: newUser.name, role: "member" });
-    
-    await createNotification({
-  recipient: newUser._id,
-  type: "group_invite",
-  message: `You were added to the group "${group.name}"`,
-  relatedGroup: group._id,
-  relatedUser: userId,
-    });
-    await group.save();
-    await logActivity({
-  group: groupId,
-  actor: userId,
-  action: "member_added",
-  description: `added ${newUser.name} to the group`,
-});
-
-    res.status(200).json({ success: true, message: "Member added", group });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
 
 
 

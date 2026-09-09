@@ -2,31 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { jwtDecode } from 'jwt-decode'
 import AppLayout from '../../components/AppLayout'
-import {
-  getGroupById,
-  updateGroup,
-  addMember,
-  updateMemberRole,
-  removeMember,
-  toggleArchive,
-  deleteGroup,
-} from '../../config/group/groupAPI'
+import {getGroupById,updateGroup,addMember,updateMemberRole,removeMember,toggleArchive,deleteGroup,} from '../../config/group/groupAPI'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-
-import {
-  ArrowLeft,
-  Users,
-  Coins,
-  Receipt,
-  Plus,
-  Settings,
-  Archive,
-  ArchiveRestore,
-  Trash2,
-  UserPlus,
-  UserMinus,
-  Shield,
+import {ArrowLeft,Users,Coins,
+Receipt,Plus,Settings,Archive,ArchiveRestore,Trash2,UserPlus,UserMinus, Shield,
   ShieldCheck,
   CheckCircle2,
   AlertCircle,
@@ -43,7 +23,7 @@ const ViewGroup = () => {
   const [updating, setUpdating] = useState(false)
   const [addingMember, setAddingMember] = useState(false)
   const [currentUserId, setCurrentUserId] = useState(null)
-  const [profileId, setProfileId] = useState('')
+  const [memberSearch, setMemberSearch] = useState('')
   const [editData, setEditData] = useState({
     name: '',
     description: '',
@@ -116,24 +96,26 @@ const ViewGroup = () => {
   // ADD MEMBER OWNER / ADMIN ONLY
   const handleAddMember = async (e) => {
     e?.preventDefault()
-    if (!profileId.trim()) {
-      toast.error('Please enter a Profile ID')
-      return
-    }
-    try {
-      setAddingMember(true)
-      const token = localStorage.getItem('token')
-      await addMember(groupId, { profileId: profileId.trim() }, token)
-      setProfileId('')
-      await loadGroup()
-      toast.success('Member added successfully!')
-    } catch (err) {
-      console.log(err)
-      toast.error(err.response?.data?.message || 'Failed to add member')
-    } finally {
-      setAddingMember(false)
-    }
+     if (!memberSearch.trim()) {
+    toast.error('Please enter a Profile ID or Full Name')
+    return
   }
+    try {
+    setAddingMember(true)
+    const token = localStorage.getItem('token')
+    await addMember( groupId, { search: memberSearch.trim() }, token );
+    setMemberSearch('')
+    await loadGroup()
+    toast.success('Member added successfully!')
+  } catch (err) {
+    console.log(err)
+    toast.error(
+      err.response?.data?.message || 'Failed to add member'
+    )
+  } finally {
+    setAddingMember(false)
+  }
+}
 
   // CHANGE ROLE OWNER ONLY
   const handleRoleChange = async (memberId, role) => {
@@ -435,17 +417,20 @@ const ViewGroup = () => {
             {/* ADD MEMBER FORM (OWNER / ADMIN ONLY) */}
             {(currentUserRole === 'owner' || currentUserRole === 'admin') && (
               <form onSubmit={handleAddMember} className="flex gap-2 w-full sm:w-auto">
-                <div className="relative flex-1 sm:w-64">
+                
+                <div className="relative flex-1 sm:w-70">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
                     <UserPlus className="w-4 h-4" />
                   </div>
                   <input
-                    value={profileId}
-                    onChange={(e) => setProfileId(e.target.value)}
-                    placeholder="Enter Profile ID"
-                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-xs placeholder:text-stone-400 focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all"
+                     value={memberSearch}
+                    onChange={(e) => setMemberSearch(e.target.value)}
+                    placeholder="Enter Profile ID or Full Name"
+                    className="w-full  pl-9 pr-4 py-2 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-xs placeholder:text-stone-400 focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all"
                   />
                 </div>
+               
+               
                 <button
                   type="submit"
                   disabled={addingMember}
