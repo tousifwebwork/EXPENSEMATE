@@ -94,7 +94,7 @@ const GroupExpenses = () => {
 
       const API_URL = import.meta.env.DEV
         ? import.meta.env.VITE_API_URL_DEV
-        : import.meta.env.VITE_API_URL_PROD
+        : import.meta.env.MY_VITE_API_URL_PROD
 
       const response = await axios.get(
         `${API_URL}/api/reports/group/${groupId}/expenses/export`,

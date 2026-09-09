@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = import.meta.env.DEV
   ? import.meta.env.VITE_API_URL_DEV
-  : import.meta.env.VITE_API_URL_PROD;
+  : import.meta.env.MY_VITE_API_URL_PROD;
 const NOTIFICATION_API_URL = `${API_URL}/api/notifications`;
 
 export const getNotifications = async (token) => {
