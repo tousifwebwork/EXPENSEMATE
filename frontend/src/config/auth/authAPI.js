@@ -5,7 +5,7 @@ const API_URL = import.meta.env.DEV
   : import.meta.env.MY_VITE_API_URL_PROD;
 
 const API = axios.create({
-  baseURL: `${API_URL}/api/auth`,
+  baseURL: `${API_URL}/api/auth`, 
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
