@@ -55,8 +55,13 @@ function App() {
 
         {/* Friends */}
         <Route path="/friends" element={<Friends />}/>
+
+
         {/* All Expenses */}
         <Route path="/expenses" element={<Expenses />}/>
+
+
+
         {/* Balances */}
         <Route path="/balances" element={<Balances />}/>
         {/* Settlement Suggestions */}

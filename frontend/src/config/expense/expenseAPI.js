@@ -51,3 +51,8 @@ export const deleteReceiptPhoto = (expenseId, token) => {
 };
 
 
+
+
+export const getMyExpenses = (token) => {
+  return API.get("allexpense/myexpenses", authHeader(token));
+};
