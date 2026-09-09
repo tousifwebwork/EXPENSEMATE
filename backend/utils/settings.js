@@ -5,16 +5,8 @@ require("dotenv").config();
 
 function setup(app) {
   connectDB();
-
-  app.use(cors({
-<<<<<<< HEAD
-    origin: [
-      "http://localhost:5173",
-      process.env.CLIENT_URL,
-    ],
-=======
-    origin: [process.env.CLIENT_URL_DEV, process.env.CLIENT_URL_PROD], //cors url for dev and prod
->>>>>>> integration
+  app.use(cors({  
+    origin: [process.env.CLIENT_URL_DEV, process.env.CLIENT_URL_PROD], 
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
