@@ -27,6 +27,7 @@ function setup(app) {
   app.use("/api/dashboard", require("../router/dashboard/dashboardRoutes"));
   app.use("/api/notifications", require("../router/notification/notificationRoutes"));
   app.use("/api/reports", require("../router/report/reportRoutes"));
+  app.use("/api/activity", require("../router/activity/activityRoutes"));
 }
 
 module.exports = setup;

@@ -3,6 +3,7 @@ const Group = require("../../model/groupModel");
 const getGroupMembership = require("../../utils/getGroupMembership");
 const calculateGroupBalances = require("../../utils/calculateGroupBalances");
 const createNotification = require("../../utils/createNotification");
+const logActivity = require("../../utils/logActivity");
 
 
 // RECORD SETTLEMENT
@@ -43,7 +44,12 @@ exports.createSettlement = async (req, res) => {
       date,
       createdBy: userId,
     });
-
+    await logActivity({
+  group: groupId,
+  actor: userId,
+  action: "settlement_recorded",
+  description: `recorded a settlement of ${group.baseCurrency} ${amount}`,
+});
     await createNotification({
   recipient: receiver,
   type: "settlement_recorded",

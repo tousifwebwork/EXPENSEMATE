@@ -2,6 +2,7 @@
 const Group = require("../../model/groupModel");
 const User = require("../../model/userModel");
 const createNotification = require("../../utils/createNotification");
+const logActivity = require("../../utils/logActivity");
 
 
 // CREATE GROUP
@@ -26,7 +27,12 @@ exports.createGroup = async (req, res) => {
       owner: userId,
       members: [{ user: userId,userName:username,role: "owner" }],
     }); 
-    console.log(group)
+    await logActivity({
+  group: group._id,
+  actor: userId,
+  action: "group_created",
+  description: `created the group "${name}"`,
+}); 
     res.status(201).json({ success: true, message: "Group created", group });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -171,6 +177,12 @@ exports.addMember = async (req, res) => {
   relatedUser: userId,
     });
     await group.save();
+    await logActivity({
+  group: groupId,
+  actor: userId,
+  action: "member_added",
+  description: `added ${newUser.name} to the group`,
+});
 
     res.status(200).json({ success: true, message: "Member added", group });
   } catch (error) {
@@ -211,6 +223,14 @@ exports.updateMemberRole = async (req, res) => {
     member.role = role;
     await group.save();
 
+    await logActivity({
+  group: groupId,
+  actor: userId,
+  action: "member_role_changed",
+  description: `changed a member's role to ${role}`,
+  metadata: { newRole: role },
+});
+
     res.status(200).json({ success: true, message: "Member role updated", group });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -241,6 +261,12 @@ exports.removeMember = async (req, res) => {
 
     group.members = group.members.filter((m) => m.user.toString() !== memberId);
     await group.save();
+    await logActivity({
+  group: groupId,
+  actor: userId,
+  action: "member_removed",
+  description: `removed a member from the group`,
+});
 
     res.status(200).json({ success: true, message: "Member removed", group });
   } catch (error) {

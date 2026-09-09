@@ -545,16 +545,15 @@ const GroupExpenses = () => {
               </span>
             </button>
 
-            <button
-              onClick={() =>
-                navigate(
-                  `/groups/${groupId}/expenses/add`
-                )
-              }
-              className="inline-flex items-center gap-2 rounded-xl bg-[#159a8c] px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-[#159a8c]/30 hover:bg-[#117d72] active:scale-[0.99] transition-all cursor-pointer"
-            >
+            <button  onClick={() =>  navigate(`/groups/${groupId}/expenses/add`)  }
+              className="inline-flex items-center gap-2 rounded-xl bg-[#159a8c] px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-[#159a8c]/30 hover:bg-[#117d72] active:scale-[0.99] transition-all cursor-pointer">
               <Plus className="w-4 h-4" />
               <span>Add Expense</span>
+            </button>
+
+            <button  onClick={() => navigate(`/groups/${groupId}/activity`)}
+             className="rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-600 hover:bg-slate-100">
+               View Activity
             </button>
           </div>
         </div>
