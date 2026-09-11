@@ -1,7 +1,6 @@
 const FriendRequest = require("../../model/friendRequestModel");
 const User = require("../../model/userModel");
 const createNotification = require("../../utils/createNotification");
- 
 exports.searchUsers = async (req, res) => {
   try {
     const { query } = req.query;
@@ -260,6 +259,74 @@ exports.removeFriend = async (req, res) => {
     }
 
     res.status(200).json({ success: true, message: "Friend removed" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+exports.searchUsers_to_add = async (req, res) => {
+  try {
+    const { query } = req.query;
+    const userId = req.user.userId;
+
+    if (!query || !query.trim()) {
+      return res.status(400).json({ success: false, message: "Search query is required" });
+    }
+
+    const trimmedQuery = query.trim();
+
+    const users = await User.find({
+      _id: { $ne: userId },
+      $or: [
+        { name: { $regex: trimmedQuery, $options: "i" } },
+        { email: { $regex: trimmedQuery, $options: "i" } },
+        { profileId: { $regex: trimmedQuery, $options: "i" } },
+      ],
+    })
+      .select("name email profileId profileImage")
+      .limit(10);
+
+    if (users.length === 0) {
+      return res.status(200).json({ success: true, users: [] });
+    }
+
+    const userIds = users.map((u) => u._id);
+ 
+    const requests = await FriendRequest.find({
+      $or: [
+        { sender: userId, receiver: { $in: userIds } },
+        { receiver: userId, sender: { $in: userIds } },
+      ],
+    });
+
+    const relationshipByUserId = new Map();
+    requests.forEach((r) => {
+      const isSender = r.sender.toString() === userId;
+      const otherId = isSender ? r.receiver.toString() : r.sender.toString();
+
+      if (r.status === "accepted") {
+        relationshipByUserId.set(otherId, { status: "friends", requestId: r._id.toString() });
+      } else if (r.status === "pending") {
+        relationshipByUserId.set(otherId, {
+          status: isSender ? "pending_sent" : "pending_received",
+          requestId: r._id.toString(),
+        });
+      }
+      // declined -> intentionally not stored, so it resolves to "none" below
+    });
+
+    const usersWithRelationship = users.map((u) => ({
+      _id: u._id,
+      name: u.name,
+      email: u.email,
+      profileId: u.profileId,
+      profileImage: u.profileImage,
+      relationship: relationshipByUserId.get(u._id.toString()) || { status: "none", requestId: null },
+    }));
+
+    res.status(200).json({ success: true, users: usersWithRelationship });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

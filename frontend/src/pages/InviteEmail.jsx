@@ -1,5 +1,4 @@
- 
-import { Plus,Activity } from 'lucide-react'
+import { Plus, Activity, Loader2 } from 'lucide-react'
 import AppLayout from '../components/AppLayout.jsx'  
 import { useEffect, useState } from 'react'
 import { getProfile } from '../config/user/userAPI.js';
@@ -10,14 +9,16 @@ const InviteEmail = () => {
    
   const [inviteText, setInviteText] = useState('') 
   const [email, setemail] = useState('')
+  const [sending, setSending] = useState(false)  
   
-  // GET PROFILE 
-    useEffect(() => {
+  
+  useEffect(() => {
+    const CLIENT_URL_PROD=`https://expensmatefrontend.vercel.app`
     const token = localStorage.getItem('token')
     const fetchProfile = async () => {
       try {
         const res = await getProfile(token)  
-        setInviteText(`Hey ${res.data.user.name}, I am using this amazing app to manage my expenses. Visit https://expensemate-1-fmj3.onrender.com and join me to make expense sharing easier and more fun!`)
+        setInviteText(`Hey ${res.data.user.name}, I am using this amazing app to manage my expenses. Visit ${CLIENT_URL_PROD} and join me to make expense sharing easier and more fun!`)
       } catch (error) {
         console.log(error.response?.data || error.message) 
       }  
@@ -25,19 +26,28 @@ const InviteEmail = () => {
     fetchProfile()
   }, [])
 
-  const handle_mail = async(e) => {
+  const handle_mail = async (e) => {
     try {
-      e.preventDefault(); 
-      if(!email) {  toast.error("Please enter valid email."); return; }
+      e.preventDefault();
+
+      if (!email) {
+        toast.error("Please enter valid email.");
+        return;
+      }
+
+      setSending(true); // start loader
 
       const token = localStorage.getItem('token');
-      await sent_email_invite({email,inviteText} ,token); 
+      await sent_email_invite({ email, inviteText }, token);
       toast.success("Invite sent successfully.");
-    }catch (error) {
+      setemail('');  
+    } catch (error) {
       toast.error("Server Error.");
-      console.log(error.response?.data || error.message) 
+      console.log(error.response?.data || error.message)
+    } finally {
+      setSending(false); // stop loader, runs whether success or failure
+    }
   }
-}
 
 
   return (
@@ -88,11 +98,38 @@ const InviteEmail = () => {
                   <form onSubmit={handle_mail} className="border flex flex-col gap-y-5 items-center border-gray-300 px-8 py-4 rounded-lg w-full max-w-xl h-fit">
 
                   <span className="flex justify-center font-bold text-2xl">Email Address</span>
-                   <input  name='email' onChange={(e)=>{setemail(e.target.value);}} type="email" placeholder="Enter email address" className=" w-full mt-2 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#159a8c] focus:border-transparent" />
-                   <textarea type="text" value={`${inviteText}`}  rows="3" 
-                   onChange={(e) => setInviteText(e.target.value)} placeholder="Enter name" 
-                   className=" w-full mt-2 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#159a8c] focus:border-transparent" />
-                   <button type='submit' className="w-full max-w-md bg-[#159a8c] text-white py-2 px-4 rounded-lg hover:bg-[#159a8c]/90 focus:outline-none focus:ring-2 focus:ring-[#159a8c] focus:ring-offset-2">Invite</button>
+                   <input
+                     name='email'
+                     onChange={(e) => { setemail(e.target.value); }}
+                     value={email}
+                     type="email"
+                     placeholder="Enter email address"
+                     disabled={sending}
+                     className="w-full mt-2 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#159a8c] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                   />
+                   <textarea
+                     type="text"
+                     value={inviteText}
+                     rows="3"
+                     onChange={(e) => setInviteText(e.target.value)}
+                     placeholder="Enter name"
+                     disabled={sending}
+                     className="w-full mt-2 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#159a8c] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                   />
+                   <button
+                     type='submit'
+                     disabled={sending}
+                     className="w-full max-w-md bg-[#159a8c] text-white py-2 px-4 rounded-lg hover:bg-[#159a8c]/90 focus:outline-none focus:ring-2 focus:ring-[#159a8c] focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                   >
+                     {sending ? (
+                       <>
+                         <Loader2 className="w-4 h-4 animate-spin" />
+                         Sending...
+                       </>
+                     ) : (
+                       "Invite"
+                     )}
+                   </button>
                  
                   </form>  
               </div> 

@@ -2,17 +2,22 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { jwtDecode } from 'jwt-decode'
 import AppLayout from '../../components/AppLayout'
-import {getGroupById,updateGroup,addMember,updateMemberRole,removeMember,toggleArchive,deleteGroup,} from '../../config/group/groupAPI'
+import {
+  getGroupById,
+  updateGroup,
+  addMember,
+  updateMemberRole,
+  removeMember,
+  toggleArchive,
+  deleteGroup,
+} from '../../config/group/groupAPI'
+import  {searchUsers_to_add}  from '../../config/friends/friendAPI' // ✅ added import
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import {ArrowLeft,Users,Coins,
-Receipt,Plus,Settings,Archive,ArchiveRestore,Trash2,UserPlus,UserMinus, Shield,
-  ShieldCheck,
-  CheckCircle2,
-  AlertCircle,
-  Sparkles,
-  Save,
-  ChevronRight,
+import {
+  ArrowLeft, Users, Coins, Receipt, Plus, Settings, Archive, ArchiveRestore,
+  Trash2, ShieldCheck, AlertCircle,
+  Sparkles, Save, ChevronRight, Search, UserCheck,
 } from 'lucide-react'
 
 const ViewGroup = () => {
@@ -24,11 +29,11 @@ const ViewGroup = () => {
   const [addingMember, setAddingMember] = useState(false)
   const [currentUserId, setCurrentUserId] = useState(null)
   const [memberSearch, setMemberSearch] = useState('')
-  const [editData, setEditData] = useState({
-    name: '',
-    description: '',
-    baseCurrency: 'INR',
-  })
+  const [editData, setEditData] = useState({ name: '', description: '', baseCurrency: 'INR' })
+
+  const [searchedUsers, setSearchedUsers] = useState([]) // ✅ renamed for clarity
+  const [searching, setSearching] = useState(false)       // ✅ loading state for search
+  const [showResults, setShowResults] = useState(false)   // ✅ toggle dropdown visibility
 
   // GET GROUP
   const loadGroup = async () => {
@@ -59,32 +64,15 @@ const ViewGroup = () => {
     loadGroup()
   }, [groupId])
 
-  // CURRENT USER MEMBERSHIP
-  const currentMember = group?.members?.find(
-    (member) =>
-      (member.user?._id || member.user)?.toString() === currentUserId?.toString()
-  )
-  let currentUserRole = currentMember?.role
-
-  const ownerId = group?.owner?._id || group?.owner
-  if (ownerId?.toString() === currentUserId?.toString()) {
-    currentUserRole = 'owner'
-  }
-
-  // EDIT GROUP OWNER / ADMIN ONLY
   const handleUpdateGroup = async (e) => {
-    e?.preventDefault()
-    if (!editData.name.trim()) {
-      toast.error('Group name is required')
-      return
-    }
+    e.preventDefault()
 
     try {
       setUpdating(true)
       const token = localStorage.getItem('token')
       const res = await updateGroup(groupId, editData, token)
       setGroup(res.data.group)
-      toast.success('Group settings updated successfully!')
+      toast.success('Group updated successfully!')
     } catch (err) {
       console.log(err)
       toast.error(err.response?.data?.message || 'Failed to update group')
@@ -93,29 +81,100 @@ const ViewGroup = () => {
     }
   }
 
-  // ADD MEMBER OWNER / ADMIN ONLY
+  // CURRENT USER MEMBERSHIP
+  const currentMember = group?.members?.find(
+    (member) => (member.user?._id || member.user)?.toString() === currentUserId?.toString()
+  )
+  let currentUserRole = currentMember?.role
+
+  const ownerId = group?.owner?._id || group?.owner
+  if (ownerId?.toString() === currentUserId?.toString()) {
+    currentUserRole = 'owner'
+  }
+
+  // Existing group member IDs — used to filter out people already in the group
+  const existingMemberIds = new Set(
+    (group?.members || []).map((m) => (m.user?._id || m.user)?.toString())
+  )
+
+  // =========================
+  // SEARCH FRIENDS TO ADD (fixed + completed)
+  // =========================
+
+  const handleMemberSearchInput = async (value) => {
+    setMemberSearch(value)
+
+    if (!value.trim()) {
+      setSearchedUsers([])
+      setShowResults(false)
+      return
+    }
+
+    try {
+      setSearching(true)
+      setShowResults(true)
+      const token = localStorage.getItem('token')
+
+      const response = await searchUsers_to_add(value.trim(), token)
+
+      // ✅ Only show people who are FRIENDS and not already in this group
+      const friendsOnly = (response.data.users || []).filter(
+        (u) =>
+          u.relationship?.status === 'friends' &&
+          !existingMemberIds.has(u._id.toString())
+      )
+
+      setSearchedUsers(friendsOnly)
+    } catch (err) {
+      console.log(err)
+      toast.error(err.response?.data?.message || 'Failed to search users')
+    } finally {
+      setSearching(false)
+    }
+  }
+
+  // ADD MEMBER — now takes a specific user directly from search results
   const handleAddMember = async (e) => {
     e?.preventDefault()
-     if (!memberSearch.trim()) {
-    toast.error('Please enter a Profile ID or Full Name')
-    return
-  }
+    if (!memberSearch.trim()) {
+      toast.error('Please enter a Profile ID or Full Name')
+      return
+    }
     try {
-    setAddingMember(true)
-    const token = localStorage.getItem('token')
-    await addMember( groupId, { search: memberSearch.trim() }, token );
-    setMemberSearch('')
-    await loadGroup()
-    toast.success('Member added successfully!')
-  } catch (err) {
-    console.log(err)
-    toast.error(
-      err.response?.data?.message || 'Failed to add member'
-    )
-  } finally {
-    setAddingMember(false)
+      setAddingMember(true)
+      const token = localStorage.getItem('token')
+      await addMember(groupId, { search: memberSearch.trim() }, token)
+      setMemberSearch('')
+      setSearchedUsers([])
+      setShowResults(false)
+      await loadGroup()
+      toast.success('Member added successfully!')
+    } catch (err) {
+      console.log(err)
+      toast.error(err.response?.data?.message || 'Failed to add member')
+    } finally {
+      setAddingMember(false)
+    }
   }
-}
+
+  // Add a specific friend directly by clicking them in the dropdown
+  const handleAddSpecificUser = async (user) => {
+    try {
+      setAddingMember(true)
+      const token = localStorage.getItem('token')
+      await addMember(groupId, { search: user.profileId }, token)
+      setMemberSearch('')
+      setSearchedUsers([])
+      setShowResults(false)
+      await loadGroup()
+      toast.success(`${user.name} added to the group!`)
+    } catch (err) {
+      console.log(err)
+      toast.error(err.response?.data?.message || 'Failed to add member')
+    } finally {
+      setAddingMember(false)
+    }
+  }
 
   // CHANGE ROLE OWNER ONLY
   const handleRoleChange = async (memberId, role) => {
@@ -244,9 +303,7 @@ const ViewGroup = () => {
       <ToastContainer position="top-right" autoClose={3000} />
 
       <div className="max-w-6xl mx-auto space-y-8 animate-fade-in-up">
-        {/* =========================
-            BREADCRUMBS & NAVIGATION
-        ========================= */}
+        {/* BREADCRUMBS & NAVIGATION */}
         <div className="flex items-center gap-2 text-xs font-medium text-stone-500">
           <button
             onClick={() => navigate('/groups')}
@@ -261,12 +318,9 @@ const ViewGroup = () => {
           </span>
         </div>
 
-        {/* =========================
-            GROUP HERO HEADER
-        ========================= */}
+        {/* GROUP HERO HEADER */}
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between pb-6 border-b border-stone-200/80">
           <div className="flex items-start gap-4">
-            {/* AVATAR */}
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] text-white font-bold text-xl shadow-md shadow-[#159a8c]/20">
               {getInitials(group.name)}
             </div>
@@ -295,9 +349,7 @@ const ViewGroup = () => {
             </div>
           </div>
 
-          {/* ACTION BUTTONS (Archive / Delete) */}
           <div className="flex items-center gap-2.5 self-start md:self-auto shrink-0">
-            {/* ARCHIVE / REOPEN - OWNER ONLY */}
             {currentUserRole === 'owner' && (
               <button
                 onClick={handleArchive}
@@ -317,7 +369,6 @@ const ViewGroup = () => {
               </button>
             )}
 
-            {/* DELETE - OWNER / ADMIN */}
             {(currentUserRole === 'owner' || currentUserRole === 'admin') && (
               <button
                 onClick={handleDeleteGroup}
@@ -330,11 +381,8 @@ const ViewGroup = () => {
           </div>
         </div>
 
-        {/* =========================
-            QUICK STATS & ACTIONS ROW
-        ========================= */}
+        {/* QUICK STATS & ACTIONS ROW */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* CURRENCY CARD */}
           <div className="rounded-3xl border border-stone-200/80 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between text-stone-400">
               <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">
@@ -350,7 +398,6 @@ const ViewGroup = () => {
             </div>
           </div>
 
-          {/* MEMBERS COUNT */}
           <div className="rounded-3xl border border-stone-200/80 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between text-stone-400">
               <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">
@@ -366,7 +413,6 @@ const ViewGroup = () => {
             </div>
           </div>
 
-          {/* TRACK RECORD (EXPENSES) */}
           <div className="rounded-3xl border border-stone-200/80 bg-white p-5 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between text-stone-400">
               <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">
@@ -383,7 +429,6 @@ const ViewGroup = () => {
             </button>
           </div>
 
-          {/* ADD EXPENSE CTA */}
           <div className="rounded-3xl border border-[#159a8c]/20 bg-gradient-to-br from-[#159a8c]/5 to-[#47c5b0]/10 p-5 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between text-[#159a8c]">
               <span className="text-xs font-semibold uppercase tracking-wider text-[#159a8c]">
@@ -401,9 +446,7 @@ const ViewGroup = () => {
           </div>
         </div>
 
-        {/* =========================
-            MEMBERS MANAGEMENT SECTION
-        ========================= */}
+        {/* MEMBERS MANAGEMENT SECTION */}
         <div className="rounded-3xl border border-stone-200/80 bg-white p-6 sm:p-8 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-stone-100">
             <div>
@@ -414,32 +457,75 @@ const ViewGroup = () => {
               <h2 className="text-xl font-bold text-[#1a1a1a]">Members</h2>
             </div>
 
-            {/* ADD MEMBER FORM (OWNER / ADMIN ONLY) */}
+            {/* ADD MEMBER — SEARCH BOX WITH DROPDOWN (OWNER / ADMIN ONLY) */}
             {(currentUserRole === 'owner' || currentUserRole === 'admin') && (
-              <form onSubmit={handleAddMember} className="flex gap-2 w-full sm:w-auto">
-                
-                <div className="relative flex-1 sm:w-70">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
-                    <UserPlus className="w-4 h-4" />
+              <div className="relative w-full sm:w-80">
+                <form onSubmit={handleAddMember} className="flex gap-2">
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
+                      <Search className="w-4 h-4" />
+                    </div>
+                    <input
+                      value={memberSearch}
+                      onChange={(e) => handleMemberSearchInput(e.target.value)}
+                      onFocus={() => memberSearch && setShowResults(true)}
+                      placeholder="Search friends to add..."
+                      className="w-full pl-9 pr-4 py-2 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-xs placeholder:text-stone-400 focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all"
+                    />
                   </div>
-                  <input
-                     value={memberSearch}
-                    onChange={(e) => setMemberSearch(e.target.value)}
-                    placeholder="Enter Profile ID or Full Name"
-                    className="w-full  pl-9 pr-4 py-2 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-xs placeholder:text-stone-400 focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all"
-                  />
-                </div>
-               
-               
-                <button
-                  type="submit"
-                  disabled={addingMember}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-[#159a8c] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#117d72] transition-all disabled:opacity-60 cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>{addingMember ? 'Adding...' : 'Add'}</span>
-                </button>
-              </form>
+
+                  <button
+                    type="submit"
+                    disabled={addingMember}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#159a8c] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#117d72] transition-all disabled:opacity-60 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{addingMember ? 'Adding...' : 'Add'}</span>
+                  </button>
+                </form>
+
+                {/* SEARCH RESULTS DROPDOWN — FRIENDS ONLY */}
+                {showResults && (
+                  <div className="absolute z-20 mt-2 w-full rounded-xl border border-stone-200 bg-white shadow-lg max-h-64 overflow-y-auto">
+                    {searching ? (
+                      <p className="p-4 text-center text-xs text-stone-400">Searching...</p>
+                    ) : searchedUsers.length === 0 ? (
+                      <p className="p-4 text-center text-xs text-stone-400">
+                        No friends found matching "{memberSearch}"
+                      </p>
+                    ) : (
+                      searchedUsers.map((user) => (
+                        <button
+                          key={user._id}
+                          type="button"
+                          onClick={() => handleAddSpecificUser(user)}
+                          disabled={addingMember}
+                          className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left hover:bg-stone-50 transition-colors disabled:opacity-50"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            {user.profileImage ? (
+                              <img
+                                src={user.profileImage}
+                                alt={user.name}
+                                className="h-8 w-8 rounded-xl object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-stone-100 text-stone-600 font-bold text-[10px]">
+                                {getInitials(user.name)}
+                              </div>
+                            )}
+                            <div>
+                              <p className="text-xs font-semibold text-[#1a1a1a]">{user.name}</p>
+                              <p className="text-[10px] text-stone-400">{user.email}</p>
+                            </div>
+                          </div>
+                          <UserCheck className="w-4 h-4 text-[#159a8c]" />
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
@@ -458,7 +544,6 @@ const ViewGroup = () => {
                   key={member._id || memberUserId}
                   className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 first:pt-0 last:pb-0"
                 >
-                  {/* MEMBER DETAILS */}
                   <div className="flex items-center gap-3.5">
                     {memberUser.profileImage ? (
                       <img
@@ -489,15 +574,11 @@ const ViewGroup = () => {
                     </div>
                   </div>
 
-                  {/* CONTROLS */}
                   <div className="flex items-center gap-3 self-end sm:self-auto">
-                    {/* ROLE BADGE / SELECTOR */}
                     {canManageMember && currentUserRole === 'owner' && !isOwner ? (
                       <select
                         value={member.role}
-                        onChange={(e) =>
-                          handleRoleChange(memberUser._id, e.target.value)
-                        }
+                        onChange={(e) => handleRoleChange(memberUser._id, e.target.value)}
                         className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs font-semibold text-stone-700 focus:border-[#159a8c] outline-none cursor-pointer transition-colors"
                       >
                         <option value="member">Member</option>
@@ -518,12 +599,9 @@ const ViewGroup = () => {
                       </span>
                     )}
 
-                    {/* REMOVE MEMBER BUTTON */}
                     {canManageMember && !isOwner && (
                       <button
-                        onClick={() =>
-                          handleRemoveMember(memberUser._id, memberUser.name)
-                        }
+                        onClick={() => handleRemoveMember(memberUser._id, memberUser.name)}
                         className="p-1.5 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                         title="Remove member"
                         aria-label={`Remove ${memberUser.name}`}
@@ -538,9 +616,7 @@ const ViewGroup = () => {
           </div>
         </div>
 
-        {/* =========================
-            EDIT GROUP SETTINGS (OWNER / ADMIN ONLY)
-        ========================= */}
+        {/* EDIT GROUP SETTINGS (OWNER / ADMIN ONLY) */}
         {(currentUserRole === 'owner' || currentUserRole === 'admin') && (
           <div className="rounded-3xl border border-stone-200/80 bg-white p-6 sm:p-8 shadow-sm">
             <div className="pb-6 border-b border-stone-100">
@@ -548,57 +624,43 @@ const ViewGroup = () => {
                 <Settings className="w-3.5 h-3.5" />
                 <span>Configuration</span>
               </div>
-              <h2 className="text-xl font-bold text-[#1a1a1a]">
-                Edit Group Settings
-              </h2>
+              <h2 className="text-xl font-bold text-[#1a1a1a]">Edit Group Settings</h2>
             </div>
 
             <form onSubmit={handleUpdateGroup} className="mt-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* NAME */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2">
                     Group Name
                   </label>
                   <input
                     value={editData.name}
-                    onChange={(e) =>
-                      setEditData({ ...editData, name: e.target.value })
-                    }
+                    onChange={(e) => setEditData({ ...editData, name: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all"
                     placeholder="Group name"
                     required
                   />
                 </div>
 
-                {/* DESCRIPTION */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2">
                     Description
                   </label>
                   <input
                     value={editData.description}
-                    onChange={(e) =>
-                      setEditData({ ...editData, description: e.target.value })
-                    }
+                    onChange={(e) => setEditData({ ...editData, description: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all"
                     placeholder="Short description"
                   />
                 </div>
 
-                {/* CURRENCY */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2">
                     Base Currency
                   </label>
                   <select
                     value={editData.baseCurrency}
-                    onChange={(e) =>
-                      setEditData({
-                        ...editData,
-                        baseCurrency: e.target.value,
-                      })
-                    }
+                    onChange={(e) => setEditData({ ...editData, baseCurrency: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all cursor-pointer"
                   >
                     <option value="INR">INR (₹) - Indian Rupee</option>

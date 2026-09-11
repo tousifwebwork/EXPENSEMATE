@@ -23,6 +23,11 @@ export const searchUsers = (query, token) => {
   return API.get(`/search?query=${encodeURIComponent(query)}`, authHeader(token));
 };
 
+// SEARCH USERS TO ADD
+export const searchUsers_to_add = (query, token) => {
+  return API.get(`/searchtoadd?query=${encodeURIComponent(query)}`, authHeader(token));
+};
+
 
 // SEND FRIEND REQUEST
 export const sendRequest = (profileId, token) => {
