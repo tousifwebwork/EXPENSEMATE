@@ -4,11 +4,13 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, required: true, select: false },
-    profileImage: { type: String, default: "" },
+    password: { type: String, required: true, select: false }, 
     phone: { type: String, default: "" },
     preferredCurrency: { type: String, default: "INR" },
-    profileId: { type: String, required: true, unique: true },
+    profileImage: {
+      url: { type: String, default: "" },
+      publicId: { type: String, default: "" },
+    },
     about: { type: String, default: "", trim: true, maxlength: 300 },
     address: {
       landmark: { type: String, default: "", trim: true },

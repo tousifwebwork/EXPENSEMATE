@@ -59,28 +59,28 @@ function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) return
+   useEffect(() => {
+  const token = localStorage.getItem('token')
+  if (!token) return
 
-    const fetchProfile = async () => {
-      try {
-        const res = await getProfile(token)
-        if (res.data?.user) {
-          setUser({
-            name: res.data.user.name || '',
-            email: res.data.user.email || '',
-            profileImage: res.data.user.profileImage || '',
-            profileId: res.data.user.profileId || '',
-          })
-        }
-      } catch (error) {
-        console.log('Error fetching user profile:', error)
+  const fetchProfile = async () => {
+    try {
+      const res = await getProfile(token)
+      if (res.data?.user) {
+        setUser({
+          name: res.data.user.name || '',
+          email: res.data.user.email || '',
+          profileImage: res.data.user.profileImage?.url || '', // ✅ .url + optional chaining
+          profileId: res.data.user.profileId || '',
+        })
       }
+    } catch (error) {
+      console.log('Error fetching user profile:', error)
     }
+  }
 
-    fetchProfile()
-  }, [])
+  fetchProfile()
+}, [])
 
   const handleLogout = async () => {
     try {

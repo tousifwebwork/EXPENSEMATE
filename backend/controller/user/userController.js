@@ -71,40 +71,30 @@ exports.getUserById = async (req, res) => {
   }
 };
 
- 
+
+//Update Profile Image
 exports.updateProfileImage = async (req, res) => {
   try { 
     if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "Profile image is required",
-      });
-    } 
-
-    const { path } = req.file;
- 
-
-    const userId = req.user.userId;
-
+      return res.status(400).json({ success: false, message: "Profile image is required" });
+    }
     const user = await User.findByIdAndUpdate(
-      userId,
-      { profileImage: path },
+      req.user.userId,
+      {
+        profileImage: {
+          url: req.file.path,       // secure_url from Cloudinary
+          publicId: req.file.filename, // public_id from Cloudinary
+        },
+      },
       { new: true }
     ).select("-password");
-
-    res.status(200).json({
-      success: true,
-      message: "Profile image updated successfully",
-      user,
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(200).json({ success: true,message: "Profile image updated successfully",user,});
+  }catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
  // DELETE PROFILE IMAGE
 exports.deleteProfileImage = async (req, res) => {
   try {

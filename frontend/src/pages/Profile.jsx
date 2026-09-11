@@ -54,41 +54,42 @@ function Profile() {
   const [deletingImage, setDeletingImage] = useState(false)
 
   // ================= GET PROFILE =================
-  useEffect(() => {
-    const token = localStorage.getItem('token')
+   // ================= GET PROFILE =================
+useEffect(() => {
+  const token = localStorage.getItem('token')
 
-    const fetchProfile = async () => {
-      try {
-        const res = await getProfile(token)
-        const data = res.data.user
+  const fetchProfile = async () => {
+    try {
+      const res = await getProfile(token)
+      const data = res.data.user
 
-        setUser({
-          name: data.name || '',
-          email: data.email || '',
-          phone: data.phone || '',
-          preferredCurrency: data.preferredCurrency || 'INR',
-          profileId: data.profileId || '',
-          profileImage: data.profileImage || '',
-          about: data.about || '',
-          address: {
-            landmark: data.address?.landmark || '',
-            state: data.address?.state || '',
-            country: data.address?.country || '',
-          },
-          status: data.status || '',
-          createdAt: data.createdAt || '',
-          updatedAt: data.updatedAt || '',
-        })
-      } catch (error) {
-        console.log(error.response?.data || error.message)
-        toast.error(error.response?.data?.message || 'Failed to load profile.')
-      } finally {
-        setLoading(false)
-      }
+      setUser({
+        name: data.name || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        preferredCurrency: data.preferredCurrency || 'INR',
+        profileId: data.profileId || '',
+        profileImage: data.profileImage?.url || '', // ✅ optional chaining
+        about: data.about || '',
+        address: {
+          landmark: data.address?.landmark || '',
+          state: data.address?.state || '',
+          country: data.address?.country || '',
+        },
+        status: data.status || '',
+        createdAt: data.createdAt || '',
+        updatedAt: data.updatedAt || '',
+      })
+    } catch (error) {
+      console.log(error.response?.data || error.message)
+      toast.error(error.response?.data?.message || 'Failed to load profile.')
+    } finally {
+      setLoading(false)
     }
+  }
 
-    fetchProfile()
-  }, [])
+  fetchProfile()
+}, [])
 
   // ================= INPUT HANDLER =================
   const handleChange = (field, value) => {
@@ -103,137 +104,133 @@ function Profile() {
     }))
   }
 
-  // ================= PROFILE IMAGE UPLOAD =================
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
+   // ================= PROFILE IMAGE UPLOAD =================
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB — keep in sync with backend upload.js limit
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file')
-      e.target.value = ''
-      return
-    }
+const handleImageUpload = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
 
-    // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB')
-      e.target.value = ''
-      return
-    }
-
-    const toastId = toast.loading('Uploading profile image...')
-
-    try {
-      setUploadingImage(true)
-      const token = localStorage.getItem('token')
-      const formData = new FormData()
-      formData.append('profileImage', file)
-
-      const res = await updateProfileImage(token, formData)
-
-      setUser((prev) => ({
-        ...prev,
-        profileImage: res.data.user.profileImage,
-      }))
-
-      toast.success('Profile image updated successfully!', { id: toastId })
-    } catch (error) {
-      console.log(error.response?.data || error.message)
-      toast.error(
-        error.response?.data?.message || 'Failed to upload profile image.',
-        { id: toastId }
-      )
-    } finally {
-      setUploadingImage(false)
-      e.target.value = ''
-    }
+  if (!file.type.startsWith('image/')) {
+    toast.error('Please select an image file')
+    e.target.value = ''
+    return
   }
+
+  if (file.size > MAX_IMAGE_SIZE) {
+    toast.error('Image must be smaller than 10MB')
+    e.target.value = ''
+    return
+  }
+
+  const toastId = toast.loading('Uploading profile image...')
+
+  try {
+    setUploadingImage(true)
+    const token = localStorage.getItem('token')
+    const formData = new FormData()
+    formData.append('profileImage', file)
+
+    const res = await updateProfileImage(token, formData)
+
+    setUser((prev) => ({
+      ...prev,
+      profileImage: res.data.user.profileImage?.url || '',
+    }))
+
+    toast.success('Profile image updated successfully!', { id: toastId })
+  } catch (error) {
+    console.error('Update profile image error:', error.response?.data || error.message)
+    toast.error(error.response?.data?.message || 'Failed to upload profile image', { id: toastId })
+  } finally {
+    setUploadingImage(false)
+    e.target.value = ''
+  }
+}
 
   // ================= DELETE PROFILE IMAGE =================
-  const handleDeleteImage = async () => {
-    if (!user.profileImage) {
-      toast.error('No profile image to delete.')
-      return
-    }
-
-    const confirmed = window.confirm(
-      'Are you sure you want to remove your profile image?'
-    )
-    if (!confirmed) return
-
-    const toastId = toast.loading('Removing profile image...')
-
-    try {
-      setDeletingImage(true)
-      const token = localStorage.getItem('token')
-      const res = await deleteProfileImage(token)
-
-      setUser((prev) => ({
-        ...prev,
-        profileImage: res.data.user?.profileImage || '',
-      }))
-
-      toast.success('Profile image removed successfully!', { id: toastId })
-    } catch (error) {
-      console.log(error.response?.data || error.message)
-      toast.error(
-        error.response?.data?.message || 'Failed to delete profile image.',
-        { id: toastId }
-      )
-    } finally {
-      setDeletingImage(false)
-    }
+const handleDeleteImage = async () => {
+  if (!user.profileImage) {
+    toast.error('No profile image to delete.')
+    return
   }
+
+  const confirmed = window.confirm(
+    'Are you sure you want to remove your profile image?'
+  )
+  if (!confirmed) return
+
+  const toastId = toast.loading('Removing profile image...')
+
+  try {
+    setDeletingImage(true)
+    const token = localStorage.getItem('token')
+    const res = await deleteProfileImage(token)
+
+    setUser((prev) => ({
+      ...prev,
+      profileImage: res.data.user?.profileImage?.url || '', // ✅ .url
+    }))
+
+    toast.success('Profile image removed successfully!', { id: toastId })
+  } catch (error) {
+    console.log(error.response?.data || error.message)
+    toast.error(
+      error.response?.data?.message || 'Failed to delete profile image.',
+      { id: toastId }
+    )
+  } finally {
+    setDeletingImage(false)
+  }
+}
 
   // ================= UPDATE PROFILE =================
-  const handleUpdate = async () => {
-    try {
-      setSaving(true)
-      const token = localStorage.getItem('token')
+const handleUpdate = async () => {
+  try {
+    setSaving(true)
+    const token = localStorage.getItem('token')
 
-      const res = await updateUserProfile(token, {
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        preferredCurrency: user.preferredCurrency,
-        about: user.about,
-        address: {
-          landmark: user.address.landmark,
-          state: user.address.state,
-          country: user.address.country,
-        },
-      })
+    const res = await updateUserProfile(token, {
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      preferredCurrency: user.preferredCurrency,
+      about: user.about,
+      address: {
+        landmark: user.address.landmark,
+        state: user.address.state,
+        country: user.address.country,
+      },
+    })
 
-      const data = res.data.user
+    const data = res.data.user
 
-      setUser({
-        name: data.name || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        preferredCurrency: data.preferredCurrency || 'INR',
-        profileId: data.profileId || '',
-        profileImage: data.profileImage || '',
-        about: data.about || '',
-        address: {
-          landmark: data.address?.landmark || '',
-          state: data.address?.state || '',
-          country: data.address?.country || '',
-        },
-        status: data.status || '',
-        createdAt: data.createdAt || '',
-        updatedAt: data.updatedAt || '',
-      })
+    setUser({
+      name: data.name || '',
+      email: data.email || '',
+      phone: data.phone || '',
+      preferredCurrency: data.preferredCurrency || 'INR',
+      profileId: data.profileId || '',
+      profileImage: data.profileImage?.url || '', // ✅ .url
+      about: data.about || '',
+      address: {
+        landmark: data.address?.landmark || '',
+        state: data.address?.state || '',
+        country: data.address?.country || '',
+      },
+      status: data.status || '',
+      createdAt: data.createdAt || '',
+      updatedAt: data.updatedAt || '',
+    })
 
-      toast.success('Profile updated successfully!')
-    } catch (error) {
-      console.log(error.response?.data || error.message)
-      toast.error(error.response?.data?.message || 'Failed to update profile.')
-    } finally {
-      setSaving(false)
-    }
+    toast.success('Profile updated successfully!')
+  } catch (error) {
+    console.log(error.response?.data || error.message)
+    toast.error(error.response?.data?.message || 'Failed to update profile.')
+  } finally {
+    setSaving(false)
   }
-
+}
   // ================= SAVE =================
   const saveSettings = async (event) => {
     event.preventDefault()
@@ -275,8 +272,7 @@ function Profile() {
   }
 
   return (
-    <AppLayout>
-      <Toaster position="top-right" />
+    <AppLayout> 
 
       <div className="mx-auto max-w-4xl space-y-8 animate-fade-in-up">
         {/* ================= HEADER ================= */}

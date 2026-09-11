@@ -505,7 +505,7 @@ const ViewGroup = () => {
                           <div className="flex items-center gap-2.5">
                             {user.profileImage ? (
                               <img
-                                src={user.profileImage}
+                                src={user.profileImage?.url}
                                 alt={user.name}
                                 className="h-8 w-8 rounded-xl object-cover"
                               />
@@ -540,17 +540,12 @@ const ViewGroup = () => {
                 (currentUserRole === 'admin' && member.role === 'member')
 
               return (
-                <div
-                  key={member._id || memberUserId}
-                  className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 first:pt-0 last:pb-0"
-                >
+                <div  key={member._id || memberUserId}
+                  className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 first:pt-0 last:pb-0">
                   <div className="flex items-center gap-3.5">
                     {memberUser.profileImage ? (
-                      <img
-                        src={memberUser.profileImage}
-                        alt={memberUser.name || 'Member'}
-                        className="h-10 w-10 rounded-2xl object-cover ring-1 ring-stone-200"
-                      />
+                      <img  src={memberUser.profileImage?.url}   alt={memberUser.name || 'Member'}
+                        className="h-10 w-10 rounded-2xl object-cover ring-1 ring-stone-200"/>
                     ) : (
                       <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-stone-100 text-stone-700 font-bold text-xs">
                         {getInitials(memberUser.name)}
@@ -614,6 +609,8 @@ const ViewGroup = () => {
               )
             })}
           </div>
+
+
         </div>
 
         {/* EDIT GROUP SETTINGS (OWNER / ADMIN ONLY) */}
