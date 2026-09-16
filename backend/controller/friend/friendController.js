@@ -1,6 +1,9 @@
 const FriendRequest = require("../../model/friendRequestModel");
 const User = require("../../model/userModel");
 const createNotification = require("../../utils/createNotification");
+const jwt = require("jsonwebtoken");
+
+
 exports.searchUsers = async (req, res) => {
   try {
     const { query } = req.query;
@@ -327,6 +330,57 @@ exports.searchUsers_to_add = async (req, res) => {
     }));
 
     res.status(200).json({ success: true, users: usersWithRelationship });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+exports.processReferral = async (req, res) => {
+  try {
+    const { referralToken } = req.body;
+    const newUserId = req.user.userId;
+
+    if (!referralToken) {
+      return res.status(400).json({ success: false, message: "No referral token provided" });
+    } 
+
+     let decoded;
+     try {
+       decoded = jwt.verify(referralToken, process.env.JWT_SECRET);
+       console.log("Decoded successfully:", decoded);
+     } catch (err) {
+       console.log("JWT VERIFY ERROR:", err.name, "-", err.message); // ✅ the real reason
+       return res.status(400).json({ success: false, message: "Invalid or expired invite link" });
+     }
+
+    const inviterId = decoded.inviterId;
+
+    if (inviterId === newUserId) {
+      return res.status(400).json({ success: false, message: "Cannot refer yourself" });
+    }
+
+    const existing = await FriendRequest.findOne({
+      $or: [
+        { sender: inviterId, receiver: newUserId },
+        { sender: newUserId, receiver: inviterId },
+      ],
+    });
+
+    if (existing) {
+      return res.status(200).json({ success: true, message: "Already connected" });
+    }
+
+    const request = await FriendRequest.create({ sender: inviterId, receiver: newUserId });
+
+    await createNotification({
+      recipient: newUserId,
+      type: "friend_request",
+      message: `You have a new friend request`,
+      relatedUser: inviterId,
+    });
+
+    res.status(200).json({ success: true, message: "Friend request sent automatically", request });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

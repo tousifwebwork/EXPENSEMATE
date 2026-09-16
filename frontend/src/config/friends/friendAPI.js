@@ -64,4 +64,10 @@ export const removeFriend = (friendId, token) => {
   return API.delete(`/${friendId}`, authHeader(token));
 };
 
+
+export const processReferral = (referralToken, token) => {
+  return API.post("/process-referral", { referralToken }, authHeader(token));
+};
+
+
 export default API;

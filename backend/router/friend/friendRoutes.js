@@ -2,11 +2,12 @@ const express = require("express");
 const router = express.Router();
 
 const {protect} = require("../../middleware/authMiddleware");
-const {searchUsers,searchUsers_to_add,sendRequest,respondToRequest,cancelRequest,getPendingRequests,getFriends,removeFriend,} = require("../../controller/friend/friendController");
+const {searchUsers,searchUsers_to_add,sendRequest,respondToRequest,cancelRequest,getPendingRequests,getFriends,removeFriend, processReferral,} = require("../../controller/friend/friendController");
 
 router.get("/search", protect, searchUsers);
 router.get("/searchtoadd", protect, searchUsers_to_add);
 router.post("/request", protect, sendRequest);
+router.post("/process-referral", protect, processReferral);
 router.patch("/request/:requestId", protect, respondToRequest);
 router.delete("/request/:requestId", protect, cancelRequest);
 router.get("/requests/pending", protect, getPendingRequests);

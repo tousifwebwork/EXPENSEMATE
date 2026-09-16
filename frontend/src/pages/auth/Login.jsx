@@ -1,17 +1,30 @@
-import { useState } from 'react'
+ 
+
+import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { login } from '../../config/auth/authAPI'
+import { processReferral } from '../../config/friends/friendAPI'
 import { Eye, EyeOff, ArrowRight, Shield, Sparkles, CheckCircle2, Lock, Mail } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 function SignIn() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [eye, setEye] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  // ✅ Capture referral token if someone lands directly on /login?ref=...
+  useEffect(() => {
+    const ref = searchParams.get('ref')
+    if (ref) {
+      localStorage.setItem('referralToken', ref)
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -23,7 +36,21 @@ function SignIn() {
       setLoading(true)
       setError('')
       const res = await login({ email, password })
-      localStorage.setItem('token', res.data.token)
+      const newToken = res.data.token
+      localStorage.setItem('token', newToken)
+
+      // ✅ Process referral silently after successful login
+      const savedReferral = localStorage.getItem('referralToken')
+      if (savedReferral) {
+        try {
+          await processReferral(savedReferral, newToken)
+        } catch (err) {
+          console.log('Referral processing failed silently:', err)
+        } finally {
+          localStorage.removeItem('referralToken')
+        }
+      }
+
       toast.success('Welcome back!')
       navigate('/dashboard')
     } catch (err) {
@@ -46,11 +73,9 @@ function SignIn() {
 
         {/* Left Side - Brand & Editorial Panel */}
         <div className="relative hidden lg:flex lg:col-span-5 flex-col justify-between p-10 xl:p-12 bg-[#121f28] text-white overflow-hidden">
-          {/* Subtle background glow */}
           <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-[#159a8c]/20 blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-[#47c5b0]/10 blur-3xl pointer-events-none" />
 
-          {/* Top Logo */}
           <div className="relative z-10 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] shadow-md shadow-[#159a8c]/20 text-white font-bold text-lg tracking-tight">
               ₹
@@ -61,7 +86,6 @@ function SignIn() {
             </div>
           </div>
 
-          {/* Middle Value Proposition */}
           <div className="relative z-10 my-auto py-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#159a8c]/15 text-[#8bded2] text-xs font-semibold mb-6 border border-[#159a8c]/20">
               <Sparkles className="w-3.5 h-3.5" />
@@ -88,7 +112,6 @@ function SignIn() {
             </div>
           </div>
 
-          {/* Bottom Footer note */}
           <div className="relative z-10 pt-6 border-t border-white/10 flex items-center justify-between text-xs text-stone-400">
             <span>Enterprise-grade security</span>
             <span className="flex items-center gap-1 text-stone-400">
@@ -100,7 +123,6 @@ function SignIn() {
         {/* Right Side - Form */}
         <div className="lg:col-span-7 p-6 sm:p-10 lg:p-12 xl:p-14 flex flex-col justify-center bg-white">
 
-          {/* Mobile Logo */}
           <div className="flex lg:hidden items-center gap-3 mb-8">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] text-white font-bold text-lg">
               ₹
@@ -122,7 +144,6 @@ function SignIn() {
             </div>
 
             <form className="space-y-5" onSubmit={handleSubmit}>
-              {/* Email field */}
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2" htmlFor="email">
                   Email Address
@@ -143,7 +164,6 @@ function SignIn() {
                 </div>
               </div>
 
-              {/* Password field */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700" htmlFor="password">
@@ -186,7 +206,6 @@ function SignIn() {
                 </div>
               )}
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}

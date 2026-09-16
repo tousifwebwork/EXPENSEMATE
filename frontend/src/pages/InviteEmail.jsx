@@ -5,20 +5,21 @@ import { getProfile } from '../config/user/userAPI.js';
 import { toast } from 'react-hot-toast';
 import { sent_email_invite } from '../config/auth/authAPI.js';
 
+const CLIENT_URL_PROD = `https://expensmatefrontend.vercel.app`  
+
 const InviteEmail = () => { 
    
   const [inviteText, setInviteText] = useState('') 
   const [email, setemail] = useState('')
-  const [sending, setSending] = useState(false)  
+  const [sending, setSending] = useState(false)
   
-  
+  // GET PROFILE 
   useEffect(() => {
-    const CLIENT_URL_PROD=`https://expensmatefrontend.vercel.app`
     const token = localStorage.getItem('token')
     const fetchProfile = async () => {
       try {
         const res = await getProfile(token)  
-        setInviteText(`Hey ${res.data.user.name}, I am using this amazing app to manage my expenses. Visit ${CLIENT_URL_PROD} and join me to make expense sharing easier and more fun!`)
+        setInviteText(`Hey ${res.data.user.name}, I am using this amazing app to manage my expenses. Join me to make expense sharing easier and more fun!`)
       } catch (error) {
         console.log(error.response?.data || error.message) 
       }  
@@ -29,26 +30,22 @@ const InviteEmail = () => {
   const handle_mail = async (e) => {
     try {
       e.preventDefault();
+      if (!email) { toast.error("Please enter valid email."); return; }
 
-      if (!email) {
-        toast.error("Please enter valid email.");
-        return;
-      }
-
-      setSending(true); // start loader
+      setSending(true)
 
       const token = localStorage.getItem('token');
-      await sent_email_invite({ email, inviteText }, token);
+
+       await sent_email_invite({ email, inviteText, frontendUrl: CLIENT_URL_PROD }, token); 
       toast.success("Invite sent successfully.");
-      setemail('');  
+      setemail('')
     } catch (error) {
       toast.error("Server Error.");
-      console.log(error.response?.data || error.message)
+      console.log(error.response?.data || error.message) 
     } finally {
-      setSending(false); // stop loader, runs whether success or failure
+      setSending(false)
     }
   }
-
 
   return (
     <AppLayout>
@@ -98,26 +95,25 @@ const InviteEmail = () => {
                   <form onSubmit={handle_mail} className="border flex flex-col gap-y-5 items-center border-gray-300 px-8 py-4 rounded-lg w-full max-w-xl h-fit">
 
                   <span className="flex justify-center font-bold text-2xl">Email Address</span>
-                   <input
-                     name='email'
-                     onChange={(e) => { setemail(e.target.value); }}
+                   <input 
+                     name='email' 
+                     onChange={(e) => { setemail(e.target.value); }} 
                      value={email}
-                     type="email"
-                     placeholder="Enter email address"
+                     type="email" 
+                     placeholder="Enter email address" 
                      disabled={sending}
-                     className="w-full mt-2 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#159a8c] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                     className="w-full mt-2 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#159a8c] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed" 
                    />
-                   <textarea
-                     type="text"
-                     value={inviteText}
-                     rows="3"
-                     onChange={(e) => setInviteText(e.target.value)}
-                     placeholder="Enter name"
+                   <textarea 
+                     value={inviteText}  
+                     rows="4" 
+                     onChange={(e) => setInviteText(e.target.value)} 
+                     placeholder="Edit your invite message"
                      disabled={sending}
-                     className="w-full mt-2 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#159a8c] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                     className="w-full mt-2 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#159a8c] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed" 
                    />
-                   <button
-                     type='submit'
+                   <button 
+                     type='submit' 
                      disabled={sending}
                      className="w-full max-w-md bg-[#159a8c] text-white py-2 px-4 rounded-lg hover:bg-[#159a8c]/90 focus:outline-none focus:ring-2 focus:ring-[#159a8c] focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                    >

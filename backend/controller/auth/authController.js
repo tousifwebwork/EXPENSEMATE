@@ -246,15 +246,28 @@ exports.resetPassword = async (req, res) => {
 
 exports.sendMail_Invite = async (req, res) => {
   try { 
-    const { email, inviteText } = req.body;
+    const { email, inviteText, frontendUrl } = req.body;
+    const inviterId = req.user.userId;
     const user = await User.findById(req.user.userId);
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required" });
+    }
+    if (!frontendUrl) {
+      return res.status(400).json({ success: false, message: "Frontend URL is required" });
+    }
+
+    const referralToken = jwt.sign({ inviterId }, process.env.JWT_SECRET, { expiresIn: "7d" });
     const from = user.email;
-    await sendEmail_to_invite(from, email, inviteText);
-    res.status(200).json({ success: true,message: "Invitation sent successfully",});
+    const inviteUrl = `${frontendUrl}/register?ref=${referralToken}`;
+    const finalMessage = `${inviteText}\n\nJoin here: ${inviteUrl}`;
+
+    await sendEmail_to_invite(from, email, finalMessage);
+    console.log(`Invitation sent to ${email} from ${from}`);
+    res.status(200).json({ success: true, message: "Invitation sent successfully" });
 
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false,  message: "Failed to send invitation",});
+    res.status(500).json({ success: false, message: "Failed to send invitation" });
   }
 };
-

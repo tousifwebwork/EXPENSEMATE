@@ -1,5 +1,7 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+ 
+
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { register } from '../../config/auth/authAPI'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff, ArrowRight, Shield, Sparkles, CheckCircle2, Lock, Mail, User } from 'lucide-react'
@@ -7,6 +9,8 @@ import { motion } from 'framer-motion'
 
 function Register() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -16,6 +20,14 @@ function Register() {
   const [eye, setEye] = useState(false)
   const [conEye, setConEye] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  // ✅ Silently capture referral token from URL, save for later (used after login)
+  useEffect(() => {
+    const ref = searchParams.get('ref')
+    if (ref) {
+      localStorage.setItem('referralToken', ref)
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -58,11 +70,9 @@ function Register() {
 
         {/* Left Side - Brand & Editorial Panel */}
         <div className="relative hidden lg:flex lg:col-span-5 flex-col justify-between p-10 xl:p-12 bg-[#121f28] text-white overflow-hidden">
-          {/* Subtle background glow */}
           <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-[#159a8c]/20 blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-[#47c5b0]/10 blur-3xl pointer-events-none" />
 
-          {/* Top Logo */}
           <div className="relative z-10 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] shadow-md shadow-[#159a8c]/20 text-white font-bold text-lg tracking-tight">
               ₹
@@ -73,7 +83,6 @@ function Register() {
             </div>
           </div>
 
-          {/* Middle Value Proposition */}
           <div className="relative z-10 my-auto py-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#159a8c]/15 text-[#8bded2] text-xs font-semibold mb-6 border border-[#159a8c]/20">
               <Sparkles className="w-3.5 h-3.5" />
@@ -100,7 +109,6 @@ function Register() {
             </div>
           </div>
 
-          {/* Bottom Footer note */}
           <div className="relative z-10 pt-6 border-t border-white/10 flex items-center justify-between text-xs text-stone-400">
             <span>Free to use forever</span>
             <span className="flex items-center gap-1 text-stone-400">
@@ -112,7 +120,6 @@ function Register() {
         {/* Right Side - Form */}
         <div className="lg:col-span-7 p-6 sm:p-10 lg:p-12 xl:p-14 flex flex-col justify-center bg-white">
 
-          {/* Mobile Logo */}
           <div className="flex lg:hidden items-center gap-3 mb-8">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] text-white font-bold text-lg">
               ₹
@@ -134,7 +141,6 @@ function Register() {
             </div>
 
             <form className="space-y-5" onSubmit={handleSubmit}>
-              {/* Full Name field */}
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2" htmlFor="fullName">
                   Full Name
@@ -155,7 +161,6 @@ function Register() {
                 </div>
               </div>
 
-              {/* Email field */}
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2" htmlFor="email">
                   Email Address
@@ -176,7 +181,6 @@ function Register() {
                 </div>
               </div>
 
-              {/* Password field */}
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2" htmlFor="password">
                   Password
@@ -205,7 +209,6 @@ function Register() {
                 </div>
               </div>
 
-              {/* Confirm Password field */}
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-2" htmlFor="confirmPassword">
                   Confirm Password
@@ -240,7 +243,6 @@ function Register() {
                 </div>
               )}
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
