@@ -29,6 +29,7 @@ exports.register = async (req, res) => {
     if (!existing) isUnique = true;
   }
  
+    console.log("Generated profileId before create:", profileId);
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({name,email,password: hashedPassword,profileId });
