@@ -6,7 +6,12 @@ require("dotenv").config();
 function setup(app) {
   connectDB();
   app.use(cors({  
-    origin: [process.env.CLIENT_URL_DEV, process.env.CLIENT_URL_PROD], 
+    origin: [
+    process.env.CLIENT_URL_DEV, 
+    process.env.CLIENT_URL_PROD,
+    'http://localhost',        // Capacitor Android
+    'capacitor://localhost',   // Capacitor iOS
+  ], 
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
