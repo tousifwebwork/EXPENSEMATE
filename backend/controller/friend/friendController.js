@@ -368,19 +368,32 @@ exports.processReferral = async (req, res) => {
     });
 
     if (existing) {
-      return res.status(200).json({ success: true, message: "Already connected" });
+      if (existing.status === "pending") {
+        existing.status = "accepted";
+        await existing.save();
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: existing.status === "accepted" ? "Already connected" : "Referral already processed",
+        request: existing,
+      });
     }
 
-    const request = await FriendRequest.create({ sender: inviterId, receiver: newUserId });
+    const request = await FriendRequest.create({
+      sender: inviterId,
+      receiver: newUserId,
+      status: "accepted",
+    });
 
     await createNotification({
       recipient: newUserId,
-      type: "friend_request",
-      message: `You have a new friend request`,
+      type: "friend_accepted",
+      message: `You are now friends with the inviter`,
       relatedUser: inviterId,
     });
 
-    res.status(200).json({ success: true, message: "Friend request sent automatically", request });
+    res.status(200).json({ success: true, message: "Friend request accepted automatically", request });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

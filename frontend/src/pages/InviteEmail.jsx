@@ -19,7 +19,7 @@ const InviteEmail = () => {
     const fetchProfile = async () => {
       try {
         const res = await getProfile(token)  
-        setInviteText(`Hey ${res.data.user.name}, I am using this amazing app to manage my expenses. Join me to make expense sharing easier and more fun!`)
+        setInviteText(`Hey, My self ${res.data.user.name} I am using this amazing app to manage my expenses. Join me to make expense sharing easier and more fun!`)
       } catch (error) {
         console.log(error.response?.data || error.message) 
       }  
