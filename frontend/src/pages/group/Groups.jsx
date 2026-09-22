@@ -92,10 +92,8 @@ const Groups = () => {
 
       const res = await createGroup(groupInfo, token)
 
-      // Add newly created group immediately
       setAllGroups((prev) => [...prev, res.data.group])
 
-      // Close modal
       const modal = document.getElementById('add_group_modal')
       if (modal) {
         modal.close()
@@ -103,7 +101,6 @@ const Groups = () => {
 
       toast.success('Group created successfully!')
 
-      // Reset form
       setGroupInfo({
         name: '',
         description: '',
@@ -132,7 +129,6 @@ const Groups = () => {
 
       await deleteGroup(id, token)
 
-      // Immediately remove from UI
       setAllGroups((prev) => prev.filter((group) => group._id !== id))
       toast.success('Group deleted successfully!')
     } catch (err) {
@@ -141,7 +137,6 @@ const Groups = () => {
     }
   }
 
-  // Filter groups based on search query
   const filteredGroups = allGroups.filter((g) => {
     if (!searchQuery.trim()) return true
     return (
@@ -166,9 +161,13 @@ const Groups = () => {
     <AppLayout>
       <ToastContainer position="top-right" autoClose={3000} />
 
- 
-          {/* PAGE HEADER   */}
-      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-8">
+      {/* PAGE HEADER   */}
+      <motion.div
+        initial={{ opacity: 0, y: -15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-8"
+      >
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#159a8c]/10 text-[#159a8c] text-xs font-semibold uppercase tracking-wider mb-3">
             <Layers className="w-3.5 h-3.5" />
@@ -192,11 +191,16 @@ const Groups = () => {
             <span>New Group</span>
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/*   SEARCH & FILTER BAR  */}
       {allGroups.length > 0 && (
-        <div className="  mb-6 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08, duration: 0.35 }}
+          className="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center"
+        >
           <div className="relative flex-1 max-w-md">
             <input
               type="text"
@@ -209,7 +213,7 @@ const Groups = () => {
           <div className="text-xs font-medium text-stone-500 self-center">
             Showing {filteredGroups.length} of {allGroups.length} groups
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/*   GROUPS GRID  */}
@@ -237,7 +241,12 @@ const Groups = () => {
         </div>
       ) : filteredGroups.length === 0 ? (
         /* EMPTY STATE */
-        <div className="text-center py-16 px-4 bg-white rounded-3xl border border-dashed border-stone-200 shadow-xs max-w-2xl mx-auto my-8 animate-fade-in-up dark:bg-stone-800 dark:border-stone-700">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="text-center py-16 px-4 bg-white rounded-3xl border border-dashed border-stone-200 shadow-xs max-w-2xl mx-auto my-8 dark:bg-stone-800 dark:border-stone-700"
+        >
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#159a8c]/10 text-[#159a8c] mb-4">
             <FolderPlus className="w-8 h-8" />
           </div>
@@ -260,12 +269,11 @@ const Groups = () => {
               <span>Create Your First Group</span>
             </button>
           )}
-        </div>
+        </motion.div>
       ) : (
         /* GROUPS CARDS */
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredGroups.map((group, index) => {
-            // Find current user's role
             const currentMember = group.members?.find((member) => {
               const memberUserId = member.user?._id || member.user
               return memberUserId?.toString() === currentUserId?.toString()
@@ -293,13 +301,10 @@ const Groups = () => {
             return (
               <motion.div
                 key={group._id}
-                initial={{ opacity: 0, y: 14 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.06, duration: 0.3 }}
+                transition={{ delay: 0.1 + index * 0.06, duration: 0.35 }}
                 className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-stone-200/80 bg-white p-6 text-stone-900 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-stone-300 hover:shadow-xl dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100 dark:hover:border-stone-600"
-                style={{
-                  animationDelay: `${index * 50}ms`,
-                }}
               >
                 {/* TOP SECTION */}
                 <div>

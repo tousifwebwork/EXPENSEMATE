@@ -9,6 +9,7 @@ import {
 } from '../config/user/userAPI.js'
 
 import toast, { Toaster } from 'react-hot-toast'
+import { motion } from 'framer-motion'
 
 import {
   User,
@@ -54,42 +55,41 @@ function Profile() {
   const [deletingImage, setDeletingImage] = useState(false)
 
   // ================= GET PROFILE =================
-   // ================= GET PROFILE =================
-useEffect(() => {
-  const token = localStorage.getItem('token')
+  useEffect(() => {
+    const token = localStorage.getItem('token')
 
-  const fetchProfile = async () => {
-    try {
-      const res = await getProfile(token)
-      const data = res.data.user
+    const fetchProfile = async () => {
+      try {
+        const res = await getProfile(token)
+        const data = res.data.user
 
-      setUser({
-        name: data.name || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        preferredCurrency: data.preferredCurrency || 'INR',
-        profileId: data.profileId || '',
-        profileImage: data.profileImage?.url || '', // ✅ optional chaining
-        about: data.about || '',
-        address: {
-          landmark: data.address?.landmark || '',
-          state: data.address?.state || '',
-          country: data.address?.country || '',
-        },
-        status: data.status || '',
-        createdAt: data.createdAt || '',
-        updatedAt: data.updatedAt || '',
-      })
-    } catch (error) {
-      console.log(error.response?.data || error.message)
-      toast.error(error.response?.data?.message || 'Failed to load profile.')
-    } finally {
-      setLoading(false)
+        setUser({
+          name: data.name || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          preferredCurrency: data.preferredCurrency || 'INR',
+          profileId: data.profileId || '',
+          profileImage: data.profileImage?.url || '',
+          about: data.about || '',
+          address: {
+            landmark: data.address?.landmark || '',
+            state: data.address?.state || '',
+            country: data.address?.country || '',
+          },
+          status: data.status || '',
+          createdAt: data.createdAt || '',
+          updatedAt: data.updatedAt || '',
+        })
+      } catch (error) {
+        console.log(error.response?.data || error.message)
+        toast.error(error.response?.data?.message || 'Failed to load profile.')
+      } finally {
+        setLoading(false)
+      }
     }
-  }
 
-  fetchProfile()
-}, [])
+    fetchProfile()
+  }, [])
 
   // ================= INPUT HANDLER =================
   const handleChange = (field, value) => {
@@ -104,133 +104,134 @@ useEffect(() => {
     }))
   }
 
-   // ================= PROFILE IMAGE UPLOAD =================
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB — keep in sync with backend upload.js limit
+  // ================= PROFILE IMAGE UPLOAD =================
+  const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB — keep in sync with backend upload.js limit
 
-const handleImageUpload = async (e) => {
-  const file = e.target.files[0]
-  if (!file) return
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
 
-  if (!file.type.startsWith('image/')) {
-    toast.error('Please select an image file')
-    e.target.value = ''
-    return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file')
+      e.target.value = ''
+      return
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast.error('Image must be smaller than 10MB')
+      e.target.value = ''
+      return
+    }
+
+    const toastId = toast.loading('Uploading profile image...')
+
+    try {
+      setUploadingImage(true)
+      const token = localStorage.getItem('token')
+      const formData = new FormData()
+      formData.append('profileImage', file)
+
+      const res = await updateProfileImage(token, formData)
+
+      setUser((prev) => ({
+        ...prev,
+        profileImage: res.data.user.profileImage?.url || '',
+      }))
+
+      toast.success('Profile image updated successfully!', { id: toastId })
+    } catch (error) {
+      console.error('Update profile image error:', error.response?.data || error.message)
+      toast.error(error.response?.data?.message || 'Failed to upload profile image', { id: toastId })
+    } finally {
+      setUploadingImage(false)
+      e.target.value = ''
+    }
   }
-
-  if (file.size > MAX_IMAGE_SIZE) {
-    toast.error('Image must be smaller than 10MB')
-    e.target.value = ''
-    return
-  }
-
-  const toastId = toast.loading('Uploading profile image...')
-
-  try {
-    setUploadingImage(true)
-    const token = localStorage.getItem('token')
-    const formData = new FormData()
-    formData.append('profileImage', file)
-
-    const res = await updateProfileImage(token, formData)
-
-    setUser((prev) => ({
-      ...prev,
-      profileImage: res.data.user.profileImage?.url || '',
-    }))
-
-    toast.success('Profile image updated successfully!', { id: toastId })
-  } catch (error) {
-    console.error('Update profile image error:', error.response?.data || error.message)
-    toast.error(error.response?.data?.message || 'Failed to upload profile image', { id: toastId })
-  } finally {
-    setUploadingImage(false)
-    e.target.value = ''
-  }
-}
 
   // ================= DELETE PROFILE IMAGE =================
-const handleDeleteImage = async () => {
-  if (!user.profileImage) {
-    toast.error('No profile image to delete.')
-    return
-  }
+  const handleDeleteImage = async () => {
+    if (!user.profileImage) {
+      toast.error('No profile image to delete.')
+      return
+    }
 
-  const confirmed = window.confirm(
-    'Are you sure you want to remove your profile image?'
-  )
-  if (!confirmed) return
-
-  const toastId = toast.loading('Removing profile image...')
-
-  try {
-    setDeletingImage(true)
-    const token = localStorage.getItem('token')
-    const res = await deleteProfileImage(token)
-
-    setUser((prev) => ({
-      ...prev,
-      profileImage: res.data.user?.profileImage?.url || '', // ✅ .url
-    }))
-
-    toast.success('Profile image removed successfully!', { id: toastId })
-  } catch (error) {
-    console.log(error.response?.data || error.message)
-    toast.error(
-      error.response?.data?.message || 'Failed to delete profile image.',
-      { id: toastId }
+    const confirmed = window.confirm(
+      'Are you sure you want to remove your profile image?'
     )
-  } finally {
-    setDeletingImage(false)
+    if (!confirmed) return
+
+    const toastId = toast.loading('Removing profile image...')
+
+    try {
+      setDeletingImage(true)
+      const token = localStorage.getItem('token')
+      const res = await deleteProfileImage(token)
+
+      setUser((prev) => ({
+        ...prev,
+        profileImage: res.data.user?.profileImage?.url || '',
+      }))
+
+      toast.success('Profile image removed successfully!', { id: toastId })
+    } catch (error) {
+      console.log(error.response?.data || error.message)
+      toast.error(
+        error.response?.data?.message || 'Failed to delete profile image.',
+        { id: toastId }
+      )
+    } finally {
+      setDeletingImage(false)
+    }
   }
-}
 
   // ================= UPDATE PROFILE =================
-const handleUpdate = async () => {
-  try {
-    setSaving(true)
-    const token = localStorage.getItem('token')
+  const handleUpdate = async () => {
+    try {
+      setSaving(true)
+      const token = localStorage.getItem('token')
 
-    const res = await updateUserProfile(token, {
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      preferredCurrency: user.preferredCurrency,
-      about: user.about,
-      address: {
-        landmark: user.address.landmark,
-        state: user.address.state,
-        country: user.address.country,
-      },
-    })
+      const res = await updateUserProfile(token, {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        preferredCurrency: user.preferredCurrency,
+        about: user.about,
+        address: {
+          landmark: user.address.landmark,
+          state: user.address.state,
+          country: user.address.country,
+        },
+      })
 
-    const data = res.data.user
+      const data = res.data.user
 
-    setUser({
-      name: data.name || '',
-      email: data.email || '',
-      phone: data.phone || '',
-      preferredCurrency: data.preferredCurrency || 'INR',
-      profileId: data.profileId || '',
-      profileImage: data.profileImage?.url || '', // ✅ .url
-      about: data.about || '',
-      address: {
-        landmark: data.address?.landmark || '',
-        state: data.address?.state || '',
-        country: data.address?.country || '',
-      },
-      status: data.status || '',
-      createdAt: data.createdAt || '',
-      updatedAt: data.updatedAt || '',
-    })
+      setUser({
+        name: data.name || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        preferredCurrency: data.preferredCurrency || 'INR',
+        profileId: data.profileId || '',
+        profileImage: data.profileImage?.url || '',
+        about: data.about || '',
+        address: {
+          landmark: data.address?.landmark || '',
+          state: data.address?.state || '',
+          country: data.address?.country || '',
+        },
+        status: data.status || '',
+        createdAt: data.createdAt || '',
+        updatedAt: data.updatedAt || '',
+      })
 
-    toast.success('Profile updated successfully!')
-  } catch (error) {
-    console.log(error.response?.data || error.message)
-    toast.error(error.response?.data?.message || 'Failed to update profile.')
-  } finally {
-    setSaving(false)
+      toast.success('Profile updated successfully!')
+    } catch (error) {
+      console.log(error.response?.data || error.message)
+      toast.error(error.response?.data?.message || 'Failed to update profile.')
+    } finally {
+      setSaving(false)
+    }
   }
-}
+
   // ================= SAVE =================
   const saveSettings = async (event) => {
     event.preventDefault()
@@ -274,9 +275,13 @@ const handleUpdate = async () => {
   return (
     <AppLayout> 
 
-      <div className="mx-auto max-w-4xl space-y-8 animate-fade-in-up">
+      <div className="mx-auto max-w-4xl space-y-8">
         {/* ================= HEADER ================= */}
-        <div>
+        <motion.div
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#159a8c]/10 text-[#159a8c] text-xs font-semibold uppercase tracking-wider mb-3">
             <User className="w-3.5 h-3.5" />
             <span>Your Account</span>
@@ -289,21 +294,29 @@ const handleUpdate = async () => {
           <p className="mt-2 text-sm text-stone-500 max-w-2xl">
             Manage your personal information, contact details, and expense preferences.
           </p>
-        </div>
+        </motion.div>
 
         <form className="space-y-6" onSubmit={saveSettings}>
           {/* ================= PROFILE HERO ================= */}
-          <section className="overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-sm">
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08, duration: 0.4 }}
+            className="overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-sm"
+          >
             {/* BANNER */}
-            <div class="h-30 bg-linear-to-b from-[#0e6d63] to-white dark:from-[#222020] dark:to-[#0e7167]">
-
+            <div className="h-30 bg-gradient-to-b from-[#0e6d63] to-white dark:from-[#222020] dark:to-[#0e7167]">
             </div>
-
 
             <div className="px-6 sm:px-8 pb-8">
               <div className="-mt-16 flex flex-col sm:flex-row sm:items-end gap-6">
                 {/* PROFILE IMAGE */}
-                <div className="relative mx-auto sm:mx-0">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.15, duration: 0.35 }}
+                  className="relative mx-auto sm:mx-0"
+                >
                   {user.profileImage ? (
                     <img
                       src={user.profileImage}
@@ -311,7 +324,7 @@ const handleUpdate = async () => {
                       className="h-32 w-32 rounded-3xl border-4 border-white object-cover shadow-xl"
                     />
                   ) : (
-                    <div className="flex h-32 w-32 items-center justify-center rounded-3xl border-4 border-white bg-linear-to-br from-[#159a8c] to-[#0e6d63] text-4xl font-bold text-white shadow-xl">
+                    <div className="flex h-32 w-32 items-center justify-center rounded-3xl border-4 border-white bg-gradient-to-br from-[#159a8c] to-[#0e6d63] text-4xl font-bold text-white shadow-xl">
                       {getInitials(user.name)}
                     </div>
                   )}
@@ -340,10 +353,15 @@ const handleUpdate = async () => {
                       className="hidden"
                     />
                   </label>
-                </div>
+                </motion.div>
 
                 {/* PROFILE INFO */}
-                <div className="flex-1 text-center sm:text-left pb-2">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.35 }}
+                  className="flex-1 text-center sm:text-left pb-2"
+                >
                   <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#1a1a1a]">
                     {user.name || 'Your Name'}
                   </h2>
@@ -380,13 +398,18 @@ const handleUpdate = async () => {
                       </button>
                     </div>
                   )}
-                </div>
+                </motion.div>
               </div>
             </div>
-          </section>
+          </motion.section>
 
           {/* ================= PERSONAL INFORMATION ================= */}
-          <section className="rounded-3xl border border-stone-200/80 bg-white p-6 sm:p-8 shadow-sm">
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.4 }}
+            className="rounded-3xl border border-stone-200/80 bg-white p-6 sm:p-8 shadow-sm"
+          >
             <div className="pb-6 border-b border-stone-100">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#159a8c] mb-1">
                 <User className="w-3.5 h-3.5" />
@@ -481,10 +504,15 @@ const handleUpdate = async () => {
                 </div>
               </div>
             </div>
-          </section>
+          </motion.section>
 
           {/* ================= ABOUT ================= */}
-          <section className="rounded-3xl border border-stone-200/80 bg-white p-6 sm:p-8 shadow-sm">
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="rounded-3xl border border-stone-200/80 bg-white p-6 sm:p-8 shadow-sm"
+          >
             <div className="pb-6 border-b border-stone-100">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#159a8c] mb-1">
                 <FileText className="w-3.5 h-3.5" />
@@ -505,10 +533,15 @@ const handleUpdate = async () => {
                 className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50/50 text-stone-900 text-sm placeholder:text-stone-400 resize-y focus:bg-white focus:border-[#159a8c] focus:ring-4 focus:ring-[#159a8c]/10 outline-none transition-all"
               />
             </div>
-          </section>
+          </motion.section>
 
           {/* ================= ADDRESS ================= */}
-          <section className="rounded-3xl border border-stone-200/80 bg-white p-6 sm:p-8 shadow-sm">
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.4 }}
+            className="rounded-3xl border border-stone-200/80 bg-white p-6 sm:p-8 shadow-sm"
+          >
             <div className="pb-6 border-b border-stone-100">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#159a8c] mb-1">
                 <MapPin className="w-3.5 h-3.5" />
@@ -580,10 +613,15 @@ const handleUpdate = async () => {
                 </div>
               </div>
             </div>
-          </section>
+          </motion.section>
 
           {/* ================= ACCOUNT METADATA ================= */}
-          <section className="rounded-3xl border border-stone-200/80 bg-stone-50/70 p-6 sm:p-8">
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+            className="rounded-3xl border border-stone-200/80 bg-stone-50/70 p-6 sm:p-8"
+          >
             <div className="grid gap-6 sm:grid-cols-2">
               {/* Created */}
               <div className="flex items-center gap-4">
@@ -615,10 +653,15 @@ const handleUpdate = async () => {
                 </div>
               </div>
             </div>
-          </section>
+          </motion.section>
 
           {/* ================= SAVE BUTTON ================= */}
-          <div className="flex items-center justify-end pt-2">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.35, duration: 0.3 }}
+            className="flex items-center justify-end pt-2"
+          >
             <button
               type="submit"
               disabled={saving}
@@ -636,7 +679,7 @@ const handleUpdate = async () => {
                 </>
               )}
             </button>
-          </div>
+          </motion.div>
         </form>
       </div>
     </AppLayout>

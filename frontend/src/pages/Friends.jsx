@@ -29,7 +29,7 @@ import {
   CheckCircle2,
   Loader2,
 } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const SEARCH_DEBOUNCE_MS = 400
 
@@ -61,8 +61,6 @@ function Friends() {
   const [outgoingRequests, setOutgoingRequests] = useState([])
   const [initialLoading, setInitialLoading] = useState(true)
 
-  // ids currently mid-request (used to disable buttons / show spinners
-  // and prevent double-submits, e.g. double-clicking "Add")
   const [processingIds, setProcessingIds] = useState(() => new Set())
 
   const searchSeqRef = useRef(0)
@@ -77,14 +75,12 @@ function Friends() {
     })
   }
 
-  // ----- helpers -----
   const patchSearchRelationship = useCallback((userId, relationship) => {
     setSearchResults((prev) =>
       prev.map((u) => (u._id === userId ? { ...u, relationship } : u))
     )
   }, [])
 
-  // ----- loaders -----
   const loadFriends = useCallback(async () => {
     try {
       const response = await getFriends(token)
@@ -118,7 +114,6 @@ function Friends() {
 
       try {
         const response = await searchUsers(trimmed, token)
-        // Ignore stale responses from a superseded/older keystroke
         if (seq !== searchSeqRef.current) return
         setSearchResults(response.data.users || response.data.data || [])
       } catch (error) {
@@ -132,7 +127,6 @@ function Friends() {
     [token]
   )
 
-  // Debounce the search box so we don't fire a request on every keystroke
   useEffect(() => {
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current)
 
@@ -149,7 +143,6 @@ function Friends() {
     return () => clearTimeout(debounceTimerRef.current)
   }, [search, runSearch])
 
-  // Initial load
   useEffect(() => {
     ;(async () => {
       setInitialLoading(true)
@@ -157,8 +150,6 @@ function Friends() {
       setInitialLoading(false)
     })()
   }, [loadFriends, loadPendingRequests])
-
-  // ----- actions -----
 
   // SEND FRIEND REQUEST (from search results)
   const handleSendRequest = async (user) => {
@@ -179,8 +170,6 @@ function Friends() {
     }
   }
 
-  // ACCEPT / DECLINE — targetUserId is passed when responding from a search
-  // card so we can keep that card's state in sync too.
   const handleRespondToRequest = async (
     requestId,
     action,
@@ -211,7 +200,6 @@ function Friends() {
     }
   }
 
-  // CANCEL — targetUserId is passed when cancelling from a search card
   const handleCancelRequest = async (requestId, targetUserId = null) => {
     if (isProcessing(requestId)) return
     if (!window.confirm('Cancel this friend request?')) return
@@ -234,7 +222,6 @@ function Friends() {
     }
   }
 
-  // REMOVE FRIEND
   const handleRemoveFriend = async (friendId) => {
     if (isProcessing(friendId)) return
     if (!window.confirm('Remove this friend?')) return
@@ -252,7 +239,6 @@ function Friends() {
     }
   }
 
-  // ----- render helpers -----
   const renderSearchAction = (user) => {
     const relationship = user.relationship || {
       status: 'none',
@@ -346,9 +332,13 @@ function Friends() {
         hideProgressBar={false}
       />
 
-      <div className="mx-auto max-w-5xl space-y-8 animate-fade-in-up">
+      <div className="mx-auto max-w-5xl space-y-8">
         {/* ================= HEADER ================= */}
-        <div>
+        <motion.div
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#159a8c]/10 text-[#159a8c] text-xs font-semibold uppercase tracking-wider mb-3">
             <Users className="w-3.5 h-3.5" />
             <span>Connections</span>
@@ -361,10 +351,15 @@ function Friends() {
           <p className="mt-2 text-sm text-stone-500 max-w-2xl">
             Find people, manage friend requests, and stay connected.
           </p>
-        </div>
+        </motion.div>
 
         {/* ================= SEARCH ================= */}
-        <div className="relative">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08, duration: 0.35 }}
+          className="relative"
+        >
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400">
             <Search className="w-5 h-5" />
           </div>
@@ -380,11 +375,18 @@ function Friends() {
               <Loader2 className="w-4 h-4 text-stone-400 animate-spin" />
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* ================= SEARCH RESULTS ================= */}
+        <AnimatePresence>
         {search.trim() && (
-          <section className="space-y-4">
+          <motion.section
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="space-y-4 overflow-hidden"
+          >
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-[#1a1a1a]">
                 Search Results
@@ -397,18 +399,26 @@ function Friends() {
             </div>
 
             {isSearching ? (
-              <div className="rounded-2xl border border-stone-200/80 bg-white p-8 text-center shadow-sm">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="rounded-2xl border border-stone-200/80 bg-white p-8 text-center shadow-sm"
+              >
                 <Loader2 className="w-6 h-6 text-[#159a8c] animate-spin mx-auto mb-3" />
                 <p className="text-sm text-stone-500">Searching...</p>
-              </div>
+              </motion.div>
             ) : searchResults.length === 0 ? (
-              <div className="rounded-2xl border border-stone-200/80 bg-white p-8 text-center shadow-sm">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="rounded-2xl border border-stone-200/80 bg-white p-8 text-center shadow-sm"
+              >
                 <Search className="w-8 h-8 text-stone-300 mx-auto mb-3" />
                 <p className="text-sm font-medium text-stone-600">No users found</p>
                 <p className="text-xs text-stone-400 mt-1">
                   Try a different name or email
                 </p>
-              </div>
+              </motion.div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
                 {searchResults.map((user, index) => (
@@ -420,7 +430,7 @@ function Friends() {
                     className="flex items-center justify-between gap-4 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#159a8c] to-[#0e6d63] text-sm font-bold text-white shadow-sm">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] text-sm font-bold text-white shadow-sm">
                         {getInitials(user.name)}
                       </div>
 
@@ -440,11 +450,17 @@ function Friends() {
                 ))}
               </div>
             )}
-          </section>
+          </motion.section>
         )}
+        </AnimatePresence>
 
         {/* ================= INCOMING REQUESTS ================= */}
-        <section className="space-y-4">
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.35 }}
+          className="space-y-4"
+        >
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-[#1a1a1a]">
               Pending Requests
@@ -531,10 +547,15 @@ function Friends() {
               })}
             </div>
           )}
-        </section>
+        </motion.section>
 
         {/* ================= OUTGOING REQUESTS ================= */}
-        <section className="space-y-4">
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.35 }}
+          className="space-y-4"
+        >
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-[#1a1a1a]">Sent Requests</h2>
             {outgoingRequests.length > 0 && (
@@ -606,10 +627,15 @@ function Friends() {
               })}
             </div>
           )}
-        </section>
+        </motion.section>
 
         {/* ================= MY FRIENDS ================= */}
-        <section className="space-y-4 pb-8">
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.35 }}
+          className="space-y-4 pb-8"
+        >
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-[#1a1a1a]">My Friends</h2>
             {friends.length > 0 && (
@@ -623,10 +649,8 @@ function Friends() {
           {initialLoading ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm animate-pulse"
-                >
+                <div key={i}
+                  className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm animate-pulse">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="h-12 w-12 rounded-xl bg-stone-200" />
                     <div className="flex-1 space-y-2">
@@ -642,7 +666,11 @@ function Friends() {
               ))}
             </div>
           ) : friends.length === 0 ? (
-            <div className="rounded-2xl border border-stone-200/80 bg-white p-12 text-center shadow-sm">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="rounded-2xl border border-stone-200/80 bg-white p-12 text-center shadow-sm"
+            >
               <Users className="w-12 h-12 text-stone-300 mx-auto mb-4" />
               <p className="text-sm font-medium text-stone-600">
                 No friends yet
@@ -650,7 +678,7 @@ function Friends() {
               <p className="text-xs text-stone-400 mt-1">
                 Search for users above to send friend requests
               </p>
-            </div>
+            </motion.div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {friends.map((friend, index) => {
@@ -662,12 +690,14 @@ function Friends() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05, duration: 0.25 }}
-                    className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
-                  >
+                    className="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all" >
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] text-sm font-bold text-white shadow-sm">
-                        {getInitials(friend.name)}
-                      </div>
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] text-sm font-bold text-white shadow-sm overflow-hidden">
+                         {friend.profileImage?.url ? 
+                         (<img  className="h-full w-full object-cover"  src={friend.profileImage.url}  alt={friend.name}/>) 
+                         : 
+                         ( <span>{getInitials(friend.name)}</span> )}
+                        </div>
 
                       <div className="min-w-0 flex-1">
                         <h3 className="truncate font-bold text-[#1a1a1a] text-sm">
@@ -707,7 +737,7 @@ function Friends() {
               })}
             </div>
           )}
-        </section>
+        </motion.section>
       </div>
     </AppLayout>
   )

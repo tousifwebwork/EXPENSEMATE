@@ -690,7 +690,7 @@ const GroupExpenses = () => {
                     <div className="flex items-center gap-3">
                       {member.user.profileImage ? (
                         <img
-                          src={member.user.profileImage}
+                          src={member.user.profileImage.url}
                           alt={member.user.name}
                           className="h-12 w-12 rounded-2xl object-cover ring-1 ring-stone-200"
                         />

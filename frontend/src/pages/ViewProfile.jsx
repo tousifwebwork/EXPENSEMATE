@@ -38,6 +38,7 @@ const ViewProfile = () => {
         }
 
         const res = await getUserById(userId, token) 
+        console.log('Fetched user data:', res.data.user)
 
         setUser(res.data.user)
       } catch (error) {
@@ -209,7 +210,7 @@ const ViewProfile = () => {
               <div className="relative mx-auto sm:mx-0">
                 {user.profileImage ? (
                   <img
-                    src={user.profileImage}
+                    src={user.profileImage.url}
                     alt={fullName}
                     className="h-32 w-32 rounded-3xl border-4 border-white object-cover shadow-xl"
                   />

@@ -1,20 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Wallet,
-  ArrowUpRight,
-  ArrowDownRight,
-  Users,
-  Receipt,
-  TrendingUp,
-  Activity,
-  CreditCard,
-  CalendarDays,
-  ChevronRight,
-  Loader2,
-  AlertCircle,
-  IndianRupee,
-  PieChart,
-} from "lucide-react";
+import { Wallet, ArrowUpRight, ArrowDownRight, Users, Receipt, TrendingUp, Activity, CreditCard, CalendarDays, ChevronRight, Loader2, AlertCircle, IndianRupee, PieChart, } from "lucide-react";
 import { motion } from "framer-motion";
 
 import AppLayout from "../components/AppLayout";

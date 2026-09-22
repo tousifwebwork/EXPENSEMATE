@@ -386,7 +386,7 @@ const Settlement = () => {
       <AppLayout>
         <div className="min-h-screen bg-slate-50 flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-[#159a8c] to-[#0e6d63] flex items-center justify-center shadow-lg shadow-indigo-200">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] flex items-center justify-center shadow-lg shadow-indigo-200">
               <Loader2
                 size={24}
                 className="text-white animate-spin"
@@ -412,11 +412,16 @@ const Settlement = () => {
         {/* HEADER */}
 
         <div className="border-b border-slate-200 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
+          <motion.div
+            initial={{ opacity: 0, y: -15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7"
+          >
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-11 h-11 rounded-2xl bg-linear-to-br from-[#159a8c] to-[#0e6d63] flex items-center justify-center shadow-lg shadow-indigo-200">
+                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] flex items-center justify-center shadow-lg shadow-indigo-200">
                     <Wallet
                       size={22}
                       className="text-white"
@@ -438,49 +443,62 @@ const Settlement = () => {
               <button
                 onClick={openCreateModal}
                 disabled={!selectedGroup}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-linear-to-br from-[#159a8c] to-[#0e6d63] hover:bg-linear-to-br hover:from-[#159a8c] hover:to-[#0e6d63] text-white font-semibold text-sm shadow-lg shadow-indigo-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] hover:opacity-90 text-white font-semibold text-sm shadow-lg shadow-indigo-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Plus size={18} />
                 Record Settlement
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
           {/* ERROR */}
 
-          {error && (
-            <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-4">
-              <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
-                <X
-                  size={18}
-                  className="text-red-600"
-                />
-              </div>
-
-              <div className="flex-1">
-                <p className="font-semibold text-red-800 text-sm">
-                  Something went wrong
-                </p>
-
-                <p className="text-sm text-red-600 mt-0.5">
-                  {error}
-                </p>
-              </div>
-
-              <button
-                onClick={() => setError("")}
-                className="text-red-400 hover:text-red-600"
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: "auto" }}
+                exit={{ opacity: 0, y: -10, height: 0 }}
+                transition={{ duration: 0.25 }}
+                className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-4 overflow-hidden"
               >
-                <X size={18} />
-              </button>
-            </div>
-          )}
+                <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
+                  <X
+                    size={18}
+                    className="text-red-600"
+                  />
+                </div>
+
+                <div className="flex-1">
+                  <p className="font-semibold text-red-800 text-sm">
+                    Something went wrong
+                  </p>
+
+                  <p className="text-sm text-red-600 mt-0.5">
+                    {error}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setError("")}
+                  className="text-red-400 hover:text-red-600"
+                >
+                  <X size={18} />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* GROUP SELECTOR */}
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-6"
+          >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
@@ -531,13 +549,18 @@ const Settlement = () => {
                 />
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* SUMMARY CARDS */}
 
           {selectedGroup && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow"
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -560,9 +583,14 @@ const Settlement = () => {
                     />
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow"
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -585,9 +613,14 @@ const Settlement = () => {
                     />
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow"
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -610,13 +643,18 @@ const Settlement = () => {
                     />
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
           )}
 
           {/* SECTION HEADER */}
 
-          <div className="flex items-center justify-between mb-4">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="flex items-center justify-between mb-4"
+          >
             <div>
               <h2 className="text-lg font-bold text-slate-900">
                 Settlement History
@@ -630,17 +668,21 @@ const Settlement = () => {
             {selectedGroup && !loadingSettlements && (
               <button
                 onClick={fetchSettlements}
-                className="text-sm font-semibold text-[#159a8c]  hover:text-[#159a8c] transition"
+                className="text-sm font-semibold text-[#159a8c] hover:text-[#0e6d63] transition"
               >
                 Refresh
               </button>
             )}
-          </div>
+          </motion.div>
 
           {/* LOADING */}
 
           {loadingSettlements ? (
-            <div className="bg-white border border-slate-200 rounded-2xl p-14 flex flex-col items-center justify-center shadow-sm">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-white border border-slate-200 rounded-2xl p-14 flex flex-col items-center justify-center shadow-sm"
+            >
               <div className="w-11 h-11 rounded-xl bg-indigo-50 flex items-center justify-center mb-4">
                 <Loader2
                   size={21}
@@ -655,11 +697,16 @@ const Settlement = () => {
               <p className="text-xs text-slate-400 mt-1">
                 Please wait a moment...
               </p>
-            </div>
+            </motion.div>
           ) : settlements.length === 0 ? (
             /* EMPTY STATE */
 
-            <div className="bg-white border border-dashed border-slate-300 rounded-2xl p-12 text-center shadow-sm">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white border border-dashed border-slate-300 rounded-2xl p-12 text-center shadow-sm"
+            >
               <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-5">
                 <Receipt
                   size={28}
@@ -678,12 +725,12 @@ const Settlement = () => {
 
               <button
                 onClick={openCreateModal}
-                className="mt-6 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-linear-to-br from-[#159a8c] to-[#0e6d63] hover:bg-linear-to-br hover:from-[#159a8c] hover:to-[#0e6d63] text-white text-sm font-semibold transition"
+                className="mt-6 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] hover:opacity-90 text-white text-sm font-semibold transition"
               >
                 <Plus size={17} />
                 Record First Settlement
               </button>
-            </div>
+            </motion.div>
           ) : (
             /* SETTLEMENT LIST */
 
@@ -700,9 +747,9 @@ const Settlement = () => {
                 return (
                   <motion.div
                     key={settlement._id}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05, duration: 0.25 }}
+                    transition={{ delay: 0.3 + index * 0.05, duration: 0.3 }}
                     className="group bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200"
                   >
                     <div className="flex flex-col lg:flex-row lg:items-center gap-5">
@@ -845,7 +892,7 @@ const Settlement = () => {
               initial={{ opacity: 0, y: 14, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.98 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
               className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
             >
               {/* MODAL HEADER */}
@@ -1060,7 +1107,7 @@ const Settlement = () => {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex-1 px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-br from-[#159a8c] to-[#0e6d63] hover:opacity-90 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 transition disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {saving ? (
                       <>
@@ -1107,7 +1154,7 @@ const Settlement = () => {
               initial={{ opacity: 0, y: 14, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.98 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
               className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6"
             >
               <div className="flex items-start gap-4">
