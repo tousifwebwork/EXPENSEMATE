@@ -28,6 +28,10 @@ jobs:
         run: npx cap sync
         working-directory: frontend
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+        working-directory: frontend/android
+
       - name: Build APK
         run: ./gradlew assembleDebug
         working-directory: frontend/android
