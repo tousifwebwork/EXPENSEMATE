@@ -8,7 +8,7 @@
   "scope": "/",
   "short_name": "ExpenseMate",
   "start_url": "/",
-  "theme_color": "#ffffff",
+  "theme_color": "#159a8c",
   "icons": [
     {
       "src": "https://expensmatefrontend.vercel.app/favicon.svg",
@@ -34,5 +34,12 @@
       "is256x256": false,
       "is192x192": false
     }
+  ],
+  "id": "expensemate-app",
+  "lang": "en",
+  "categories": [
+    "design",
+    "development",
+    "events"
   ]
 }
