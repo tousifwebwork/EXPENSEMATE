@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment variables & secrets (CRITICAL: keep hidden)
+.env
+.env.*
+*.env
+*.env.*
+!.env.example
+!*.env.example
+
+# Production builds
+dist/
+dist-ssr/
+build/
+out/
+
+# Logs and artifacts
+logs/
+*.log
+.artifacts/
+**/artifacts/
+scratch/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor and IDEs
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Android / Mobile local & build files
+frontend/android/.gradle/
+frontend/android/build/
+frontend/android/app/build/
+frontend/android/local.properties
+frontend/android/captures/
+frontend/android/.externalNativeBuild
+frontend/android/.cxx/
+*.apk
+*.aab
+*.keystore
+*.jks

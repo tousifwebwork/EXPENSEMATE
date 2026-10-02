@@ -1,0 +1,27 @@
+{
+  "background_color": "#159a8c",
+  "description": "ExpenseMate - Split expenses, settle balances, and track shared spending with friends and groups",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "ExpenseMate",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "ExpenseMate",
+  "start_url": "/",
+  "theme_color": "#159a8c",
+  "icons": [
+    {
+      "src": "/launchericon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/launchericon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "id": "expensemate-app",
+  "lang": "en",
+  "categories": ["design", "development", "events"]
+}
