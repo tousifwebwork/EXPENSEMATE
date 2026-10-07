@@ -78,6 +78,13 @@ exports.updateProfileImage = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ success: false, message: "Profile image is required" });
     }
+    const existingUser = await User.findById(req.user.userId).select("profileImage");
+    if (!existingUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    if (existingUser.profileImage?.publicId) {
+      await cloudinary.uploader.destroy(existingUser.profileImage.publicId);
+    }
     const user = await User.findByIdAndUpdate(
       req.user.userId,
       {
@@ -117,12 +124,12 @@ exports.deleteProfileImage = async (req, res) => {
       });
     }
 
-    // Delete image from Cloudinary
-    // Only if your stored path is a Cloudinary public_id
-    await cloudinary.uploader.destroy(user.profileImage);
+    if (user.profileImage.publicId) {
+      await cloudinary.uploader.destroy(user.profileImage.publicId);
+    }
 
     // Remove image from database
-    user.profileImage = "";
+    user.profileImage = { url: "", publicId: "" };
     await user.save();
 
     res.status(200).json({

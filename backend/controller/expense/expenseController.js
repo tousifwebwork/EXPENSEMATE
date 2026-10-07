@@ -11,28 +11,14 @@ const {
   calculatePercentageSplit,
 } = require("../../utils/calculateSplit");
 
-const uploadReceipt = (buffer) =>
-  new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: "expense-receipts" },
-      (error, result) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-        resolve(result.secure_url);
-      }
-    );
-    uploadStream.end(buffer);
-  });
-
-
  // CREATE EXPENSE 
 exports.createExpense = async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    const receiptPhoto = req.file ? await uploadReceipt(req.file.buffer) : "";
+    // CloudinaryStorage has already uploaded the file; use its returned URL.
+    const receiptPhoto = req.file ? req.file.path : "";
+    const receiptPublicId = req.file ? req.file.filename : "";
 
     let { groupId, title, description, amount, currency, category, date, paidBy, splitType, shares } = req.body;
 
@@ -143,6 +129,7 @@ exports.createExpense = async (req, res) => {
       shares: finalShares,
       createdBy: userId,
       receiptUrl: receiptPhoto,
+      receiptPublicId,
       notes: "",
     });
 
@@ -314,7 +301,9 @@ exports.updateExpense = async (req, res) => {
     const userId = req.user.userId;
     const { expenseId } = req.params;
 
-    const receiptPhoto = req.file ? await uploadReceipt(req.file.buffer) : undefined;
+    // CloudinaryStorage has already uploaded the file; use its returned URL.
+    const receiptPhoto = req.file ? req.file.path : undefined;
+    const receiptPublicId = req.file ? req.file.filename : undefined;
 
     let { title, description, amount, category, date, paidBy, splitType, shares, notes } = req.body;
 
@@ -436,7 +425,13 @@ exports.updateExpense = async (req, res) => {
     if (date !== undefined) expense.date = date;
     if (paidBy !== undefined) expense.paidBy = paidBy;
     if (notes !== undefined) expense.notes = notes;
-    if (receiptPhoto !== undefined) expense.receiptUrl = receiptPhoto;
+    if (receiptPhoto !== undefined) {
+      if (expense.receiptPublicId) {
+        await cloudinary.uploader.destroy(expense.receiptPublicId);
+      }
+      expense.receiptUrl = receiptPhoto;
+      expense.receiptPublicId = receiptPublicId;
+    }
 
     await expense.save();
 
@@ -555,7 +550,11 @@ exports.deleteReceiptPhoto = async (req, res) => {
       });
     }
     if (expense.receiptUrl) {
+      if (expense.receiptPublicId) {
+        await cloudinary.uploader.destroy(expense.receiptPublicId);
+      }
       expense.receiptUrl = null;
+      expense.receiptPublicId = "";
       await expense.save();
     }
     return res.status(200).json({success: true, message: "Receipt deleted",});

@@ -5,13 +5,14 @@ const cloudinary = require("../config/cloudinary");
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params:{
-    folder: "profileImages_Karmavenom_Internship",
-    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+  params: (req, file) => ({
+    folder: file.fieldname === "receiptPhoto"
+      ? "expense-receipts"
+      : "profileImages_Karmavenom_Internship",
+    allowed_formats: ["jpg", "jpeg", "png", "webp", "heic", "heif"],
     transformation: [{ width: 500, height: 500, crop: "limit" }],
-
-  }
-})
+  }),
+});
 
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image/")) {

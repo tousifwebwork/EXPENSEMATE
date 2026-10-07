@@ -5,13 +5,23 @@ require("dotenv").config();
 
 function setup(app) {
   connectDB();
-  app.use(cors({  
-    origin: [
-    process.env.CLIENT_URL_DEV, 
-    process.env.CLIENT_URL_PROD,
-    'http://localhost',        // Capacitor Android
-    'capacitor://localhost',   // Capacitor iOS
-  ], 
+  app.use(cors({
+    origin: (origin, callback) => {
+      const configuredOrigins = [
+        process.env.CLIENT_URL_DEV,
+        process.env.CLIENT_URL_PROD,
+        "http://localhost",
+        "https://localhost",
+        "capacitor://localhost",
+        "ionic://localhost",
+      ].filter(Boolean);
+      const localNetworkOrigin = /^https?:\/\/(localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+)(:\d+)?$/;
+
+      if (!origin || configuredOrigins.includes(origin) || localNetworkOrigin.test(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Origin not allowed by CORS"));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],

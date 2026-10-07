@@ -1,8 +1,11 @@
 
 import axios from "axios";
 
+const devApiUrl = import.meta.env.VITE_API_URL_DEV;
 const API_URL = import.meta.env.DEV
-  ? import.meta.env.VITE_API_URL_DEV
+  ? (window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"
+      ? `${window.location.protocol}//${window.location.hostname}:3000`
+      : devApiUrl)
   : import.meta.env.VITE_API_URL_PROD;
 
 const API = axios.create({
